@@ -22,7 +22,7 @@ ScopeTable::~ScopeTable() // destructor
     for (int i = 0; i < n_buckets; i++)
     {
         SymbolInfo *cur = hash_table[i];
-        while (cur != NULL)
+        while (cur != nullptr)
         {
             SymbolInfo *tmp = cur->getNext();
             delete cur;

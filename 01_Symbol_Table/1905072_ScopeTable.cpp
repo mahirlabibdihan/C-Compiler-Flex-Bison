@@ -151,7 +151,7 @@ void ScopeTable::print()
     {
         cout << i << " --> ";
         SymbolInfo *cur = hash_table[i];
-        while (cur != NULL)
+        while (cur != nullptr)
         {
             cout << "< " << cur->getName() << " : " << cur->getType() << " > ";
             cur = cur->getNext();

@@ -14,22 +14,25 @@ private:
     string id;
     int child_count;
     int n_buckets;
-    vector<SymbolInfo *> hash_table;
+    SymbolInfo **hash_table;
     function<unsigned long(string)> hash_value;
 
     void operator=(const ScopeTable &) {} // Protect assignment
     ScopeTable(const ScopeTable &) {}     // Protect copy constructor
 
 public:
-    template <typename T>
-    ScopeTable(int size, T func)
+    ScopeTable(int size, function<unsigned long(string)> func)
     {
         this->id = "1";
         this->child_count = 0;
         this->parent_scope = nullptr;
         this->n_buckets = size;
         this->hash_value = func;
-        this->hash_table = vector<SymbolInfo *>(size, nullptr);
+        this->hash_table = new SymbolInfo *[n_buckets];
+        for (int i = 0; i < n_buckets; i++)
+        {
+            hash_table[i] = nullptr;
+        }
     }
     ~ScopeTable();
 
@@ -45,8 +48,8 @@ public:
     int getBucketSize() const;
     void setBucketSize(const int &size);
 
-    vector<SymbolInfo *> getHashTable() const;
-    void setHashTable(vector<SymbolInfo *> hash_table);
+    SymbolInfo **getHashTable() const;
+    void setHashTable(SymbolInfo **hash_table);
 
     int hash(const string &key);
 

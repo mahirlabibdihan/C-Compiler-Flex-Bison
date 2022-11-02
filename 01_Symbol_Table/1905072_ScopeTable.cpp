@@ -6,7 +6,7 @@ using namespace std;
 
 ScopeTable::~ScopeTable() // destructor
 {
-    for (int i = 0; i < hash_table.size(); i++)
+    for (int i = 0; i < n_buckets; i++)
     {
         SymbolInfo *cur = hash_table[i];
         while (cur != NULL)

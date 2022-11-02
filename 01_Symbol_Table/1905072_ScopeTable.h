@@ -16,6 +16,7 @@ private:
     int n_buckets;
     SymbolInfo **hash_table;
     function<unsigned long(string)> hash_value;
+    pair<int, int> last_accessed_location;
 
     void operator=(const ScopeTable &) {} // Protect assignment
     ScopeTable(const ScopeTable &) {}     // Protect copy constructor
@@ -45,5 +46,7 @@ public:
     bool insert(const SymbolInfo &symbol);
     bool remove(const string &key);
     void print();
+
+    pair<int, int> getLastAccessedLocation();
 };
 #endif

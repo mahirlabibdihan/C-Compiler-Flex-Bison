@@ -17,7 +17,7 @@ ScopeTable::ScopeTable(const int &size, function<unsigned long(string)> func)
         hash_table[i] = nullptr;
     }
 }
-ScopeTable::~ScopeTable() // destructor
+ScopeTable::~ScopeTable()
 {
     for (int i = 0; i < n_buckets; i++)
     {
@@ -29,6 +29,26 @@ ScopeTable::~ScopeTable() // destructor
             cur = tmp;
         }
     }
+}
+
+int ScopeTable::getBucketSize() const
+{
+    return n_buckets;
+}
+
+void ScopeTable::setBucketSize(const int &size)
+{
+    this->n_buckets = size;
+}
+
+SymbolInfo **ScopeTable::getHashTable() const
+{
+    return hash_table;
+}
+
+void ScopeTable::setHashTable(SymbolInfo **hashTable)
+{
+    this->hash_table = hash_table;
 }
 
 ScopeTable *ScopeTable::getParentScope() const
@@ -73,7 +93,7 @@ SymbolInfo *ScopeTable::search(const string &key)
     {
         if (cur->getName() == key)
         {
-            cout << "Found in ScopeTable# " << id << " at position " << hash_index << ", " << i << endl;
+            last_accessed_location = {hash_index, i};
             return cur;
         }
         cur = cur->getNext();
@@ -90,7 +110,7 @@ bool ScopeTable::insert(const SymbolInfo &s_info)
 
     if (hash_table[hash_index] == nullptr)
     {
-        cout << "Inserted in ScopeTable# " << id << " at position " << hash_index << ", " << 0 << endl;
+        last_accessed_location = {hash_index, 0};
         hash_table[hash_index] = new_info; // First symbol
     }
     else
@@ -100,7 +120,6 @@ bool ScopeTable::insert(const SymbolInfo &s_info)
         {
             if (cur->getName() == name)
             {
-                cout << "< " << cur->getName() << "," << cur->getType() << " > already exists in current ScopeTable" << endl;
                 return false;
             }
             if (cur->getNext() != nullptr)
@@ -109,7 +128,8 @@ bool ScopeTable::insert(const SymbolInfo &s_info)
             }
             else
             {
-                cout << "Inserted in ScopeTable# " << id << " at position " << hash_index << ", " << i << endl;
+                last_accessed_location = {hash_index, i};
+
                 cur->setNext(new_info);
                 break;
             }
@@ -131,7 +151,8 @@ bool ScopeTable::remove(const string &key)
         {
             if (cur->getName() == key)
             {
-                cout << "Deleted Entry " << hash_index << "," << i << " from current ScopeTable" << endl;
+                last_accessed_location = {hash_index, i};
+
                 if (prv != nullptr)
                 {
                     prv->setNext(cur->getNext());
@@ -150,26 +171,11 @@ bool ScopeTable::remove(const string &key)
     }
     else
     {
-        cout << "Not found" << endl
-             << endl;
-        cout << key << " not found" << endl;
         return false;
     }
 }
 
-void ScopeTable::print()
+pair<int, int> ScopeTable::getLastAccessedLocation()
 {
-    cout << "ScopeTable # " << id << endl;
-    for (int i = 0; i < n_buckets; i++)
-    {
-        cout << i << " --> ";
-        SymbolInfo *cur = hash_table[i];
-        while (cur != nullptr)
-        {
-            cout << "< " << cur->getName() << " : " << cur->getType() << " > ";
-            cur = cur->getNext();
-        }
-        cout << endl;
-    }
-    cout << endl;
+    return last_accessed_location;
 }

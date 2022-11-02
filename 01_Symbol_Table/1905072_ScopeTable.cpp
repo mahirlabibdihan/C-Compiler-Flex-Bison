@@ -29,6 +29,7 @@ ScopeTable::~ScopeTable()
             cur = tmp;
         }
     }
+    delete[] hash_table;
 }
 
 int ScopeTable::getBucketSize() const

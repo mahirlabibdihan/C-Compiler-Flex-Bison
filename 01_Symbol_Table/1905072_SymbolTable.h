@@ -24,13 +24,7 @@ class SymbolTable
     void operator=(const SymbolTable &) {} // Protect assignment
     SymbolTable(const SymbolTable &) {}    // Protect copy constructor
 public:
-    template <typename T>
-    SymbolTable(const int &size, T hash_value)
-    {
-        this->n_buckets = size;
-        this->hash_value = hash_value;
-        this->current_scope = new ScopeTable(size, hash_value);
-    }
+    SymbolTable(const int &size, function<unsigned long(string)> hash_value);
     ~SymbolTable();
 
     ScopeTable *getCurrentScope() const;

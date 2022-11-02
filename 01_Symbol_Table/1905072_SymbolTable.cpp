@@ -4,6 +4,12 @@
 #include "1905072_SymbolTable.h"
 using namespace std;
 
+SymbolTable::SymbolTable(const int &size, function<unsigned long(string)> hash_value)
+{
+    this->n_buckets = size;
+    this->hash_value = hash_value;
+    this->current_scope = new ScopeTable(size, hash_value);
+}
 SymbolTable::~SymbolTable()
 {
     while (current_scope != nullptr)

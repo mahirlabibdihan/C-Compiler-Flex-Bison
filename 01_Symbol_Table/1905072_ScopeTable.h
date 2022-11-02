@@ -21,19 +21,7 @@ private:
     ScopeTable(const ScopeTable &) {}     // Protect copy constructor
 
 public:
-    ScopeTable(int size, function<unsigned long(string)> func)
-    {
-        this->id = "1";
-        this->child_count = 0;
-        this->parent_scope = nullptr;
-        this->n_buckets = size;
-        this->hash_value = func;
-        this->hash_table = new SymbolInfo *[n_buckets];
-        for (int i = 0; i < n_buckets; i++)
-        {
-            hash_table[i] = nullptr;
-        }
-    }
+    ScopeTable(const int &size, function<unsigned long(string)> func);
     ~ScopeTable();
 
     ScopeTable *getParentScope() const;

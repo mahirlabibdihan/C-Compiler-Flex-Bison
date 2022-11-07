@@ -23,15 +23,14 @@ public:
     ScopeTable *getCurrentScope() const;
     void setCurrentScope(ScopeTable *currentScopeTable);
 
-    int getBucketSize() const;
-    void setBucketSize(const int &size);
+    int size() const;
 
     bool enterScope();
     bool exitScope();
 
-    bool insertSymbol(const SymbolInfo &symbol);
-    bool removeSymbol(const string &key);
-    SymbolInfo *searchSymbol(const string &key);
+    bool insert(const SymbolInfo &symbol);
+    bool remove(const string &key);
+    SymbolInfo *search(const string &key);
 
     void printCurrentScope();
     void printAllScope();

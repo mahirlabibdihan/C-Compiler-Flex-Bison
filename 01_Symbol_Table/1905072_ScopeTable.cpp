@@ -32,25 +32,25 @@ ScopeTable::~ScopeTable()
     delete[] hash_table;
 }
 
-int ScopeTable::getBucketSize() const
-{
-    return n_buckets;
-}
+// int ScopeTable::getBucketSize() const
+// {
+//     return n_buckets;
+// }
 
-void ScopeTable::setBucketSize(const int &size)
-{
-    this->n_buckets = size;
-}
+// void ScopeTable::setBucketSize(const int &size)
+// {
+//     this->n_buckets = size;
+// }
 
-SymbolInfo **ScopeTable::getHashTable() const
-{
-    return hash_table;
-}
+// SymbolInfo **ScopeTable::getHashTable() const
+// {
+//     return hash_table;
+// }
 
-void ScopeTable::setHashTable(SymbolInfo **hashTable)
-{
-    this->hash_table = hash_table;
-}
+// void ScopeTable::setHashTable(SymbolInfo **hashTable)
+// {
+//     this->hash_table = hash_table;
+// }
 
 ScopeTable *ScopeTable::getParentScope() const
 {

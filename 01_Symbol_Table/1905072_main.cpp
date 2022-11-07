@@ -53,7 +53,7 @@ int main()
             cout << name << " " << type << endl;
 
             cout << endl;
-            if (sym_tab.insertSymbol(SymbolInfo(name, type)))
+            if (sym_tab.insert(SymbolInfo(name, type)))
             {
                 cout << "Inserted in ScopeTable# " << sym_tab.getLastAccessedScopeId() << " at position " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().first << ", " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().second << endl;
             }
@@ -72,7 +72,7 @@ int main()
             cout << name << endl;
 
             cout << endl;
-            if (sym_tab.searchSymbol(name) != nullptr)
+            if (sym_tab.search(name) != nullptr)
             {
                 cout << "Found in ScopeTable# " << sym_tab.getLastAccessedScopeId() << " at position " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().first << ", " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().second << endl;
             }
@@ -92,7 +92,7 @@ int main()
             cout << name << endl;
 
             cout << endl;
-            if (sym_tab.removeSymbol(name))
+            if (sym_tab.remove(name))
             {
                 cout << "Deleted Entry " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().first << ", " << sym_tab.getLastAccessedScope()->getLastAccessedLocation().second << " from current ScopeTable" << endl;
             }

@@ -34,17 +34,18 @@ public:
     int getChildCount() const;
     void setChildCount(const int &count);
 
-    int getBucketSize() const;
-    void setBucketSize(const int &size);
+    // int getBucketSize() const;
+    // void setBucketSize(const int &size);
 
-    SymbolInfo **getHashTable() const;
-    void setHashTable(SymbolInfo **hash_table);
+    // SymbolInfo **getHashTable() const;
+    // void setHashTable(SymbolInfo **hash_table);
 
     int hash(const string &key);
 
     SymbolInfo *search(const string &key);
     bool insert(const SymbolInfo &symbol);
     bool remove(const string &key);
+
     void print();
 
     pair<int, int> getLastAccessedLocation();

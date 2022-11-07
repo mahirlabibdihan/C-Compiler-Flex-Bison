@@ -1,5 +1,6 @@
 #include <iostream>
 #include <functional>
+#include <cassert>
 #include "1905072_ScopeTable.h"
 #include "1905072_SymbolTable.h"
 using namespace std;
@@ -30,14 +31,9 @@ void SymbolTable::setCurrentScope(ScopeTable *scope)
     this->current_scope = scope;
 }
 
-int SymbolTable::getBucketSize() const
+int SymbolTable::size() const
 {
     return n_buckets;
-}
-
-void SymbolTable::setBucketSize(const int &size)
-{
-    this->n_buckets = size;
 }
 
 bool SymbolTable::enterScope()
@@ -75,21 +71,29 @@ bool SymbolTable::exitScope()
     }
 }
 
-bool SymbolTable::insertSymbol(const SymbolInfo &symbol)
+bool SymbolTable::insert(const SymbolInfo &symbol)
 {
+    if (current_scope == nullptr)
+    {
+        current_scope = new ScopeTable(n_buckets, hash_value);
+    }
     last_accessed_scope = current_scope;
     last_accessed_scope_id = current_scope->getId();
     return current_scope->insert(symbol);
 }
 
-bool SymbolTable::removeSymbol(const string &key)
+bool SymbolTable::remove(const string &key)
 {
+    if (current_scope == nullptr)
+    {
+        return false;
+    }
     last_accessed_scope = current_scope;
     last_accessed_scope_id = current_scope->getId();
     return current_scope->remove(key);
 }
 
-SymbolInfo *SymbolTable::searchSymbol(const string &key)
+SymbolInfo *SymbolTable::search(const string &key)
 {
     ScopeTable *cur = current_scope;
     while (cur != nullptr)
@@ -108,7 +112,10 @@ SymbolInfo *SymbolTable::searchSymbol(const string &key)
 
 void SymbolTable::printCurrentScope()
 {
-    current_scope->print();
+    if (current_scope != nullptr)
+    {
+        current_scope->print();
+    }
 }
 
 void SymbolTable::printAllScope()

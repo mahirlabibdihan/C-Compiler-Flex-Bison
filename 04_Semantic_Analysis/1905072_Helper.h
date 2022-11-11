@@ -6,7 +6,9 @@
 using namespace std;
 
 string toUpper(string s);
+string toLower(string s);
 char getSpecialChar(char c);
 char getActualChar(string symbol);
 string getActualString(string str);
+string formatCode(vector<SymbolInfo *> tokens);
 #endif

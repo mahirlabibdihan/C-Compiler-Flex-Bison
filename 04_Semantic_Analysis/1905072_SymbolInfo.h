@@ -10,17 +10,21 @@ private:
     string name;
     string type;
     SymbolInfo *next;
-    string id_type;   // VARIABLE, ARRAY, FUNCTION
+    string id_type;   // VARIABLE, ARRAY, FUNCTION, CONSTANT, EXPRESSION
     string data_type; // return type for function
     bool is_definition;
     vector<string> param_types;
+    SymbolInfo(const SymbolInfo &) {}
+    void operator=(const SymbolInfo &) {} // Protect assignment     // Protect copy constructor
+    void init();
 
-    void operator=(const SymbolInfo &) {} // Protect assignment
-    SymbolInfo(const SymbolInfo &) {}     // Protect copy constructor
 public:
     SymbolInfo();
+    SymbolInfo(string data_type);
     SymbolInfo(const string &name, const string &type);
     SymbolInfo(const string &name, const string &type, SymbolInfo *next);
+    SymbolInfo(const string &name, const string &type, string id_type);
+    SymbolInfo(const string &name, const string &type, string id_type, string data_type);
     SymbolInfo(const string &name, const string &type, string data_type, string id_type, bool is_definition, vector<string> params);
     ~SymbolInfo();
     const string &getName() const;

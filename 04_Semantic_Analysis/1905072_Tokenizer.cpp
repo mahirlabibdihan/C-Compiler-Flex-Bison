@@ -26,7 +26,7 @@ map<string, string> operatorType = {
     {"!", "NOT"},
     {"(", "LPAREN"},
     {")", "RPAREN"},
-    {"{", "RCURL"},
+    {"{", "LCURL"},
     {"}", "RCURL"},
     {"[", "LTHIRD"},
     {"]", "RTHIRD"},
@@ -81,6 +81,7 @@ void printToken(string type)
 {
     tokenout << "<" << type << "> ";
     tokenout.flush();
+    yylval.symbol = new SymbolInfo(toLower(type), type);
     // yylval = new SymbolInfo(symbol, (char *)"RELOP");
     // yylval.symbol = new SymbolInfo(symbol, type);
 }

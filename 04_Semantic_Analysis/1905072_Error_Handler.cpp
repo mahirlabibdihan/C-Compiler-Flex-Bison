@@ -2,12 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "1905072_SymbolTable.h"
 using namespace std;
 
 extern ofstream logout;
 extern ofstream errout;
 extern int error_count;
 extern int line_count;
+extern SymbolTable *table;
 
 void printError(string error, int line)
 {
@@ -58,6 +60,7 @@ void handleError(int type, int line, string lexeme)
         break;
         // Semantic Errors
     case MULTIPLE_DECLARATION:
+        // table->printAllScope();
         printSemanticError("Multiple declaration of '" + lexeme + "'", line);
         break;
     case INVALID_ARRAY_SIZE:
@@ -102,6 +105,7 @@ void handleError(int type, int line, string lexeme)
     case INVALID_CONVERSION:
         // function return type conflict
         // function arguments mismatch
+        printSemanticError("Invalid conversion " + lexeme, line);
         break;
     case PARAM_TYPE_MISMATCH:
         printSemanticError("Type of paramters mismatch with function-declaration in function '" + lexeme + "'", line);
@@ -122,7 +126,7 @@ void handleError(int type, int line, string lexeme)
         printSemanticError("Too many arguments to function '" + lexeme + "'", line);
         break;
     case TYPE_MISMATCH:
-        printSemanticError("Type mismatch " + lexeme, line);
+        printSemanticError("Type mismatch '" + lexeme + "'", line);
         break;
     default:
         break;

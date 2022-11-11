@@ -11,6 +11,7 @@ extern bool in_function;
 extern SymbolTable *table;
 string implicitTypecast(string left, string right)
 {
+    // cout << left << "," << right << endl;
     if (left == "NULL" || right == "NULL")
     {
         return "NULL"; // already reported , now supressing more errors
@@ -56,6 +57,7 @@ bool isConvertible(string to, string from)
 
 bool checkAssignment(string left, string right)
 {
+    // cout << line_count << " " << left << " " << right << endl;
     if (left == "NULL" || right == "NULL")
     {
         return true; // already error reported and converted to NULL , this is made true to supress more error
@@ -92,7 +94,7 @@ void defineFunction(SymbolInfo *function, vector<SymbolInfo *> params, string re
     if (!table->insert(*function))
     {
         SymbolInfo *symbol = table->search(function->getName());
-        if (symbol->getIdType() != "FUNCTION") // Already declared as non-function type
+        if (symbol->getIdType() != "FUNCTION" or symbol->isDefined()) // Already declared as non-function type or Defined as function
         {
             handleError(MULTIPLE_DECLARATION, line_count, function->getName());
         }
@@ -200,15 +202,15 @@ string callFunction(string id, vector<SymbolInfo *> args)
         return symbol->getDataType();
     }
 }
-void declareVariable(string data_type, Node *ids)
+void declareVariable(string data_type, string id_names, vector<SymbolInfo *> ids)
 {
     if (data_type == "void")
     {
-        handleError(VOID_VARIABLE, line_count, ids->getCode());
+        handleError(VOID_VARIABLE, line_count, id_names);
     }
     else
     {
-        for (auto &i : ids->getList())
+        for (auto &i : ids)
         {
             if (i->getIdType() == "ARRAY")
             {
@@ -238,9 +240,9 @@ string callVariable(string id)
     }
     else
     {
-        if (symbol->getDataType() == "int_array" || symbol->getDataType() == "float_array")
+        if (symbol->getIdType() == "ARRAY")
         {
-            handleError(TYPE_MISMATCH, line_count, id); // should i change this to indexing
+            handleError(TYPE_MISMATCH, line_count, id + " is not a variable"); // should i change this to indexing
             return "NULL";
         }
         else
@@ -250,7 +252,7 @@ string callVariable(string id)
     }
 }
 
-string callArray(string id, Node *index)
+string callArray(string id, SymbolInfo *index)
 {
 
     SymbolInfo *symbol = table->search(id);
@@ -262,9 +264,9 @@ string callArray(string id, Node *index)
     }
     else
     {
-        if (symbol->getDataType() == "int" || symbol->getDataType() == "float")
+        if (symbol->getIdType() != "ARRAY")
         {
-            handleError(TYPE_MISMATCH, line_count, id);
+            handleError(TYPE_MISMATCH, line_count, id + " is not an array");
             return "NULL";
         }
         else
@@ -275,7 +277,7 @@ string callArray(string id, Node *index)
 
     if (index->getDataType() != "int")
     {
-        handleError(INVALID_ARRAY_INDEX, line_count, index->getCode());
+        handleError(INVALID_ARRAY_INDEX, line_count, index->getName());
     }
 }
 
@@ -285,12 +287,12 @@ string assignmentOperation(string left, string right)
     {
         if (left == "void" || right == "void")
         {
-            handleError(INVALID_OPERAND, line_count);
+            handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator='");
             return "NULL";
         }
         else
         {
-            handleError(TYPE_MISMATCH, line_count);
+            handleError(INVALID_CONVERSION, line_count, "from '" + right + "' to '" + left + "'");
             return "NULL";
         }
     }
@@ -300,7 +302,7 @@ string assignmentOperation(string left, string right)
     }
 }
 
-string logicalOperation(string left, string right)
+string logicalOperation(string left, string op, string right)
 {
     string type = implicitTypecast(left, right);
 
@@ -314,7 +316,7 @@ string logicalOperation(string left, string right)
         {
             if (left == "void" || right == "void")
             {
-                handleError(INVALID_OPERAND, line_count); // Change error
+                handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator" + op + "'");
             }
             else
             {
@@ -329,7 +331,7 @@ string logicalOperation(string left, string right)
     }
 }
 
-string relationalOperation(string left, string right)
+string relationalOperation(string left, string op, string right)
 {
     string type = implicitTypecast(left, right);
 
@@ -343,7 +345,7 @@ string relationalOperation(string left, string right)
         {
             if (left == "void" || right == "void")
             {
-                handleError(INVALID_OPERAND, line_count); // Change error
+                handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator" + op + "'");
             }
             else
             {
@@ -358,7 +360,7 @@ string relationalOperation(string left, string right)
     }
 }
 
-string additionalOperation(string left, string right)
+string additionalOperation(string left, string op, string right)
 {
     string type = implicitTypecast(left, right);
 
@@ -372,7 +374,7 @@ string additionalOperation(string left, string right)
         {
             if (left == "void" || right == "void")
             {
-                handleError(INVALID_OPERAND, line_count); // Change error
+                handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator" + op + "'");
             }
             else
             {
@@ -395,14 +397,14 @@ string multiplicationalOperation(string left, string op, string right)
     {
         if (right == "0")
         {
-            handleError(MOD_BY_ZERO, line_count);
+            handleError(MOD_BY_ZERO, line_count, left + "%" + right);
             return "NULL";
         }
         else
         {
             if (type != "int")
             {
-                handleError(INVALID_OPERAND, line_count);
+                handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator" + op + "'");
                 return "NULL";
             }
             else
@@ -421,7 +423,7 @@ string multiplicationalOperation(string left, string op, string right)
         {
             if (left == "void" || right == "void")
             {
-                handleError(INVALID_OPERAND, line_count); // Change error
+                handleError(INVALID_OPERAND, line_count, "of types '" + left + "' and '" + right + "' to 'operator" + op + "'");
             }
             else
             {

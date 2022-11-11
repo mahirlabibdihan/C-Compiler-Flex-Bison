@@ -53,8 +53,29 @@ void printRule(string left_part, string right_part)
     logout << "Line " << line_count << ": " << left_part << " : " << right_part << "\n"
            << endl;
 }
+void printRule(SymbolInfo *parent, vector<SymbolInfo *> children)
+{
+    string left = parent->getType();
+    string right = "";
+    for (auto &i : children)
+    {
+        right += i->getType() + " ";
+    }
+    printRule(left, right);
+}
 void printCode(string code)
 {
     logout << code << "\n"
            << endl;
+}
+
+SymbolInfo *printRuleAndCode(vector<SymbolInfo *> child, string name)
+{
+    SymbolInfo *node = new SymbolInfo(
+        formatCode(child),
+        name);
+
+    printRule(node, child);
+    printCode(node->getName());
+    return node;
 }

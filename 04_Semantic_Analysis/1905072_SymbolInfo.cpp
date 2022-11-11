@@ -1,45 +1,72 @@
 #include "1905072_SymbolInfo.h"
 
+void SymbolInfo::init()
+{
+    this->name = "";
+    this->type = "";
+    this->next = nullptr;
+    this->data_type = "";
+    this->id_type = "";
+    this->is_definition = false;
+    this->param_types = vector<string>();
+    // cout << type << " Symbol created" << endl;
+}
 SymbolInfo::SymbolInfo()
 {
-    this->next = nullptr;
+    init();
+}
+
+SymbolInfo::SymbolInfo(string data_type)
+{
+    init();
+    this->data_type = data_type;
 }
 
 SymbolInfo::SymbolInfo(const string &name, const string &type)
 {
+    init();
     this->name = name;
     this->type = type;
-    this->next = nullptr;
-    this->data_type = "";
-    this->id_type = "";
-    this->is_definition = false;
-    this->param_types = vector<string>();
 }
 
 SymbolInfo::SymbolInfo(const string &name, const string &type, SymbolInfo *next)
 {
+    init();
     this->name = name;
     this->type = type;
     this->next = next;
-    this->data_type = "";
-    this->id_type = "";
-    this->is_definition = false;
-    this->param_types = vector<string>();
 }
 
+SymbolInfo::SymbolInfo(const string &name, const string &type, string id_type)
+{
+    init();
+    this->name = name;
+    this->type = type;
+    this->id_type = id_type;
+}
+
+SymbolInfo::SymbolInfo(const string &name, const string &type, string id_type, string data_type)
+{
+    init();
+    this->name = name;
+    this->type = type;
+    this->id_type = id_type;
+    this->data_type = data_type;
+}
 SymbolInfo::SymbolInfo(const string &name, const string &type, string data_type, string id_type, bool is_definition, vector<string> params)
 {
+    init();
     this->name = name;
     this->type = type;
     this->data_type = data_type;
     this->id_type = id_type;
     this->is_definition = is_definition;
     this->param_types = params;
-    this->next = nullptr;
 }
 
 SymbolInfo::~SymbolInfo()
 {
+    // cout << type << " Symbol destructed" << endl;
 }
 
 const string &SymbolInfo::getName() const

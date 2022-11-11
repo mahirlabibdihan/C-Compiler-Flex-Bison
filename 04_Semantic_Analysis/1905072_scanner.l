@@ -68,6 +68,7 @@ ESCAPE_SEQUENCE (\\.)
 "printf"						{ 
 									// generateToken(KEYWORD_TOKEN, yytext); 
 									// printLogData(KEYWORD_LOG,line_count,yytext); 
+									yylval.symbol = new SymbolInfo(yytext, "PRINTLN");
 									return PRINTLN;
 								}
 {INTEGER}						{ 

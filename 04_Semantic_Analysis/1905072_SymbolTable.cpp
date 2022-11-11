@@ -79,6 +79,7 @@ bool SymbolTable::insert(SymbolInfo &symbol)
     }
     last_accessed_scope = current_scope;
     last_accessed_scope_id = current_scope->getId();
+    // this->printAllScope();
     return current_scope->insert(symbol);
 }
 

@@ -1,7 +1,7 @@
-#include "1905072_Symbol_Extended.h"
-#include "1905072_Helper.h"
-#include "1905072_SymbolInfo.h"
-#include "1905072_Tokenizer.h"
+#include "1905072_Symbol_Extended.hpp"
+#include "1905072_Helper.hpp"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_Tokenizer.hpp"
 #include <map>
 #include "y.tab.h"
 #include <fstream>

@@ -1,10 +1,10 @@
 #include <string>
-#include "1905072_SymbolInfo.h"
-#include "1905072_Error_Handler.h"
-#include "1905072_SymbolTable.h"
-#include "1905072_Semantic_Analyzer.h"
-#include "1905072_Helper.h"
-#include "1905072_Assembly_Generator.h"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_Error_Handler.hpp"
+#include "1905072_SymbolTable.hpp"
+#include "1905072_Semantic_Analyzer.hpp"
+#include "1905072_Helper.hpp"
+#include "1905072_Assembly_Generator.hpp"
 using namespace std;
 
 extern int line_count;

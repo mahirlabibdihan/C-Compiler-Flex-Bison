@@ -1,6 +1,6 @@
 #ifndef __SYMBOL__
 #define __SYMBOL__
-#include "1905072_SymbolInfo.h"
+#include "1905072_SymbolInfo.hpp"
 #include <string>
 #include <vector>
 using namespace std;

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <sstream>
-#include "1905072_ScopeTable.h"
+#include "1905072_ScopeTable.hpp"
 using namespace std;
 
 class SymbolTable

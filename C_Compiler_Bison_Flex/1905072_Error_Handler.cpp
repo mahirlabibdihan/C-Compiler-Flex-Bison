@@ -1,8 +1,8 @@
-#include "1905072_Error_Handler.h"
+#include "1905072_Error_Handler.hpp"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "1905072_SymbolTable.h"
+#include "1905072_SymbolTable.hpp"
 using namespace std;
 
 extern ofstream logout;

@@ -5,16 +5,16 @@
 #include <cstring>
 #include <cmath>
 #include <string>
-#include "1905072_SymbolInfo.h"
-#include "1905072_SymbolTable.h"
-#include "1905072_ScopeTable.h"
-#include "1905072_Logger.h"
-#include "1905072_Error_Handler.h"
-#include "1905072_Semantic_Analyzer.h"
-#include "1905072_Helper.h"
-#include "1905072_Assembly_Generator.h"
-#include "1905072_Symbol_Extended.h"
-#include "1905072_Tokenizer.h"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_SymbolTable.hpp"
+#include "1905072_ScopeTable.hpp"
+#include "1905072_Logger.hpp"
+#include "1905072_Error_Handler.hpp"
+#include "1905072_Semantic_Analyzer.hpp"
+#include "1905072_Helper.hpp"
+#include "1905072_Assembly_Generator.hpp"
+#include "1905072_Symbol_Extended.hpp"
+#include "1905072_Tokenizer.hpp"
 using namespace std;
 
 extern ofstream logout;

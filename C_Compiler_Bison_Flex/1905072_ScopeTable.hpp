@@ -4,7 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <vector>
-#include "1905072_SymbolInfo.h"
+#include "1905072_SymbolInfo.hpp"
 using namespace std;
 
 class ScopeTable

@@ -3,11 +3,11 @@
 
 %{
 #include <fstream>
-#include "1905072_Error_Handler.h"
-#include "1905072_Symbol_Extended.h"
-#include "1905072_Logger.h"
-#include "1905072_SymbolTable.h"
-#include "1905072_Tokenizer.h"
+#include "1905072_Error_Handler.hpp"
+#include "1905072_Symbol_Extended.hpp"
+#include "1905072_Logger.hpp"
+#include "1905072_SymbolTable.hpp"
+#include "1905072_Tokenizer.hpp"
 #include "y.tab.h"
 using namespace std;
 

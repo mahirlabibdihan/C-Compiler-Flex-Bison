@@ -1,5 +1,5 @@
-#include "1905072_Symbol_Extended.h"
-#include "1905072_Helper.h"
+#include "1905072_Symbol_Extended.hpp"
+#include "1905072_Helper.hpp"
 extern int line_count;
 NonTerminal::NonTerminal()
 {

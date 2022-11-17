@@ -1,8 +1,8 @@
 #include <string>
-#include "1905072_Helper.h"
+#include "1905072_Helper.hpp"
 #include <vector>
-#include "1905072_SymbolInfo.h"
-#include "1905072_Symbol_Extended.h"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_Symbol_Extended.hpp"
 using namespace std;
 
 string toUpper(string s)

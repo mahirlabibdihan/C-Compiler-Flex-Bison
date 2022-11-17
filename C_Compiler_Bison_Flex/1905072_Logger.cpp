@@ -1,6 +1,6 @@
-#include "1905072_Logger.h"
-#include "1905072_Helper.h"
-#include "1905072_Symbol_Extended.h"
+#include "1905072_Logger.hpp"
+#include "1905072_Helper.hpp"
+#include "1905072_Symbol_Extended.hpp"
 #include <iostream>
 #include <fstream>
 extern ofstream logout;

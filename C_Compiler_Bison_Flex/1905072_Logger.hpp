@@ -1,8 +1,8 @@
 #ifndef __LOGGER__
 #define __LOGGER__
 #include <string>
-#include "1905072_SymbolInfo.h"
-#include "1905072_Symbol_Extended.h"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_Symbol_Extended.hpp"
 using namespace std;
 #define KEYWORD_LOG 0
 #define INTEGER_LOG 1

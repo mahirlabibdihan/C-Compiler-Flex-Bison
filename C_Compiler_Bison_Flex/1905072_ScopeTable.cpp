@@ -1,6 +1,6 @@
 #include <iostream>
-#include "1905072_SymbolInfo.h"
-#include "1905072_ScopeTable.h"
+#include "1905072_SymbolInfo.hpp"
+#include "1905072_ScopeTable.hpp"
 using namespace std;
 
 ScopeTable::ScopeTable(const int &size, function<unsigned long(string)> func)

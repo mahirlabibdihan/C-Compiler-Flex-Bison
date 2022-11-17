@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include "1905072_SymbolTable.h"
-#include "1905072_Assembly_Generator.h"
-#include "1905072_Semantic_Analyzer.h"
-#include "1905072_Optimizer.h"
+#include "1905072_SymbolTable.hpp"
+#include "1905072_Assembly_Generator.hpp"
+#include "1905072_Semantic_Analyzer.hpp"
+#include "1905072_Optimizer.hpp"
 
 using namespace std;
 

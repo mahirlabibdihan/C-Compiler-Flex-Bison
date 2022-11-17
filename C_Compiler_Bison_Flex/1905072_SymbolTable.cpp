@@ -1,8 +1,8 @@
 #include <iostream>
 #include <functional>
 #include <cassert>
-#include "1905072_ScopeTable.h"
-#include "1905072_SymbolTable.h"
+#include "1905072_ScopeTable.hpp"
+#include "1905072_SymbolTable.hpp"
 #include <string>
 using namespace std;
 

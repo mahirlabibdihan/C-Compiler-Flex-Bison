@@ -1,5 +1,5 @@
-#include "1905072_Assembly_Generator.h"
-#include "1905072_SymbolTable.h"
+#include "1905072_Assembly_Generator.hpp"
+#include "1905072_SymbolTable.hpp"
 #include <algorithm>
 #include <string>
 using namespace std;

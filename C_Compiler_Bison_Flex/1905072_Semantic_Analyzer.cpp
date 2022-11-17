@@ -12,8 +12,8 @@ extern bool in_function;
 extern SymbolTable *table;
 extern vector<string> data_segment;
 extern AssemblyGenerator *asm_gen;
-extern AssemblyGenerator *sem_anlz;
-
+extern SemanticAnalyzer *sem_anlz;
+extern ErrorHandler *err_hndlr;
 SemanticAnalyzer::SemanticAnalyzer()
 {
 }
@@ -81,15 +81,15 @@ void matchTwoFunction(Function *f1, Function *f2)
 {
     if (!f1->matchReturnType(f2))
     {
-        handleError(RETURN_TYPE_MISMATCH, line_count, f2->getSymbol());
+        err_hndlr->handleSemanticError(RETURN_TYPE_MISMATCH, line_count, f2->getSymbol());
     }
     if (!f1->matchParamsNum(f2))
     {
-        handleError(PARAM_NUMBER_MISMATCH, line_count, f2->getSymbol());
+        err_hndlr->handleSemanticError(PARAM_NUMBER_MISMATCH, line_count, f2->getSymbol());
     }
     else if (!f1->matchParamsType(f2))
     {
-        handleError(PARAM_TYPE_MISMATCH, line_count, f2->getSymbol());
+        err_hndlr->handleSemanticError(PARAM_TYPE_MISMATCH, line_count, f2->getSymbol());
     }
 }
 
@@ -97,7 +97,7 @@ void SemanticAnalyzer::returnFunction(Expression *ret)
 {
     if (ret->getDataType() != curr_func->getReturnType())
     {
-        handleError(RETURN_TYPE_MISMATCH, line_count, curr_func->getSymbol());
+        err_hndlr->handleSemanticError(RETURN_TYPE_MISMATCH, line_count, curr_func->getSymbol());
     }
     else
     {
@@ -116,7 +116,7 @@ void SemanticAnalyzer::endFunction()
         }
         else
         {
-            handleError(FUNCTION_NOT_RETURNED, line_count, curr_func->getSymbol());
+            err_hndlr->handleSemanticError(FUNCTION_NOT_RETURNED, line_count, curr_func->getSymbol());
         }
     }
 }
@@ -130,7 +130,7 @@ void SemanticAnalyzer::declareFunctionParams()
         Variable *var = new Variable(i->getSymbol(), i->getDataType());
         if (!table->insert(var))
         {
-            handleError(MULTIPLE_DECLARATION, line_count, i->getSymbol());
+            err_hndlr->handleSemanticError(MULTIPLE_DECLARATION, line_count, i->getSymbol());
         }
     }
 }
@@ -149,7 +149,7 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
         Identifier *id = (Identifier *)table->search(new_func->getSymbol());
         if (id->getIdentity() != "FUNCTION" or new_func->isDeclaredAndDefined()) // Already declared as non-function type or Defined as function
         {
-            handleError(MULTIPLE_DECLARATION, line_count, new_func->getSymbol());
+            err_hndlr->handleSemanticError(MULTIPLE_DECLARATION, line_count, new_func->getSymbol());
         }
         else
         {
@@ -167,7 +167,7 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
         {
             if (i->getSymbol() == "blank")
             {
-                handleError(MISSING_PARAM_NAME, line_count, new_func->getSymbol());
+                err_hndlr->handleSemanticError(MISSING_PARAM_NAME, line_count, new_func->getSymbol());
             }
         }
 
@@ -192,7 +192,7 @@ void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<V
         Identifier *id = (Identifier *)table->search(id_name);
         if (id->getIdentity() != "FUNCTION") // Already declared as non-function type or Defined as function
         {
-            handleError(MULTIPLE_DECLARATION, line_count, id_name);
+            err_hndlr->handleSemanticError(MULTIPLE_DECLARATION, line_count, id_name);
         }
         else
         {
@@ -213,13 +213,13 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
     Identifier *id = (Identifier *)table->search(id_name);
     if (id == NULL)
     {
-        handleError(UNDECLARED_FUNCTION, line_count, id_name);
+        err_hndlr->handleSemanticError(UNDECLARED_FUNCTION, line_count, id_name);
         return "NULL";
     }
 
     if (id->getIdentity() != "FUNCTION")
     {
-        handleError(NOT_FUNCTION, line_count, id_name);
+        err_hndlr->handleSemanticError(NOT_FUNCTION, line_count, id_name);
         return "NULL";
     }
 
@@ -227,22 +227,22 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
     // cout << func->isDeclaredAndDefined() << endl;
     if (func->isDeclaredNotDefined())
     {
-        handleError(UNDEFINED_FUNCTION, line_count, id_name);
+        err_hndlr->handleSemanticError(UNDEFINED_FUNCTION, line_count, id_name);
     }
     else if (func->getNumberOfParams() < args.size())
     {
-        handleError(TOO_MANY_ARGUMENTS, line_count, id_name);
+        err_hndlr->handleSemanticError(TOO_MANY_ARGUMENTS, line_count, id_name);
     }
     else if (func->getNumberOfParams() > args.size())
     {
-        handleError(TOO_FEW_ARGUMENTS, line_count, id_name);
+        err_hndlr->handleSemanticError(TOO_FEW_ARGUMENTS, line_count, id_name);
     }
     else
     {
         bool matched = func->isValidArgs(args);
         if (!matched)
         {
-            handleError(ARGUMENT_TYPE_MISMATCH, line_count, id_name);
+            err_hndlr->handleSemanticError(ARGUMENT_TYPE_MISMATCH, line_count, id_name);
         }
         else
         {
@@ -257,7 +257,7 @@ void SemanticAnalyzer::declareVariable(string data_type, string var_name)
 
     if (!table->insert(var)) // already present in current scope
     {
-        handleError(MULTIPLE_DECLARATION, line_count, var_name);
+        err_hndlr->handleSemanticError(MULTIPLE_DECLARATION, line_count, var_name);
     }
     else
     {
@@ -270,7 +270,7 @@ void SemanticAnalyzer::declareArray(string data_type, string arr_name, string ar
 
     if (!table->insert(arr)) // already present in current scope
     {
-        handleError(MULTIPLE_DECLARATION, line_count, arr_name);
+        err_hndlr->handleSemanticError(MULTIPLE_DECLARATION, line_count, arr_name);
     }
     else
     {
@@ -282,7 +282,7 @@ void SemanticAnalyzer::declareVariables(string data_type, string id_names, vecto
 {
     if (data_type == "void")
     {
-        handleError(VOID_VARIABLE, line_count, id_names);
+        err_hndlr->handleSemanticError(VOID_VARIABLE, line_count, id_names);
     }
     else
     {
@@ -307,21 +307,21 @@ string SemanticAnalyzer::callVariable(string var_name)
 
     if (id == NULL)
     {
-        handleError(UNDECLARED_VARIABLE, line_count, var_name);
+        err_hndlr->handleSemanticError(UNDECLARED_VARIABLE, line_count, var_name);
         return "NULL";
     }
     else
     {
         if (id->getIdentity() != "VARIABLE")
         {
-            handleError(TYPE_MISMATCH, line_count, var_name + " is not a variable"); // should i change this to indexing
+            err_hndlr->handleSemanticError(TYPE_MISMATCH, line_count, var_name + " is not a variable"); // should i change this to indexing
             return "NULL";
         }
 
         Variable *var = (Variable *)id;
         if (var->getVarType() == "ARRAY")
         {
-            handleError(TYPE_MISMATCH, line_count, var_name + " is an array"); // should i change this to indexing
+            err_hndlr->handleSemanticError(TYPE_MISMATCH, line_count, var_name + " is an array"); // should i change this to indexing
             return "NULL";
         }
         return var->getDataType();
@@ -335,26 +335,26 @@ string SemanticAnalyzer::callArray(string arr_name, Expression *index)
 
     if (id == NULL)
     {
-        handleError(UNDECLARED_VARIABLE, line_count, arr_name);
+        err_hndlr->handleSemanticError(UNDECLARED_VARIABLE, line_count, arr_name);
         return "NULL";
     }
     else
     {
         if (id->getIdentity() != "VARIABLE")
         {
-            handleError(TYPE_MISMATCH, line_count, arr_name + " is not a variable");
+            err_hndlr->handleSemanticError(TYPE_MISMATCH, line_count, arr_name + " is not a variable");
             return "NULL";
         }
 
         Variable *var = (Variable *)id;
         if (var->getVarType() != "ARRAY")
         {
-            handleError(TYPE_MISMATCH, line_count, arr_name + " is not an array"); // should i change this to indexing
+            err_hndlr->handleSemanticError(TYPE_MISMATCH, line_count, arr_name + " is not an array"); // should i change this to indexing
             return "NULL";
         }
         if (index->getDataType() != "int")
         {
-            handleError(INVALID_ARRAY_INDEX, line_count, index->getSymbol());
+            err_hndlr->handleSemanticError(INVALID_ARRAY_INDEX, line_count, index->getSymbol());
         }
         // asm_gen->callArray(var);
         return var->getDataType();
@@ -368,12 +368,12 @@ string SemanticAnalyzer::assignOp(Expression *left, Expression *right)
     {
         if (left->getDataType() == "void" || right->getDataType() == "void")
         {
-            handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator='");
+            err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator='");
             return "NULL";
         }
         else
         {
-            handleError(INVALID_CONVERSION, line_count, "from '" + right->getDataType() + "' to '" + left->getDataType() + "'");
+            err_hndlr->handleSemanticError(INVALID_CONVERSION, line_count, "from '" + right->getDataType() + "' to '" + left->getDataType() + "'");
             return "NULL";
         }
     }
@@ -398,11 +398,11 @@ string SemanticAnalyzer::logicOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "void" || right->getDataType() == "void")
             {
-                handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
+                err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
             }
             else
             {
-                handleError(INCOMPATIBLE_OPERAND, line_count);
+                err_hndlr->handleSemanticError(INCOMPATIBLE_OPERAND, line_count);
             }
             return "NULL";
         }
@@ -428,11 +428,11 @@ string SemanticAnalyzer::relOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "void" || right->getDataType() == "void")
             {
-                handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
+                err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
             }
             else
             {
-                handleError(INCOMPATIBLE_OPERAND, line_count);
+                err_hndlr->handleSemanticError(INCOMPATIBLE_OPERAND, line_count);
             }
             return "NULL";
         }
@@ -457,11 +457,11 @@ string SemanticAnalyzer::addOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "void" || right->getDataType() == "void")
             {
-                handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
+                err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
             }
             else
             {
-                handleError(INCOMPATIBLE_OPERAND, line_count);
+                err_hndlr->handleSemanticError(INCOMPATIBLE_OPERAND, line_count);
             }
             return "NULL";
         }
@@ -480,14 +480,14 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
     {
         if (right->getExpression() == "0")
         {
-            handleError(MOD_BY_ZERO, line_count, right->getExpression() + "%" + right->getExpression());
+            err_hndlr->handleSemanticError(MOD_BY_ZERO, line_count, right->getExpression() + "%" + right->getExpression());
             return "NULL";
         }
         else
         {
             if (type != "int")
             {
-                handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
+                err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
                 return "NULL";
             }
             else
@@ -508,11 +508,11 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "void" || right->getDataType() == "void")
             {
-                handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
+                err_hndlr->handleSemanticError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'");
             }
             else
             {
-                handleError(INCOMPATIBLE_OPERAND, line_count);
+                err_hndlr->handleSemanticError(INCOMPATIBLE_OPERAND, line_count);
             }
             return "NULL";
         }

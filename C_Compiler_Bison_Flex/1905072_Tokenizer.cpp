@@ -78,19 +78,19 @@ map<string, int> keywordToken = {
     {"break", BREAK},
     {"return", RETURN},
     {"continue", CONTINUE}};
-void printToken(string type, string token_type)
+void Tokenizer::printToken(string type, string token_type)
 {
     tokenout << "<" << type << "> ";
     tokenout.flush();
     yylval.terminal = new Terminal(toLower(type), type);
 }
-void printToken(string type, string symbol, string token_type)
+void Tokenizer::printToken(string type, string symbol, string token_type)
 {
     tokenout << "<" << type << "," << symbol << "> ";
     tokenout.flush();
     yylval.terminal = new Terminal(symbol, type);
 }
-void generateToken(Token type, string lexeme)
+void Tokenizer::generateToken(Token type, string lexeme)
 {
     switch (type)
     {
@@ -120,7 +120,7 @@ void generateToken(Token type, string lexeme)
     }
 }
 
-int getToken(Token type, string lexeme)
+int Tokenizer::getToken(Token type, string lexeme)
 {
     switch (type)
     {

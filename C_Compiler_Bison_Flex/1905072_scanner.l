@@ -13,6 +13,9 @@ using namespace std;
 
 extern int line_count;
 extern SymbolTable* table;
+extern Tokenizer* tknzr;
+extern Logger* logger;
+extern ErrorHandler* err_hndlr;
 %}
 
 WHITESPACE [ \t\f\r\v]+ 
@@ -62,100 +65,100 @@ ESCAPE_SEQUENCE (\\.)
 {WHITESPACE}  					{ /* Do nothing */ }
 {NEWLINE} 						{ line_count = yylineno; }
 {KEYWORDS}						{ 
-									generateToken(KEYWORD_TOKEN, yytext); 
-									printLogData(KEYWORD_LOG,line_count,yytext); 
-									return getToken(KEYWORD_TOKEN, yytext);
+									tknzr->generateToken(KEYWORD_TOKEN, yytext); 
+									logger->printLogData(KEYWORD_LOG,line_count,yytext); 
+									return tknzr->getToken(KEYWORD_TOKEN, yytext);
 								}
 "println"						{ 
-									// generateToken(KEYWORD_TOKEN, yytext); 
-									// printLogData(KEYWORD_LOG,line_count,yytext); 
+									// tknzr->generateToken(KEYWORD_TOKEN, yytext); 
+									// logger->printLogData(KEYWORD,line_count,yytext); 
 									yylval.terminal = new Terminal(yytext, "PRINTLN");
 									return PRINTLN;
 								}
 {INTEGER}						{ 
-									generateToken(INTEGER_TOKEN, yytext); 	
-									printLogData(INTEGER_LOG,line_count,yytext);
+									tknzr->generateToken(INTEGER_TOKEN, yytext); 	
+									logger->printLogData(INTEGER_LOG,line_count,yytext);
 									// if (table->insert(SymbolInfo(yytext, "CONST_INT")))
 									// {
 									// 	table->printAllScope();
 									// }
-									return getToken(INTEGER_TOKEN, yytext);
+									return tknzr->getToken(INTEGER_TOKEN, yytext);
 								}
 {FLOATING_POINT}				{ 
-									generateToken(FLOAT_TOKEN, yytext); 
-									printLogData(FLOAT_LOG,line_count,yytext);
+									tknzr->generateToken(FLOAT_TOKEN, yytext); 
+									logger->printLogData(FLOAT_LOG,line_count,yytext);
 									// if (table->insert(SymbolInfo(yytext, "CONST_FLOAT")))
 									// {
 									// 	table->printAllScope();
 									// }
-									return getToken(FLOAT_TOKEN, yytext);
+									return tknzr->getToken(FLOAT_TOKEN, yytext);
 								}
 {VALID_STRING}					{ 
-									generateToken(CHARACTER_TOKEN, yytext); 
-									printLogData(STRING_LOG,line_count,yytext);
+									tknzr->generateToken(CHARACTER_TOKEN, yytext); 
+									logger->printLogData(STRING_LOG,line_count,yytext);
 									line_count = yylineno; 
-									return getToken(CHARACTER_TOKEN, yytext); 
+									return tknzr->getToken(CHARACTER_TOKEN, yytext); 
 								}
 {UNTERMINATED_STRING} 			{ 
-									handleError(UNTERMINATED_STRING, line_count, yytext); 
+									err_hndlr->handleLexicalError(UNTERMINATED_STRING, line_count, yytext); 
 									line_count = yylineno; 
 								}
 {SINGLE_COMMENT}				{ 
-									printLogData(COMMENT_LOG,line_count,yytext); 
+									logger->printLogData(COMMENT_LOG,line_count,yytext); 
 									line_count = yylineno; 
 								}  
 {MULTI_COMMENT} 				{ 
-									printLogData(COMMENT_LOG,line_count,yytext); 
+									logger->printLogData(COMMENT_LOG,line_count,yytext); 
 									line_count = yylineno; 
 								}
 {INCOMPLETE_MULTI_COMMENT} 		{ 	
-									handleError(UNTERMINATED_COMMENT,line_count,yytext); 
+									err_hndlr->handleLexicalError(UNTERMINATED_COMMENT,line_count,yytext); 
 									line_count = yylineno; 
 								}
-{TOO_MANY_DECIMAL} 				{ handleError(TOO_MANY_DECIMAL,line_count,yytext); }
-{ILL_NUM} 						{ handleError(ILL_NUMBER,line_count,yytext); }
+{TOO_MANY_DECIMAL} 				{ err_hndlr->handleLexicalError(TOO_MANY_DECIMAL,line_count,yytext); }
+{ILL_NUM} 						{ err_hndlr->handleLexicalError(ILL_NUMBER,line_count,yytext); }
 {VALID_CHAR} 					{ 
-									generateToken(CHARACTER_TOKEN, yytext);
-									printLogData(CHARACTER_LOG,line_count,yytext);
+									tknzr->generateToken(CHARACTER_TOKEN, yytext);
+									logger->printLogData(CHARACTER_LOG,line_count,yytext);
 									// if (table->insert(SymbolInfo(yytext, "CONST_CHAR")))
 									// {
 									// 	table->printAllScope();
 									// }
-									return getToken(CHARACTER_TOKEN, yytext);
+									return tknzr->getToken(CHARACTER_TOKEN, yytext);
 								}
-{MULTI_CHAR} 					{ handleError(MULTI_CHARACTER,line_count,yytext); }
-{UNTERMINATED_CHAR} 			{ handleError(UNTERMINATED_CHARACTER,line_count,yytext); line_count = yylineno; }
-{EMPTY_CHAR} 					{ handleError(EMPTY_CHARACTER,line_count,yytext); }
+{MULTI_CHAR} 					{ err_hndlr->handleLexicalError(MULTI_CHARACTER,line_count,yytext); }
+{UNTERMINATED_CHAR} 			{ err_hndlr->handleLexicalError(UNTERMINATED_CHARACTER,line_count,yytext); line_count = yylineno; }
+{EMPTY_CHAR} 					{ err_hndlr->handleLexicalError(EMPTY_CHARACTER,line_count,yytext); }
 {LCURL} 						{ 
-									generateToken(OPERATOR_TOKEN,yytext); 
-									printLogData(OPERATOR_LOG,line_count,yytext);
+									tknzr->generateToken(OPERATOR_TOKEN,yytext); 
+									logger->printLogData(OPERATOR_LOG,line_count,yytext);
 									// cout<<"Entered new scope "<<line_count<<endl;
 									// table->enterScope();
-									return getToken(OPERATOR_TOKEN,yytext); 
+									return tknzr->getToken(OPERATOR_TOKEN,yytext); 
 								}
 {RCURL} 						{ 
-									generateToken(OPERATOR_TOKEN,yytext); 
-									printLogData(OPERATOR_LOG,line_count,yytext);
+									tknzr->generateToken(OPERATOR_TOKEN,yytext); 
+									logger->printLogData(OPERATOR_LOG,line_count,yytext);
 									// table->printAllScope();
 									// table->exitScope();
-									return getToken(OPERATOR_TOKEN,yytext); 
+									return tknzr->getToken(OPERATOR_TOKEN,yytext); 
 								}
 {OPERATOR}						{ 
-									generateToken(OPERATOR_TOKEN,yytext); 
-									printLogData(OPERATOR_LOG,line_count,yytext);
-									return getToken(OPERATOR_TOKEN,yytext); 
+									tknzr->generateToken(OPERATOR_TOKEN,yytext); 
+									logger->printLogData(OPERATOR_LOG,line_count,yytext);
+									return tknzr->getToken(OPERATOR_TOKEN,yytext); 
 								}
 {IDENTIFIER}					{ 
-									generateToken(IDENTIFIER_TOKEN, yytext);
-									printLogData(IDENTIFIER_LOG,line_count,yytext);
+									tknzr->generateToken(IDENTIFIER_TOKEN, yytext);
+									logger->printLogData(IDENTIFIER_LOG,line_count,yytext);
 									// if (table->insert(SymbolInfo(yytext, "ID")))
 									// {
 									// 	table->printAllScope();
 									// }
-									return getToken(IDENTIFIER_TOKEN, yytext);
+									return tknzr->getToken(IDENTIFIER_TOKEN, yytext);
 								}
-{NON_IDENTIFIER} 				{ handleError(INVALID_IDENTIFIER, line_count, yytext); }
-. 								{ handleError(UNRECOGNIZED, line_count, yytext); }
+{NON_IDENTIFIER} 				{ err_hndlr->handleLexicalError(INVALID_IDENTIFIER, line_count, yytext); }
+. 								{ err_hndlr->handleLexicalError(UNRECOGNIZED, line_count, yytext); }
 <<EOF>> {
     return 0;
 }

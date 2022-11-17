@@ -11,7 +11,7 @@ extern int error_count;
 extern int line_count;
 extern SymbolTable *table;
 
-void printError(string error, int line)
+void ErrorHandler::printError(string error, int line)
 {
     error_count++;
 
@@ -20,15 +20,16 @@ void printError(string error, int line)
     errout << "Error at line " << line << ": " << error << "\n"
            << endl;
 }
-void printLexicalError(string error, int line)
+void ErrorHandler::printLexicalError(string error, int line)
 {
     printError("lexical error, " + error, line);
 }
-void printSemanticError(string error, int line)
+void ErrorHandler::printSemanticError(string error, int line)
 {
     printError("semantic error, " + error, line);
 }
-void handleError(int type, int line, string lexeme)
+
+void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme)
 {
     switch (type)
     {
@@ -59,7 +60,15 @@ void handleError(int type, int line, string lexeme)
     case UNRECOGNIZED:
         printLexicalError("Unrecognized character " + lexeme, line);
         break;
-        // Semantic Errors
+    default:
+        break;
+    }
+}
+
+void ErrorHandler::handleSemanticError(SemanticError type, int line, string lexeme)
+{
+    switch (type)
+    {
     case MULTIPLE_DECLARATION:
         // table->printAllScope();
         printSemanticError("Multiple declaration of '" + lexeme + "'", line);

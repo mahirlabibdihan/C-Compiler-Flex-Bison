@@ -4,7 +4,9 @@
 #include "1905072_Assembly_Generator.hpp"
 #include "1905072_Semantic_Analyzer.hpp"
 #include "1905072_Optimizer.hpp"
-
+#include "1905072_Tokenizer.hpp"
+#include "1905072_Logger.hpp"
+#include "1905072_Error_Handler.hpp"
 using namespace std;
 
 ofstream errout;
@@ -19,7 +21,11 @@ int line_count;
 int error_count;
 AssemblyGenerator *asm_gen;
 SemanticAnalyzer *sem_anlz;
+Tokenizer *tknzr;
 Optimizer *optmzr;
+Logger *logger;
+ErrorHandler *err_hndlr;
+
 int yyparse(void);
 extern FILE *yyin;
 extern int yylineno;
@@ -82,7 +88,9 @@ int main(int argc, char *argv[])
     asm_gen = new AssemblyGenerator("1905072_code.asm");
     sem_anlz = new SemanticAnalyzer();
     optmzr = new Optimizer();
-
+    tknzr = new Tokenizer();
+    logger = new Logger();
+    err_hndlr = new ErrorHandler();
     yyin = fin;
     line_count = yylineno = 1;
     error_count = 0;

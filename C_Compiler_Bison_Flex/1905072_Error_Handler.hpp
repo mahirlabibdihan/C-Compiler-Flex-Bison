@@ -50,6 +50,14 @@ enum SemanticError
     FUNCTION_NOT_RETURNED
 };
 
-void printErrorLog(string error, int line);
-void handleError(int type, int line, string lexeme = "");
+class ErrorHandler
+{
+public:
+    void printError(string error, int line);
+    void printLexicalError(string error, int line);
+    void printSemanticError(string error, int line);
+    void handleLexicalError(LexicalError type, int line, string lexeme = "");
+    void handleSemanticError(SemanticError type, int line, string lexeme = "");
+};
+
 #endif

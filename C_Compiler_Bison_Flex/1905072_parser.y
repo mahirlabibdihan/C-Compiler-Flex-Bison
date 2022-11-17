@@ -21,6 +21,7 @@ extern ofstream logout;
 extern ofstream errout;
 extern ofstream tokenout;
 extern ofstream codeout;
+extern ErrorHandler* err_hndlr;
 Expression *last_exp;
 int yylex(void);
 extern int line_count;
@@ -492,7 +493,7 @@ declaration_list 		: declaration_list COMMA ID
 
 							if($5->getDataType()=="float")
 							{
-								handleError(INVALID_ARRAY_SIZE, line_count, $5->getSymbol());
+								err_hndlr->handleSemanticError(INVALID_ARRAY_SIZE, line_count, $5->getSymbol());
 							}
 
 							$$->addVariables($1);
@@ -507,7 +508,7 @@ declaration_list 		: declaration_list COMMA ID
 
 							if($6->getDataType() == "float")
 							{
-								handleError(INVALID_ARRAY_SIZE, line_count, $6->getSymbol());
+								err_hndlr->handleSemanticError(INVALID_ARRAY_SIZE, line_count, $6->getSymbol());
 							}
 
 							$$->addVariables($1);
@@ -532,7 +533,7 @@ declaration_list 		: declaration_list COMMA ID
 
 							if($3->getDataType()=="float")
 							{
-								handleError(INVALID_ARRAY_SIZE, line_count, $3->getSymbol());
+								err_hndlr->handleSemanticError(INVALID_ARRAY_SIZE, line_count, $3->getSymbol());
 							}
 
 							$$->addArray($1->getSymbol(),$3->getSymbol());
@@ -571,13 +572,13 @@ statement 				: var_declaration
 						| func_definition {
 							vector<SymbolInfo*> child = {$1};
 							$$ = createNonTerminal(child,"statement");
-							handleError(NESTED_FUNCTION, line_count);
+							err_hndlr->handleSemanticError(NESTED_FUNCTION, line_count);
 							freeMemory(child);
 						}
 						| func_declaration {
 							vector<SymbolInfo*> child = {$1};
 							$$ = createNonTerminal(child,"statement");
-							handleError(NESTED_FUNCTION, line_count);
+							err_hndlr->handleSemanticError(NESTED_FUNCTION, line_count);
 							freeMemory(child);
 						}
 						| expression_statement
@@ -652,11 +653,11 @@ statement 				: var_declaration
 							Identifier* id = (Identifier*)table->search($3->getSymbol());	
 							if(id == NULL)
 							{
-								handleError(UNDECLARED_VARIABLE, line_count, $3->getSymbol());
+								err_hndlr->handleSemanticError(UNDECLARED_VARIABLE, line_count, $3->getSymbol());
 							}
 							else if(id->getIdentity()=="FUNCTION")
 							{
-								handleError(UNDECLARED_VARIABLE, line_count, $3->getSymbol());
+								err_hndlr->handleSemanticError(UNDECLARED_VARIABLE, line_count, $3->getSymbol());
 							}
 							else
 							{

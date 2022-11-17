@@ -5,42 +5,43 @@
 #include <fstream>
 extern ofstream logout;
 extern int line_count;
-void printLog(string token, string lexeme, int line)
+extern Logger *logger;
+void Logger::printLog(string token, string lexeme, int line)
 {
     logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found\n"
            << endl;
 }
-void printLogWithToken(string token, string lexeme, string actual, int line)
+void Logger::printLogWithToken(string token, string lexeme, string actual, int line)
 {
     logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found --> <" << token << ", " << actual << ">\n"
            << endl;
 }
-void printLogData(int type, int line, string lexeme)
+void Logger::printLogData(LogType type, int line, string lexeme)
 {
     // switch (type)
     // {
-    // case KEYWORD_LOG:
+    // case KEYWORD:
     //     printLog(toUpper(lexeme), lexeme, line);
     //     break;
-    // case INTEGER_LOG:
+    // case INTEGER:
     //     printLog("CONST_INT", lexeme, line);
     //     break;
-    // case FLOAT_LOG:
+    // case FLOAT:
     //     printLog("CONST_FLOAT", lexeme, line);
     //     break;
-    // case CHARACTER_LOG:
+    // case CHARACTER:
     //     printLogWithToken("CONST_CHAR", lexeme, string(1, getActualChar(lexeme)), line);
     //     break;
-    // case STRING_LOG:
+    // case STRING:
     //     printLogWithToken("STRING", lexeme, getActualString(lexeme), line);
     //     break;
-    // case OPERATOR_LOG:
+    // case OPERATOR:
     //     printLog(operatorToken[lexeme], lexeme, line);
     //     break;
-    // case IDENTIFIER_LOG:
+    // case IDENTIFIER:
     //     printLog("ID", lexeme, line);
     //     break;
-    // case COMMENT_LOG:
+    // case COMMENT:
     //     printLog("COMMENT", lexeme, line);
     //     break;
     // default:
@@ -48,12 +49,12 @@ void printLogData(int type, int line, string lexeme)
     // }
 }
 
-void printRule(string left_part, string right_part)
+void Logger::printRule(string left_part, string right_part)
 {
     logout << "Line " << line_count << ": " << left_part << " : " << right_part << "\n"
            << endl;
 }
-void printRule(SymbolInfo *parent, vector<SymbolInfo *> children)
+void Logger::printRule(SymbolInfo *parent, vector<SymbolInfo *> children)
 {
     string left = parent->getType();
     string right = "";
@@ -63,32 +64,16 @@ void printRule(SymbolInfo *parent, vector<SymbolInfo *> children)
     }
     printRule(left, right);
 }
-void printCode(string code)
+void Logger::printCode(string code)
 {
     logout << code << "\n"
            << endl;
 }
 
-NonTerminal *printRuleAndCode(vector<SymbolInfo *> child, string name, bool is_exp)
+void Logger::printRuleAndCode(SymbolInfo *parent, vector<SymbolInfo *> child)
 {
-    if (is_exp)
-    {
-        Expression *node = new Expression(
-            formatCode(child),
-            name);
-        printRule(node, child);
-        printCode(node->getSymbol());
-        return node;
-    }
-    else
-    {
-        NonTerminal *node = new NonTerminal(
-            formatCode(child),
-            name);
-        printRule(node, child);
-        printCode(node->getSymbol());
-        return node;
-    }
+    printRule(parent, child);
+    printCode(parent->getSymbol());
 }
 
 NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name)
@@ -96,8 +81,7 @@ NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name)
     NonTerminal *node = new NonTerminal(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }
 
@@ -106,8 +90,7 @@ Expression *createExpression(vector<SymbolInfo *> child, string name)
     Expression *node = new Expression(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }
 
@@ -116,8 +99,7 @@ ParameterList *createParameterList(vector<SymbolInfo *> child, string name)
     ParameterList *node = new ParameterList(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }
 
@@ -126,8 +108,7 @@ DeclarationList *createDeclarationList(vector<SymbolInfo *> child, string name)
     DeclarationList *node = new DeclarationList(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }
 
@@ -136,8 +117,7 @@ ArgumentList *createArgumentList(vector<SymbolInfo *> child, string name)
     ArgumentList *node = new ArgumentList(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }
 
@@ -146,7 +126,6 @@ ArrayCall *createArrayCall(vector<SymbolInfo *> child, string name)
     ArrayCall *node = new ArrayCall(
         formatCode(child),
         name);
-    printRule(node, child);
-    printCode(node->getSymbol());
+    logger->printRuleAndCode(node, child);
     return node;
 }

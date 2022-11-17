@@ -1,5 +1,9 @@
 #include "1905072_Symbol_Extended.hpp"
 #include "1905072_Helper.hpp"
+#include "1905072_Logger.hpp"
+
+extern Logger *logger;
+extern Helper *hlpr;
 extern int line_count;
 NonTerminal::NonTerminal()
 {
@@ -380,7 +384,7 @@ void Function::setReturnType(const string &type)
 }
 void Function::addParam(Variable *param)
 {
-    param_types.push_back(param);
+    params.push_back(param);
 }
 void Function::addParams(vector<Variable *> params)
 {
@@ -391,23 +395,11 @@ void Function::addParams(vector<Variable *> params)
 }
 vector<Variable *> Function::getParams()
 {
-    return param_types;
+    return params;
 }
 int Function::getNumberOfParams()
 {
-    return param_types.size();
-}
-bool Function::isValidArgs(vector<Expression *> args)
-{
-    for (int i = 0; i < param_types.size(); i++)
-    {
-        if (!isConvertible(param_types[i]->getDataType(), args[i]->getDataType()))
-        {
-            // cout << param_types[i]->getDataType() << "," << args[i]->getDataType() << "<" << endl;
-            return false;
-        }
-    }
-    return true;
+    return params.size();
 }
 
 bool Function::isDeclaredAndDefined()
@@ -420,13 +412,13 @@ bool Function::isDeclaredNotDefined()
 }
 bool Function::matchParamsNum(Function *func)
 {
-    return func->param_types.size() == this->param_types.size();
+    return func->params.size() == this->params.size();
 }
 bool Function::matchParamsType(Function *func)
 {
-    for (int i = 0; i < param_types.size(); i++)
+    for (int i = 0; i < params.size(); i++)
     {
-        if (func->param_types[i] != this->param_types[i])
+        if (func->params[i] != this->params[i])
         {
             return false;
         }
@@ -467,4 +459,58 @@ const string &Constant::getDataType()
 void Constant::setDataType(const string &data_type)
 {
     this->data_type = data_type;
+}
+
+NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name)
+{
+    NonTerminal *node = new NonTerminal(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
+}
+
+Expression *createExpression(vector<SymbolInfo *> child, string name)
+{
+    Expression *node = new Expression(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
+}
+
+ParameterList *createParameterList(vector<SymbolInfo *> child, string name)
+{
+    ParameterList *node = new ParameterList(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
+}
+
+DeclarationList *createDeclarationList(vector<SymbolInfo *> child, string name)
+{
+    DeclarationList *node = new DeclarationList(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
+}
+
+ArgumentList *createArgumentList(vector<SymbolInfo *> child, string name)
+{
+    ArgumentList *node = new ArgumentList(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
+}
+
+ArrayCall *createArrayCall(vector<SymbolInfo *> child, string name)
+{
+    ArrayCall *node = new ArrayCall(
+        hlpr->formatCode(child),
+        name);
+    logger->printRuleAndCode(node, child);
+    return node;
 }

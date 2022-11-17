@@ -12,7 +12,7 @@ using namespace std;
 class AssemblyGenerator
 {
     int label_count, tmp_count, curr_tmp;
-    int offset;
+    // int offset;
     stack<int> offset_history;
     string header;
     string data_segment;
@@ -23,12 +23,9 @@ class AssemblyGenerator
     ofstream codeout;
     Function *curr_func;
     string outfile;
-    stack<string> ifBlockEndLabel;
-    stack<string> elseBlockEndLabel;
 
-    stack<string> forLoopEndLabel, forLoopStartLabel;
-    stack<string> forLoopDelayedCode;
-
+    stack<string> ifBlockEndLabel, elseBlockEndLabel;
+    stack<string> forLoopEndLabel, forLoopStartLabel, forLoopDelayedCode;
     stack<string> whileLoopStartLabel, whileLoopEndLabel;
 
     string forLoopIncDecCode = "";
@@ -60,7 +57,7 @@ public:
 
     string callFunction(Function *, vector<Expression *>);
     string callVariable(string);
-    string callConstant(Constant *);
+    // string callConstant(Constant *);
     string callArray(string, Expression *);
 
     string newLabel();

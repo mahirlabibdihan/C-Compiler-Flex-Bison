@@ -14,6 +14,7 @@ extern vector<string> data_segment;
 extern AssemblyGenerator *asm_gen;
 extern SemanticAnalyzer *sem_anlz;
 extern ErrorHandler *err_hndlr;
+extern Helper *hlpr;
 SemanticAnalyzer::SemanticAnalyzer()
 {
 }
@@ -51,6 +52,21 @@ string SemanticAnalyzer::implicitTypecast(string left, string right)
     return "ERROR";
 }
 
+// Can be merged with checkAssignment
+bool SemanticAnalyzer::isConvertible(string to, string from)
+{
+    if (from == "NULL")
+    {
+        return true; // already error reported and converted to NULL , this is made true to supress more error
+    }
+    if (from == "void")
+    {
+        return false;
+    }
+
+    return hlpr->getDataSize(to) >= hlpr->getDataSize(from);
+}
+
 bool SemanticAnalyzer::checkAssignment(string left, string right)
 {
     // cout << line_count << " " << left << " " << right << endl;
@@ -58,6 +74,7 @@ bool SemanticAnalyzer::checkAssignment(string left, string right)
     {
         return true; // already error reported and converted to NULL , this is made true to supress more error
     }
+    // Left can't be void, since left is a variable. And we are not inserting void variable in symbol table
     if (left == "void" || right == "void") // Void not allowed
     {
         return false;
@@ -66,15 +83,8 @@ bool SemanticAnalyzer::checkAssignment(string left, string right)
     {
         return false;
     }
-    if (left == "int" && right == "int")
-    {
-        return true;
-    }
-    if (left == "float")
-    {
-        return true;
-    }
-    return false;
+
+    return (hlpr->getDataSize(left) >= hlpr->getDataSize(left))
 }
 
 void matchTwoFunction(Function *f1, Function *f2)
@@ -239,13 +249,14 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
     }
     else
     {
-        bool matched = func->isValidArgs(args);
-        if (!matched)
+        vector<Variable *> params = func->getParams();
+        for (int i = 0; i < params.size(); i++)
         {
-            err_hndlr->handleSemanticError(ARGUMENT_TYPE_MISMATCH, line_count, id_name);
-        }
-        else
-        {
+            if (!isConvertible(params[i]->getDataType(), args[i]->getDataType()))
+            {
+                err_hndlr->handleSemanticError(ARGUMENT_TYPE_MISMATCH, line_count, id_name);
+                break;
+            }
         }
     }
     return func->getReturnType();

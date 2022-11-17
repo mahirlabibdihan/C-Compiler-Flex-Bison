@@ -3,23 +3,26 @@
 #include <vector>
 #include "1905072_SymbolInfo.hpp"
 #include "1905072_Symbol_Extended.hpp"
+#include "1905072_Logger.hpp"
+
+extern Logger *logger;
 using namespace std;
 
-string toUpper(string s)
+string Helper::toUpper(string s)
 {
     for (auto &ch : s)
         ch = toupper(ch);
     return s;
 }
 
-string toLower(string s)
+string Helper::toLower(string s)
 {
     for (auto &ch : s)
         ch = tolower(ch);
     return s;
 }
 
-char getSpecialChar(char c)
+char Helper::getSpecialChar(char c)
 {
     switch (c)
     {
@@ -52,7 +55,7 @@ char getSpecialChar(char c)
         break;
     }
 }
-char getActualChar(string symbol)
+char Helper::getActualChar(string symbol)
 {
     if (symbol[1] != '\\')
     {
@@ -64,7 +67,7 @@ char getActualChar(string symbol)
     }
 }
 
-string getActualString(string str)
+string Helper::getActualString(string str)
 {
     int n = str.length();
     string tmp = "\"";
@@ -93,7 +96,7 @@ string getActualString(string str)
     return tmp + "\"";
 }
 
-string formatCode(vector<SymbolInfo *> tokens)
+string Helper::formatCode(vector<SymbolInfo *> tokens)
 {
     string code = "";
     for (auto &i : tokens)
@@ -110,58 +113,27 @@ string formatCode(vector<SymbolInfo *> tokens)
     }
     return code;
 }
-// string formatCode(vector<Segment *> segments)
-// {
-//     string code = "";
-//     for (auto &i : segments)
-//     {
-//         code += i->getSymbol();
-//         if (i->getType() == "type_specifier" || i->getType() == "ELSE" || i->getType() == "RETURN")
-//         {
-//             code += " ";
-//         }
-//         else if (i->getType() == "LCURL" || i->getType() == "unit" || i->getType() == "statement")
-//         {
-//             code += "\n";
-//         }
-//     }
-//     return code;
-// }
-string replaceAll(string source, string toReplace, string replaceBy)
-{
-    if (source.find(toReplace, 0) == string::npos)
-    {
-        return source;
-    }
-    for (string::size_type i = 0; (i = source.find(toReplace, i)) != string::npos;)
-    {
-        source.replace(i, toReplace.length(), replaceBy);
-        i += replaceBy.length();
-    }
-    return source;
-}
 
-string newLabel(string var_name, string scope_id)
+int Helper::getDataSize(string type)
 {
-    return var_name + "_" + replaceAll(scope_id, ".", "_") + " DW ?";
-}
-string newLabel(string arr_name, string arr_size, string scope_id)
-{
-    return arr_name + "_" + replaceAll(scope_id, ".", "_") + " DW " + arr_size + " DUP ($)";
-}
-
-bool isConvertible(string to, string from)
-{
-    if (from == "NULL")
+    if (type == "void")
     {
-        return true; // already error reported and converted to NULL , this is made true to supress more error
+        return 0;
     }
-
-    // if (og_p == "void")
-    //     return pass_p == "void";
-    if (to == "int" && from == "int")
-        return true;
-    if (to == "int" && from != "void")
-        return true;
-    return false;
+    else if (type == "char")
+    {
+        return 1;
+    }
+    else if (type == "int")
+    {
+        return 4;
+    }
+    else if (type == "float")
+    {
+        return 4;
+    }
+    else if (type == "double")
+    {
+        return 8;
+    }
 }

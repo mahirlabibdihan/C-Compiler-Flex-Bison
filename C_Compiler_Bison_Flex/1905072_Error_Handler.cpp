@@ -8,13 +8,16 @@ using namespace std;
 extern ofstream logout;
 extern ofstream errout;
 extern int error_count;
+extern int lexical_error_count;
+extern int syntax_error_count;
+extern int semantic_error_count;
+
 extern int line_count;
 extern SymbolTable *table;
 
 void ErrorHandler::printError(string error, int line)
 {
     error_count++;
-
     logout << "Error at line " << line << ": " << error << "\n"
            << endl;
     errout << "Error at line " << line << ": " << error << "\n"
@@ -22,10 +25,12 @@ void ErrorHandler::printError(string error, int line)
 }
 void ErrorHandler::printLexicalError(string error, int line)
 {
+    lexical_error_count++;
     printError("lexical error, " + error, line);
 }
 void ErrorHandler::printSemanticError(string error, int line)
 {
+    semantic_error_count++;
     printError("semantic error, " + error, line);
 }
 

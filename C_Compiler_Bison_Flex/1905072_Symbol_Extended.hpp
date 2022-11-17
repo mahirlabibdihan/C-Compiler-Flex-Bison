@@ -186,7 +186,7 @@ public:
 class Function : public Identifier
 {
     string ret_type;
-    vector<Variable *> param_types;
+    vector<Variable *> params;
     bool is_declaration;
     bool is_definition;
 
@@ -199,7 +199,6 @@ public:
     void addParams(vector<Variable *>);
     vector<Variable *> getParams();
     int getNumberOfParams();
-    bool isValidArgs(vector<Expression *> args);
     bool matchParamsNum(Function *func);
     bool matchParamsType(Function *func);
     bool matchReturnType(Function *func);
@@ -209,4 +208,10 @@ public:
     void defineFunction();
 };
 
+NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name);
+Expression *createExpression(vector<SymbolInfo *> child, string name);
+ParameterList *createParameterList(vector<SymbolInfo *> child, string name);
+ArgumentList *createArgumentList(vector<SymbolInfo *> child, string name);
+DeclarationList *createDeclarationList(vector<SymbolInfo *> child, string name);
+ArrayCall *createArrayCall(vector<SymbolInfo *> child, string name);
 #endif

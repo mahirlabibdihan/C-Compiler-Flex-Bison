@@ -26,16 +26,19 @@ Expression *last_exp;
 int yylex(void);
 extern int line_count;
 extern int error_count;
+extern int lexical_error_count;
+extern int syntax_error_count;
+extern int semantic_error_count;
+
 extern SymbolTable *table;
 extern AssemblyGenerator* asm_gen;
 extern SemanticAnalyzer* sem_anlz;
 bool in_function = false;
 unsigned long sdbmHash(string str);
 extern vector<string> data_segment;
-void yyerror(string s){
-	logout<<"Error at line "<<line_count<<": "<<s<<"\n"<<endl;
-	errout<<"Error at line "<<line_count<<": "<<s<<"\n"<<endl;
-    error_count++;
+void yyerror(string error){
+	syntax_error_count++;
+	err_hndlr->printError(error, line_count);
 }
 
 void erm_s(SymbolInfo* s) // erase memory of SymbolInfo pointer
@@ -118,7 +121,7 @@ void freeMemory(vector<SymbolInfo*> symbols)
 %token <terminal> IF ELSE THEN SWITCH CASE DEFAULT FOR DO WHILE INT FLOAT DOUBLE CHAR STRING VOID BREAK RETURN CONTINUE INCOP DECOP ASSIGNOP NOT PRINTLN LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON ID CONST_INT CONST_FLOAT CONST_CHAR ADDOP MULOP LOGICOP RELOP
 
 
-%type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement  create_if_block expression_statement 
+%type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement expression_statement 
  
 %type <args> argument_list arguments
 %type <params> parameter_list
@@ -142,13 +145,14 @@ void freeMemory(vector<SymbolInfo*> symbols)
 %nonassoc THEN
 %nonassoc ELSE
 
+
 %%
 
 start 					: program
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = createNonTerminal(child,"start");
-							if(error_count==0) asm_gen->endCode();
+							if( error_count == 0) asm_gen->endCode();
 							cout<<"Code compiled successfully"<<endl;
 							freeMemory(child);
 						}

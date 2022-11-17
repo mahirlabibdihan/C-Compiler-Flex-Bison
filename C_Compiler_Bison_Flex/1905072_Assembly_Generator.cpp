@@ -92,7 +92,7 @@ void AssemblyGenerator::writeInCodeSegment(string code)
 void AssemblyGenerator::createFunctionScope()
 {
     // offset_history.push(offset);
-    offset = 4;
+    int offset = 4;
 
     vector<Variable *> params = curr_func->getParams();
     reverse(params.begin(), params.end());
@@ -628,11 +628,11 @@ string AssemblyGenerator::evaluateArrayIndex(Expression *index)
     return tmp;
 }
 
-string AssemblyGenerator::callConstant(Constant *cons)
-{
-    string tmp = cons->getSymbol();
-    return tmp;
-}
+// string AssemblyGenerator::callConstant(Constant *cons)
+// {
+//     string tmp = cons->getSymbol();
+//     return tmp;
+// }
 
 string AssemblyGenerator::newLabel()
 {

@@ -30,10 +30,4 @@ public:
 };
 // NonTerminal *printRuleAndCode(vector<SymbolInfo *> child, string name, bool is_exp = false);
 
-NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name);
-Expression *createExpression(vector<SymbolInfo *> child, string name);
-ParameterList *createParameterList(vector<SymbolInfo *> child, string name);
-ArgumentList *createArgumentList(vector<SymbolInfo *> child, string name);
-DeclarationList *createDeclarationList(vector<SymbolInfo *> child, string name);
-ArrayCall *createArrayCall(vector<SymbolInfo *> child, string name);
 #endif

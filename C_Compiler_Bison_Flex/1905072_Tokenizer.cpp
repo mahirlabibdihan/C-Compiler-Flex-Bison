@@ -7,6 +7,8 @@
 #include <fstream>
 extern ofstream tokenout;
 extern YYSTYPE yylval;
+extern Helper *hlpr;
+
 map<string, string> operatorType = {
     {"+", "ADDOP"},
     {"-", "ADDOP"},
@@ -82,7 +84,7 @@ void Tokenizer::printToken(string type, string token_type)
 {
     tokenout << "<" << type << "> ";
     tokenout.flush();
-    yylval.terminal = new Terminal(toLower(type), type);
+    yylval.terminal = new Terminal(hlpr->toLower(type), type);
 }
 void Tokenizer::printToken(string type, string symbol, string token_type)
 {
@@ -90,12 +92,12 @@ void Tokenizer::printToken(string type, string symbol, string token_type)
     tokenout.flush();
     yylval.terminal = new Terminal(symbol, type);
 }
-void Tokenizer::generateToken(Token type, string lexeme)
+void Tokenizer::generateToken(TokenType type, string lexeme)
 {
     switch (type)
     {
     case KEYWORD_TOKEN:
-        printToken(toUpper(lexeme), "KEYWORD");
+        printToken(hlpr->toUpper(lexeme), "KEYWORD");
         break;
     case INTEGER_TOKEN:
         printToken("CONST_INT", lexeme, "CONSTANT");
@@ -104,10 +106,10 @@ void Tokenizer::generateToken(Token type, string lexeme)
         printToken("CONST_FLOAT", lexeme, "CONSTANT");
         break;
     case CHARACTER_TOKEN:
-        printToken("CONST_CHAR", string(1, getActualChar(lexeme)), "CONSTANT");
+        printToken("CONST_CHAR", string(1, hlpr->getActualChar(lexeme)), "CONSTANT");
         break;
     case STRING_TOKEN:
-        printToken("STRING", getActualString(lexeme), "CONSTANT");
+        printToken("STRING", hlpr->getActualString(lexeme), "CONSTANT");
         break;
     case OPERATOR_TOKEN:
         printToken(operatorType[lexeme], lexeme, "OPERATOR");
@@ -120,7 +122,7 @@ void Tokenizer::generateToken(Token type, string lexeme)
     }
 }
 
-int Tokenizer::getToken(Token type, string lexeme)
+int Tokenizer::getToken(TokenType type, string lexeme)
 {
     switch (type)
     {

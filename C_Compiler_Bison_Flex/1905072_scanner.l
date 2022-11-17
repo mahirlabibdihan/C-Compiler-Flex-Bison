@@ -71,7 +71,7 @@ ESCAPE_SEQUENCE (\\.)
 								}
 "println"						{ 
 									// tknzr->generateToken(KEYWORD_TOKEN, yytext); 
-									// logger->printLogData(KEYWORD,line_count,yytext); 
+									logger->printLogData(KEYWORD_LOG,line_count,yytext); 
 									yylval.terminal = new Terminal(yytext, "PRINTLN");
 									return PRINTLN;
 								}

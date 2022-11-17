@@ -123,10 +123,6 @@ bool ScopeTable::insert(SymbolInfo &s_info)
 {
     string name = s_info.getSymbol();
     string type = s_info.getType();
-    // string data_type = s_info.getDataType();
-    // string id_type = s_info.getIdentity();
-    // vector<string> params = s_info.getParamTypes();
-    // bool is_defined = s_info.isDefined();
 
     int hash_index = hash(name);
     SymbolInfo *new_info = new SymbolInfo(name, type);

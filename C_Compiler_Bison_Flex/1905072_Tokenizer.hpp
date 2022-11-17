@@ -4,9 +4,7 @@
 #include <map>
 using namespace std;
 
-extern map<string, int> operatorToken;
-extern map<string, int> keywordToken;
-enum Token
+enum TokenType
 {
     KEYWORD_TOKEN = 0,
     INTEGER_TOKEN,
@@ -16,14 +14,15 @@ enum Token
     OPERATOR_TOKEN,
     IDENTIFIER_TOKEN
 };
+
 class Tokenizer
 {
 public:
     void printToken(string token);
     void printToken(string type, string token_type);
     void printToken(string type, string symbol, string token_type);
-    void generateToken(Token type, string lexeme);
-    int getToken(Token type, string lexeme);
+    void generateToken(TokenType type, string lexeme);
+    int getToken(TokenType type, string lexeme);
 };
 
 #endif

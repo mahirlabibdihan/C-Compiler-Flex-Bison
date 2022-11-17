@@ -7,10 +7,12 @@
 #include "1905072_Tokenizer.hpp"
 #include "1905072_Logger.hpp"
 #include "1905072_Error_Handler.hpp"
+#include "1905072_Helper.hpp"
 using namespace std;
 
 ofstream errout;
 ofstream logout;
+ofstream lexlogout;
 ofstream tokenout;
 ofstream codeout;
 ifstream codein;
@@ -19,12 +21,16 @@ vector<string> data_segment;
 vector<string> code_segment;
 int line_count;
 int error_count;
+int lexical_error_count;
+int syntax_error_count;
+int semantic_error_count;
 AssemblyGenerator *asm_gen;
 SemanticAnalyzer *sem_anlz;
 Tokenizer *tknzr;
 Optimizer *optmzr;
 Logger *logger;
 ErrorHandler *err_hndlr;
+Helper *hlpr;
 
 int yyparse(void);
 extern FILE *yyin;
@@ -81,6 +87,7 @@ int main(int argc, char *argv[])
 
     errout.open("1905072_error.txt");
     logout.open("1905072_log.txt");
+    lexlogout.open("1905072_lexlog.txt");
     tokenout.open("1905072_token.txt");
     codeout.open("1905072_code.asm");
 
@@ -91,9 +98,12 @@ int main(int argc, char *argv[])
     tknzr = new Tokenizer();
     logger = new Logger();
     err_hndlr = new ErrorHandler();
+    hlpr = new Helper();
+
     yyin = fin;
     line_count = yylineno = 1;
-    error_count = 0;
+    lexical_error_count = syntax_error_count = semantic_error_count = 0;
+
     asm_gen->startCode();
     yyparse();
     fclose(yyin);
@@ -101,18 +111,30 @@ int main(int argc, char *argv[])
     table->printAllScope();
 
     logout << "Total lines: " << yylineno << endl;
-    logout << "Total errors: " << error_count;
+    logout << "Total Lexical Errors: " << lexical_error_count << endl;
+    logout << "Total Syntax Errors: " << syntax_error_count << endl;
+    logout << "Total Semantic Errors: " << semantic_error_count << endl;
+
+    errout << "Total Lexical Errors: " << lexical_error_count << endl;
+    errout << "Total Syntax Errors: " << syntax_error_count << endl;
+    errout << "Total Semantic Errors: " << semantic_error_count << endl;
 
     errout.close();
     logout.close();
     tokenout.close();
     codeout.close();
+    lexlogout.close();
 
     if (error_count == 0)
     {
         codein.open("1905072_code.asm");
         optmzr->optimize(); // For first level pass
         codein.close();
+    }
+    else
+    {
+        codeout.open("1905072_code.asm");
+        codeout.close();
     }
     return EXIT_SUCCESS;
 }

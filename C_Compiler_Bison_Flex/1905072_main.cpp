@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include "../05_Intermediate_Code_Generation/1905072_SymbolTable.h"
-#include "../05_Intermediate_Code_Generation/1905072_Assembly_Generator.h"
-#include "../05_Intermediate_Code_Generation/1905072_Semantic_Analyzer.h"
+#include "1905072_SymbolTable.h"
+#include "1905072_Assembly_Generator.h"
+#include "1905072_Semantic_Analyzer.h"
 #include "1905072_Optimizer.h"
 
 using namespace std;
@@ -49,7 +49,7 @@ void ScopeTable::print()
 
         while (cur != nullptr)
         {
-            logout << "< " << cur->getName() << " : " << cur->getType()
+            logout << "< " << cur->getSymbol() << " : " << cur->getType()
                    << "> ";
             cur = cur->getNext();
         }
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     errout.open("1905072_error.txt");
     logout.open("1905072_log.txt");
-    tokenout.open("1905072_token.txt");
+    tokenout.open("1905072_Symbol_Extended.txt");
     codeout.open("1905072_code.asm");
 
     table = new SymbolTable(7, sdbmHash);

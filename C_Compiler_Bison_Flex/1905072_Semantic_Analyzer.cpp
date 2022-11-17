@@ -81,15 +81,15 @@ void matchTwoFunction(Function *f1, Function *f2)
 {
     if (!f1->matchReturnType(f2))
     {
-        handleError(RETURN_TYPE_MISMATCH, line_count, f2->getName());
+        handleError(RETURN_TYPE_MISMATCH, line_count, f2->getSymbol());
     }
     if (!f1->matchParamsNum(f2))
     {
-        handleError(PARAM_NUMBER_MISMATCH, line_count, f2->getName());
+        handleError(PARAM_NUMBER_MISMATCH, line_count, f2->getSymbol());
     }
     else if (!f1->matchParamsType(f2))
     {
-        handleError(PARAM_TYPE_MISMATCH, line_count, f2->getName());
+        handleError(PARAM_TYPE_MISMATCH, line_count, f2->getSymbol());
     }
 }
 
@@ -97,10 +97,11 @@ void SemanticAnalyzer::returnFunction(Expression *ret)
 {
     if (ret->getDataType() != curr_func->getReturnType())
     {
-        handleError(RETURN_TYPE_MISMATCH, line_count, curr_func->getName());
+        handleError(RETURN_TYPE_MISMATCH, line_count, curr_func->getSymbol());
     }
     else
     {
+        // delete curr_func;
         curr_func = NULL;
     }
 }
@@ -108,13 +109,28 @@ void SemanticAnalyzer::endFunction()
 {
     if (curr_func != NULL)
     {
-        if (curr_func->getReturnType() == "void" or curr_func->getName() == "main")
+        if (curr_func->getReturnType() == "void" or curr_func->getSymbol() == "main")
         {
+            // delete curr_func;
             curr_func = NULL;
         }
         else
         {
-            handleError(FUNCTION_NOT_RETURNED, line_count, curr_func->getName());
+            handleError(FUNCTION_NOT_RETURNED, line_count, curr_func->getSymbol());
+        }
+    }
+}
+
+void SemanticAnalyzer::declareFunctionParams()
+{
+    for (auto i : curr_func->getParams())
+    {
+        if (i->getSymbol() == "blank")
+            continue;
+        Variable *var = new Variable(i->getSymbol(), i->getDataType());
+        if (!table->insert(var))
+        {
+            handleError(MULTIPLE_DECLARATION, line_count, i->getSymbol());
         }
     }
 }
@@ -125,15 +141,15 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
     new_func->setReturnType(ret_type);
     for (auto p : params)
     {
-        new_func->addParam(new Variable(p->getName(), p->getDataType()));
+        new_func->addParam(new Variable(p->getSymbol(), p->getDataType()));
     }
 
     if (!table->insert(new_func))
     {
-        Identifier *id = (Identifier *)table->search(new_func->getName());
-        if (id->getIdType() != "FUNCTION" or new_func->isDeclaredAndDefined()) // Already declared as non-function type or Defined as function
+        Identifier *id = (Identifier *)table->search(new_func->getSymbol());
+        if (id->getIdentity() != "FUNCTION" or new_func->isDeclaredAndDefined()) // Already declared as non-function type or Defined as function
         {
-            handleError(MULTIPLE_DECLARATION, line_count, new_func->getName());
+            handleError(MULTIPLE_DECLARATION, line_count, new_func->getSymbol());
         }
         else
         {
@@ -149,9 +165,9 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
     {
         for (auto &i : params)
         {
-            if (i->getName() == "blank")
+            if (i->getSymbol() == "blank")
             {
-                handleError(MISSING_PARAM_NAME, line_count, new_func->getName());
+                handleError(MISSING_PARAM_NAME, line_count, new_func->getSymbol());
             }
         }
 
@@ -168,13 +184,13 @@ void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<V
     new_func->setReturnType(ret_type);
     for (auto p : params)
     {
-        new_func->addParam(p);
+        new_func->addParam(new Variable(p->getSymbol(), p->getDataType()));
     }
 
     if (!table->insert(new_func))
     {
         Identifier *id = (Identifier *)table->search(id_name);
-        if (id->getIdType() != "FUNCTION") // Already declared as non-function type or Defined as function
+        if (id->getIdentity() != "FUNCTION") // Already declared as non-function type or Defined as function
         {
             handleError(MULTIPLE_DECLARATION, line_count, id_name);
         }
@@ -201,7 +217,7 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
         return "NULL";
     }
 
-    if (id->getIdType() != "FUNCTION")
+    if (id->getIdentity() != "FUNCTION")
     {
         handleError(NOT_FUNCTION, line_count, id_name);
         return "NULL";
@@ -275,11 +291,11 @@ void SemanticAnalyzer::declareVariables(string data_type, string id_names, vecto
             if (var->getVarType() == "ARRAY")
             {
                 Array *arr = (Array *)var;
-                declareArray(data_type, arr->getName(), arr->getArraySize());
+                declareArray(data_type, arr->getSymbol(), arr->getArraySize());
             }
             else
             {
-                declareVariable(data_type, var->getName());
+                declareVariable(data_type, var->getSymbol());
             }
         }
     }
@@ -296,7 +312,7 @@ string SemanticAnalyzer::callVariable(string var_name)
     }
     else
     {
-        if (id->getIdType() != "VARIABLE")
+        if (id->getIdentity() != "VARIABLE")
         {
             handleError(TYPE_MISMATCH, line_count, var_name + " is not a variable"); // should i change this to indexing
             return "NULL";
@@ -324,7 +340,7 @@ string SemanticAnalyzer::callArray(string arr_name, Expression *index)
     }
     else
     {
-        if (id->getIdType() != "VARIABLE")
+        if (id->getIdentity() != "VARIABLE")
         {
             handleError(TYPE_MISMATCH, line_count, arr_name + " is not a variable");
             return "NULL";
@@ -338,7 +354,7 @@ string SemanticAnalyzer::callArray(string arr_name, Expression *index)
         }
         if (index->getDataType() != "int")
         {
-            handleError(INVALID_ARRAY_INDEX, line_count, index->getCode());
+            handleError(INVALID_ARRAY_INDEX, line_count, index->getSymbol());
         }
         // asm_gen->callArray(var);
         return var->getDataType();
@@ -505,4 +521,9 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
     {
         return "NULL";
     }
+}
+
+void SemanticAnalyzer::setCurrentExp(Expression *exp)
+{
+    this->curr_exp = exp;
 }

@@ -4,13 +4,15 @@
 %{
 #include <fstream>
 #include "1905072_Error_Handler.h"
-#include "1905072_Tokenizer.h"
+#include "1905072_Symbol_Extended.h"
 #include "1905072_Logger.h"
 #include "1905072_SymbolTable.h"
+#include "1905072_Tokenizer.h"
 #include "y.tab.h"
 using namespace std;
 
 extern int line_count;
+extern SymbolTable* table;
 %}
 
 WHITESPACE [ \t\f\r\v]+ 
@@ -67,7 +69,7 @@ ESCAPE_SEQUENCE (\\.)
 "println"						{ 
 									// generateToken(KEYWORD_TOKEN, yytext); 
 									// printLogData(KEYWORD_LOG,line_count,yytext); 
-									yylval.segment = new Segment(yytext, "PRINTLN");
+									yylval.terminal = new Terminal(yytext, "PRINTLN");
 									return PRINTLN;
 								}
 {INTEGER}						{ 
@@ -127,12 +129,14 @@ ESCAPE_SEQUENCE (\\.)
 {LCURL} 						{ 
 									generateToken(OPERATOR_TOKEN,yytext); 
 									printLogData(OPERATOR_LOG,line_count,yytext);
+									// cout<<"Entered new scope "<<line_count<<endl;
 									// table->enterScope();
 									return getToken(OPERATOR_TOKEN,yytext); 
 								}
 {RCURL} 						{ 
 									generateToken(OPERATOR_TOKEN,yytext); 
 									printLogData(OPERATOR_LOG,line_count,yytext);
+									// table->printAllScope();
 									// table->exitScope();
 									return getToken(OPERATOR_TOKEN,yytext); 
 								}

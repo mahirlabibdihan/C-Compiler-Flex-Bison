@@ -2,7 +2,7 @@
 #include "1905072_Helper.h"
 #include <vector>
 #include "1905072_SymbolInfo.h"
-#include "1905072_Expression.h"
+#include "1905072_Symbol_Extended.h"
 using namespace std;
 
 string toUpper(string s)
@@ -98,7 +98,7 @@ string formatCode(vector<SymbolInfo *> tokens)
     string code = "";
     for (auto &i : tokens)
     {
-        code += i->getName();
+        code += i->getSymbol();
         if (i->getType() == "type_specifier" || i->getType() == "ELSE" || i->getType() == "RETURN")
         {
             code += " ";
@@ -110,23 +110,23 @@ string formatCode(vector<SymbolInfo *> tokens)
     }
     return code;
 }
-string formatCode(vector<Segment *> segments)
-{
-    string code = "";
-    for (auto &i : segments)
-    {
-        code += i->getCode();
-        if (i->getType() == "type_specifier" || i->getType() == "ELSE" || i->getType() == "RETURN")
-        {
-            code += " ";
-        }
-        else if (i->getType() == "LCURL" || i->getType() == "unit" || i->getType() == "statement")
-        {
-            code += "\n";
-        }
-    }
-    return code;
-}
+// string formatCode(vector<Segment *> segments)
+// {
+//     string code = "";
+//     for (auto &i : segments)
+//     {
+//         code += i->getSymbol();
+//         if (i->getType() == "type_specifier" || i->getType() == "ELSE" || i->getType() == "RETURN")
+//         {
+//             code += " ";
+//         }
+//         else if (i->getType() == "LCURL" || i->getType() == "unit" || i->getType() == "statement")
+//         {
+//             code += "\n";
+//         }
+//     }
+//     return code;
+// }
 string replaceAll(string source, string toReplace, string replaceBy)
 {
     if (source.find(toReplace, 0) == string::npos)

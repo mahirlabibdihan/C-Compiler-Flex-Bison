@@ -31,12 +31,12 @@ SymbolInfo::~SymbolInfo()
     // cout << type << " Symbol destructed" << endl;
 }
 
-const string &SymbolInfo::getName() const
+const string &SymbolInfo::getSymbol() const
 {
     return name;
 }
 
-void SymbolInfo::setName(const string &name)
+void SymbolInfo::setSymbol(const string &name)
 {
     this->name = name;
 }

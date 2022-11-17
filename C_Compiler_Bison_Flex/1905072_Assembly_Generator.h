@@ -1,12 +1,12 @@
 #ifndef __ASSEMBLY_GENERATOR__
 #define __ASSEMBLY_GENERATOR__
 #include "1905072_SymbolInfo.h"
-#include "1905072_Expression.h"
-#include "1905072_Token.h"
-// #include "1905072_Comment_Generator.h"
+#include "1905072_Symbol_Extended.h"
+#include "1905072_Symbol_Extended.h"
 #include <fstream>
 #include <stack>
 #include <map>
+#include <string>
 using namespace std;
 
 class AssemblyGenerator
@@ -84,7 +84,7 @@ public:
     void startMain();
     void endFunction(string);
     void returnFunction(Expression * = NULL);
-    void createFunctionScope(vector<Variable *>);
+    void createFunctionScope();
 
     /** PRINT NUMBER **/
     void writePrintFunc();
@@ -112,7 +112,7 @@ public:
     string evaluateArrayIndex(Expression *index);
 
     void addComment(string);
-    void moveIndex(Expression *);
+    void moveIndex(ArrayCall *);
     string arrayToFactor(Expression *);
 
     void resetTmpVar();

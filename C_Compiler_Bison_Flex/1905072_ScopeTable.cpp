@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cassert>
 #include "1905072_SymbolInfo.h"
 #include "1905072_ScopeTable.h"
 using namespace std;
@@ -92,7 +91,7 @@ SymbolInfo *ScopeTable::search(const string &key)
 
     for (int i = 0; cur != nullptr; i++)
     {
-        if (cur->getName() == key)
+        if (cur->getSymbol() == key)
         {
             last_accessed_location = {hash_index, i};
             return cur;
@@ -110,7 +109,7 @@ pair<int, int> ScopeTable::getLocationOfSymbol(const string &key)
 
     for (int i = 0; cur != nullptr; i++)
     {
-        if (cur->getName() == key)
+        if (cur->getSymbol() == key)
         {
             last_accessed_location = {hash_index, i};
             return {hash_index, i};
@@ -122,10 +121,10 @@ pair<int, int> ScopeTable::getLocationOfSymbol(const string &key)
 
 bool ScopeTable::insert(SymbolInfo &s_info)
 {
-    string name = s_info.getName();
+    string name = s_info.getSymbol();
     string type = s_info.getType();
     // string data_type = s_info.getDataType();
-    // string id_type = s_info.getIdType();
+    // string id_type = s_info.getIdentity();
     // vector<string> params = s_info.getParamTypes();
     // bool is_defined = s_info.isDefined();
 
@@ -143,7 +142,7 @@ bool ScopeTable::insert(SymbolInfo &s_info)
         SymbolInfo *cur = hash_table[hash_index];
         for (int i = 1;; i++)
         {
-            if (cur->getName() == name)
+            if (cur->getSymbol() == name)
             {
                 return false;
             }
@@ -165,7 +164,7 @@ bool ScopeTable::insert(SymbolInfo &s_info)
 
 bool ScopeTable::insert(SymbolInfo *symbol)
 {
-    int hash_index = hash(symbol->getName());
+    int hash_index = hash(symbol->getSymbol());
     if (hash_table[hash_index] == nullptr)
     {
         hash_table[hash_index] = symbol; // First symbol
@@ -175,7 +174,7 @@ bool ScopeTable::insert(SymbolInfo *symbol)
         SymbolInfo *cur = hash_table[hash_index];
         for (int i = 1;; i++)
         {
-            if (cur->getName() == symbol->getName())
+            if (cur->getSymbol() == symbol->getSymbol())
             {
                 return false;
             }
@@ -203,7 +202,7 @@ bool ScopeTable::remove(const string &key)
     {
         for (int i = 0; cur != nullptr; i++)
         {
-            if (cur->getName() == key)
+            if (cur->getSymbol() == key)
             {
                 last_accessed_location = {hash_index, i};
 

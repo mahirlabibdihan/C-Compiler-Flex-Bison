@@ -1,7 +1,6 @@
 #include "1905072_Logger.h"
 #include "1905072_Helper.h"
-#include "1905072_Tokenizer.h"
-#include "1905072_Expression.h"
+#include "1905072_Symbol_Extended.h"
 #include <iostream>
 #include <fstream>
 extern ofstream logout;
@@ -54,7 +53,7 @@ void printRule(string left_part, string right_part)
     logout << "Line " << line_count << ": " << left_part << " : " << right_part << "\n"
            << endl;
 }
-void printRule(Segment *parent, vector<Segment *> children)
+void printRule(SymbolInfo *parent, vector<SymbolInfo *> children)
 {
     string left = parent->getType();
     string right = "";
@@ -70,7 +69,7 @@ void printCode(string code)
            << endl;
 }
 
-Segment *printRuleAndCode(vector<Segment *> child, string name, bool is_exp)
+NonTerminal *printRuleAndCode(vector<SymbolInfo *> child, string name, bool is_exp)
 {
     if (is_exp)
     {
@@ -78,16 +77,76 @@ Segment *printRuleAndCode(vector<Segment *> child, string name, bool is_exp)
             formatCode(child),
             name);
         printRule(node, child);
-        printCode(node->getCode());
+        printCode(node->getSymbol());
         return node;
     }
     else
     {
-        Segment *node = new Segment(
+        NonTerminal *node = new NonTerminal(
             formatCode(child),
             name);
         printRule(node, child);
-        printCode(node->getCode());
+        printCode(node->getSymbol());
         return node;
     }
+}
+
+NonTerminal *createNonTerminal(vector<SymbolInfo *> child, string name)
+{
+    NonTerminal *node = new NonTerminal(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
+}
+
+Expression *createExpression(vector<SymbolInfo *> child, string name)
+{
+    Expression *node = new Expression(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
+}
+
+ParameterList *createParameterList(vector<SymbolInfo *> child, string name)
+{
+    ParameterList *node = new ParameterList(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
+}
+
+DeclarationList *createDeclarationList(vector<SymbolInfo *> child, string name)
+{
+    DeclarationList *node = new DeclarationList(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
+}
+
+ArgumentList *createArgumentList(vector<SymbolInfo *> child, string name)
+{
+    ArgumentList *node = new ArgumentList(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
+}
+
+ArrayCall *createArrayCall(vector<SymbolInfo *> child, string name)
+{
+    ArrayCall *node = new ArrayCall(
+        formatCode(child),
+        name);
+    printRule(node, child);
+    printCode(node->getSymbol());
+    return node;
 }

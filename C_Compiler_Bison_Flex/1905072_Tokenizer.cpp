@@ -1,9 +1,8 @@
-#include "1905072_Tokenizer.h"
+#include "1905072_Symbol_Extended.h"
 #include "1905072_Helper.h"
 #include "1905072_SymbolInfo.h"
-#include "1905072_Token.h"
-#include "1905072_Expression.h"
-
+#include "1905072_Tokenizer.h"
+#include <map>
 #include "y.tab.h"
 #include <fstream>
 extern ofstream tokenout;
@@ -83,13 +82,13 @@ void printToken(string type, string token_type)
 {
     tokenout << "<" << type << "> ";
     tokenout.flush();
-    yylval.segment = new Segment(toLower(type), type);
+    yylval.terminal = new Terminal(toLower(type), type);
 }
 void printToken(string type, string symbol, string token_type)
 {
     tokenout << "<" << type << "," << symbol << "> ";
     tokenout.flush();
-    yylval.segment = new Segment(symbol, type);
+    yylval.terminal = new Terminal(symbol, type);
 }
 void generateToken(int type, string lexeme)
 {

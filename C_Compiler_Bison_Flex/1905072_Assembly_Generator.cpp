@@ -89,10 +89,12 @@ void AssemblyGenerator::writeInCodeSegment(string code)
     }
 }
 
-void AssemblyGenerator::createFunctionScope(vector<Variable *> params)
+void AssemblyGenerator::createFunctionScope()
 {
-    offset_history.push(offset);
+    // offset_history.push(offset);
     offset = 4;
+
+    vector<Variable *> params = curr_func->getParams();
     reverse(params.begin(), params.end());
 
     string code;
@@ -105,19 +107,19 @@ void AssemblyGenerator::createFunctionScope(vector<Variable *> params)
 
         offset += 2;
     }
-    offset = 2;
+    // offset = 2;
     addInCodeSegment(code);
     /** NEWLY ADDED **/
 }
 void AssemblyGenerator::declareArray(Array *arr)
 {
-    addInDeclaredVariable("\t\t; " + arr->getDataType() + " " + arr->getName() + "[" + arr->getArraySize() + "]" + ";\n");
+    addInDeclaredVariable("\t\t; " + arr->getDataType() + " " + arr->getSymbol() + "[" + arr->getArraySize() + "]" + ";\n");
     addInDeclaredVariable("\t\t" + getVariableName(arr) + " DW " + arr->getArraySize() + " DUP(0) \n");
 }
 
 void AssemblyGenerator::declareVariable(Variable *var)
 {
-    addInDeclaredVariable("\t\t; " + var->getDataType() + " " + var->getName() + ";\n");
+    addInDeclaredVariable("\t\t; " + var->getDataType() + " " + var->getSymbol() + ";\n");
     addInDeclaredVariable("\t\t" + getVariableName(var) + " DW ?\n");
 }
 
@@ -128,16 +130,16 @@ void AssemblyGenerator::startFunction(Function *func)
         return;
     }
     string code = "\n";
-    code += "\t" + func->getName() + " PROC\n";
-    code += "\t\t; Function with name " + func->getName() + " started\n";
-    if (func->getName() != "main")
+    code += "\t" + func->getSymbol() + " PROC\n";
+    code += "\t\t; Function with name " + func->getSymbol() + " started\n";
+    if (func->getSymbol() != "main")
     {
         code += "\t\tPUSH BP\n";
         code += "\t\tMOV BP, SP\n";
         code += "\t\t; All the offsets of a function depends on the value of BP\n";
     }
     addInCodeSegment(code);
-    if (func->getName() == "main")
+    if (func->getSymbol() == "main")
     {
         startMain();
     }
@@ -152,7 +154,7 @@ void AssemblyGenerator::returnFunction(Expression *ret)
     }
     string code = "\n";
 
-    if (curr_func->getName() != "main")
+    if (curr_func->getSymbol() != "main")
     {
         code += "\t\t; Restoring BP at the end of function\n";
         code += "\t\tPOP BP\n";
@@ -170,8 +172,8 @@ void AssemblyGenerator::returnFunction(Expression *ret)
     }
     else
     {
-        code += "\t\t; return " + ret->getCode() + ";\n";
-        if (curr_func->getName() != "main")
+        code += "\t\t; return " + ret->getSymbol() + ";\n";
+        if (curr_func->getSymbol() != "main")
         {
             code += "\t\tPOP BX\n"; // return address in BX
             code += "\t\tPUSH " + ret->getTmpVar() + "\n";
@@ -200,8 +202,8 @@ void AssemblyGenerator::endFunction(string name)
     code += "\t" + name + " ENDP" + "\n\n";
     addInCodeSegment(code);
     curr_func = nullptr;
-    offset = offset_history.top();
-    offset_history.pop();
+    // offset = offset_history.top();
+    // offset_history.pop();
 }
 
 void AssemblyGenerator::writePrintFunc()
@@ -267,7 +269,7 @@ void AssemblyGenerator::startMain()
     code += "\t\t; DATA SEGMENT INITIALIZATION\n";
     code += "\t\tMOV AX, @DATA\n";
     code += "\t\tMOV DS, AX\n";
-    offset = 2;
+    // offset = 2;
     addInCodeSegment(code);
 }
 
@@ -328,7 +330,7 @@ string AssemblyGenerator::addOp(Expression *left, string op, Expression *right)
         op = "SUB";
     }
     string code = "\n";
-    code += "\t\t; " + left->getCode() + opr + right->getCode() + "\n";
+    code += "\t\t; " + left->getSymbol() + opr + right->getSymbol() + "\n";
     code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
     code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
     string tmp = newTemp();
@@ -349,7 +351,7 @@ string AssemblyGenerator::relOp(Expression *left, string op, Expression *right)
 
     string tmp = newTemp();
 
-    code += "\t\t; " + left->getCode() + opr + right->getCode() + "\n";
+    code += "\t\t; " + left->getSymbol() + opr + right->getSymbol() + "\n";
     // AX = Left, BX = Right and Compare
     code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
     code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
@@ -367,7 +369,7 @@ string AssemblyGenerator::logicOp(Expression *left, string op, Expression *right
 
     string code = "\n";
 
-    code += "\t\t; " + left->getCode() + op + right->getCode() + "\n";
+    code += "\t\t; " + left->getSymbol() + op + right->getSymbol() + "\n";
     code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
     code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
 
@@ -410,11 +412,11 @@ string AssemblyGenerator::logicOp(Expression *left, string op, Expression *right
     return tmp;
 }
 
-void AssemblyGenerator::moveIndex(Expression *var)
+void AssemblyGenerator::moveIndex(ArrayCall *var)
 {
     string code = "\n";
     code += "\t\t; Assigning index into BX to access array element\n";
-    code += "\t\tMOV BX, " + var->getIndexVar() + "\n";
+    code += "\t\tMOV BX, " + var->getIndex()->getTmpVar() + "\n";
     addInCodeSegment(code);
 }
 
@@ -434,11 +436,11 @@ string AssemblyGenerator::assignOp(Expression *left, Expression *right)
 {
     string code = "\n";
 
-    code += "\t\t; " + left->getCode() + "=" + right->getCode() + "\n";
+    code += "\t\t; " + left->getSymbol() + "=" + right->getSymbol() + "\n";
     code += "\t\tMOV AX, " + right->getTmpVar() + "\n";
-    if (!left->getIndexVar().empty())
+    if (left->getExpType() == "ARRAY_CALL")
     {
-        moveIndex(left); // Moving index to BX
+        moveIndex((ArrayCall *)left); // Moving index to BX
     }
     code += "\t\tMOV " + left->getTmpVar() + ", AX\n";
     addInCodeSegment(code);
@@ -449,11 +451,11 @@ string AssemblyGenerator::assignOp(Expression *left, Expression *right)
 void AssemblyGenerator::decrementOperation(Expression *var)
 {
     string code;
-    if (!var->getIndexVar().empty())
+    if (var->getExpType() == "ARRAY_CALL")
     {
-        moveIndex(var); // Moving index to BX
+        moveIndex((ArrayCall *)var); // Moving index to BX
     }
-    code += "\t\t; " + var->getCode() + "--\n";
+    code += "\t\t; " + var->getSymbol() + "--\n";
     code += "\t\tMOV AX, " + var->getTmpVar() + "\n";
     code += "\t\tDEC AX\n";
     code += "\t\tMOV " + var->getTmpVar() + ", AX\n";
@@ -464,12 +466,12 @@ void AssemblyGenerator::decrementOperation(Expression *var)
 void AssemblyGenerator::incrementOperation(Expression *var)
 {
     string code = "\n";
-    if (!var->getIndexVar().empty())
+    if (var->getExpType() == "ARRAY_CALL")
     {
-        moveIndex(var); // Moving index to BX
+        moveIndex((ArrayCall *)var); // Moving index to BX
     }
 
-    code += "\t\t; " + var->getCode() + "++\n";
+    code += "\t\t; " + var->getSymbol() + "++\n";
     code += "\t\tMOV AX, " + var->getTmpVar() + "\n";
     code += "\t\tINC AX\n";
     code += "\t\tMOV " + var->getTmpVar() + ", AX\n";
@@ -500,7 +502,7 @@ string AssemblyGenerator::mulOp(Expression *left, string op, Expression *right)
 
     string tmp = newTemp();
 
-    code += "\t\t; " + left->getCode() + op + right->getCode() + "\n";
+    code += "\t\t; " + left->getSymbol() + op + right->getSymbol() + "\n";
     code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
     code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
 
@@ -540,7 +542,7 @@ string AssemblyGenerator::unaryOperation(string uniop, Expression *sym)
         tmp = newTemp();
         string code = "\n";
 
-        code += "\t\t; -" + sym->getCode() + "\n";
+        code += "\t\t; -" + sym->getSymbol() + "\n";
         code += "\t\tMOV AX, " + sym->getTmpVar() + "\n";
         code += "\t\tNEG AX\n";
         code += "\t\tMOV " + tmp + ", AX\n";
@@ -576,10 +578,10 @@ string AssemblyGenerator::callFunction(Function *func, vector<Expression *> args
 {
     string code = "\n";
 
-    code += "\t\t; " + func->getName() + "(";
+    code += "\t\t; " + func->getSymbol() + "(";
     for (auto &i : args)
     {
-        code += i->getCode() + ",";
+        code += i->getSymbol() + ",";
     }
     if (code.back() == ',')
         code.pop_back();
@@ -591,8 +593,8 @@ string AssemblyGenerator::callFunction(Function *func, vector<Expression *> args
         code += "\t\tPUSH " + i->getTmpVar() + "\n";
     }
 
-    code += "\t\tCALL " + func->getName() + "\n";
-    // code += "\t; Function with name " + func->getName() + " called" + "\n";
+    code += "\t\tCALL " + func->getSymbol() + "\n";
+    // code += "\t; Function with name " + func->getSymbol() + " called" + "\n";
 
     string tmp = newTemp(); // Temporary variable for return value
 
@@ -618,7 +620,7 @@ string AssemblyGenerator::evaluateArrayIndex(Expression *index)
     string code = "\n";
     string tmp = newTemp();
 
-    code += "\t\t; [" + index->getCode() + "]\n";
+    code += "\t\t; [" + index->getSymbol() + "]\n";
     code += "\t\tMOV BX, " + index->getTmpVar() + "\n";
     code += "\t\tSHL BX, 1\n";
     code += "\t\tMOV " + tmp + ", BX\n";
@@ -628,7 +630,7 @@ string AssemblyGenerator::evaluateArrayIndex(Expression *index)
 
 string AssemblyGenerator::callConstant(Constant *cons)
 {
-    string tmp = cons->getName();
+    string tmp = cons->getSymbol();
     return tmp;
 }
 
@@ -657,7 +659,7 @@ string AssemblyGenerator::newTemp()
 
 string AssemblyGenerator::getVariableName(Variable *var)
 {
-    string scope = table->getScopeIdOfSymbol(var->getName());
+    string scope = table->getScopeIdOfSymbol(var->getSymbol());
     for (auto &c : scope)
     {
         if (c == '.')
@@ -665,7 +667,7 @@ string AssemblyGenerator::getVariableName(Variable *var)
             c = '_';
         }
     }
-    return var->getName() + "_" + scope;
+    return var->getSymbol() + "_" + scope;
 }
 
 string AssemblyGenerator::getVariableName(string var_name)
@@ -685,7 +687,7 @@ void AssemblyGenerator::printId(Variable *id)
 {
     string code = "\n";
 
-    code += "\t\t; println(" + id->getName() + ");\n";
+    code += "\t\t; println(" + id->getSymbol() + ");\n";
     code += "\t\tPUSH " + getVariableName(id) + "\n";
     // code += "\t; Passing " + getVariableName(id) + " to PRINT_NUM for printing it" + "\n";
     code += "\t\tCALL PRINT_NUM\n";
@@ -712,7 +714,7 @@ void AssemblyGenerator::forLoopConditionCheck(Expression *exp)
         forLoopEndLabel.push(end_label);
 
         string code = "\n";
-        code += "\t\t; for( ;" + exp->getCode() + "; )\n";
+        code += "\t\t; for( ;" + exp->getSymbol() + "; )\n";
         code += "\t\tMOV AX, " + exp->getTmpVar() + "\n";
         code += "\t\tCMP AX, 0\n";
         code += "\t\tJE " + end_label + "\n";
@@ -772,7 +774,7 @@ void AssemblyGenerator::createIfBlock(Expression *exp)
 
     string code = "\n";
 
-    code += "\t\t; if(" + exp->getCode() + ")\n";
+    code += "\t\t; if(" + exp->getSymbol() + ")\n";
     code += "\t\tMOV AX, " + exp->getTmpVar() + "\n";
     code += "\t\tCMP AX, 0\n";
     code += "\t\tJE " + end_label + "\n";
@@ -845,7 +847,7 @@ void AssemblyGenerator::whileLoopConditionCheck(Expression *exp)
     whileLoopEndLabel.push(end_label);
     string code = "\n";
 
-    code += "\t\twhile(" + exp->getCode() + ")\n";
+    code += "\t\twhile(" + exp->getSymbol() + ")\n";
     code += "\t\tMOV AX, " + exp->getTmpVar() + "\n";
     code += "\t\tCMP AX, 0\n";
     // code += string("\t; Checking if the condition is true or false") + "\n";

@@ -14,6 +14,7 @@ extern SymbolTable *table;
 void printError(string error, int line)
 {
     error_count++;
+
     logout << "Error at line " << line << ": " << error << "\n"
            << endl;
     errout << "Error at line " << line << ": " << error << "\n"

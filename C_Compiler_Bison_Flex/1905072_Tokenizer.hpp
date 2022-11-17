@@ -3,17 +3,21 @@
 #include <string>
 #include <map>
 using namespace std;
-#define KEYWORD_TOKEN 0
-#define INTEGER_TOKEN 1
-#define FLOAT_TOKEN 2
-#define CHARACTER_TOKEN 3
-#define STRING_TOKEN 4
-#define OPERATOR_TOKEN 5
-#define IDENTIFIER_TOKEN 6
+
+enum Token
+{
+    KEYWORD_TOKEN,
+    INTEGER_TOKEN,
+    FLOAT_TOKEN,
+    CHARACTER_TOKEN,
+    STRING_TOKEN,
+    OPERATOR_TOKEN,
+    IDENTIFIER_TOKEN
+};
 
 extern map<string, int> operatorToken;
 extern map<string, int> keywordToken;
 void printToken(string token);
-void generateToken(int type, string lexeme);
-int getToken(int type, string lexeme);
+void generateToken(Token type, string lexeme);
+int getToken(Token type, string lexeme);
 #endif

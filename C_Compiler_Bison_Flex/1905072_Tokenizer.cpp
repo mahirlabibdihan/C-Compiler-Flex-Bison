@@ -90,7 +90,7 @@ void printToken(string type, string symbol, string token_type)
     tokenout.flush();
     yylval.terminal = new Terminal(symbol, type);
 }
-void generateToken(int type, string lexeme)
+void generateToken(Token type, string lexeme)
 {
     switch (type)
     {
@@ -120,7 +120,7 @@ void generateToken(int type, string lexeme)
     }
 }
 
-int getToken(int type, string lexeme)
+int getToken(Token type, string lexeme)
 {
     switch (type)
     {

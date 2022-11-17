@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     errout.open("1905072_error.txt");
     logout.open("1905072_log.txt");
-    tokenout.open("1905072_Symbol_Extended.txt");
+    tokenout.open("1905072_token.txt");
     codeout.open("1905072_code.asm");
 
     table = new SymbolTable(7, sdbmHash);

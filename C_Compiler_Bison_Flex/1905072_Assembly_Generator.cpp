@@ -289,6 +289,29 @@ void AssemblyGenerator::endCode()
     addInCodeSegment(code);
 }
 
+string AssemblyGenerator::addOp(Expression *left, string op, Expression *right)
+{
+    string opr = op;
+    if (op == "+")
+    {
+        op = "ADD";
+    }
+    else if (op == "-")
+    {
+        op = "SUB";
+    }
+    string code = "\n";
+    code += "\t\t; " + left->getSymbol() + opr + right->getSymbol() + "\n";
+    code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
+    code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
+    string tmp = newTemp();
+    code += "\t\t" + op + " AX, BX\n";
+    code += "\t\t; " + tmp + " = " + left->getSymbol() + opr + right->getSymbol() + "\n";
+    code += "\t\tMOV " + tmp + ", AX\n";
+    addInCodeSegment(code);
+    return tmp;
+}
+
 string getRelOpASM(string op)
 {
     if (op == ">")
@@ -317,28 +340,6 @@ string getRelOpASM(string op)
     }
     return "";
 }
-
-string AssemblyGenerator::addOp(Expression *left, string op, Expression *right)
-{
-    string opr = op;
-    if (op == "+")
-    {
-        op = "ADD";
-    }
-    else if (op == "-")
-    {
-        op = "SUB";
-    }
-    string code = "\n";
-    code += "\t\t; " + left->getSymbol() + opr + right->getSymbol() + "\n";
-    code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
-    code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
-    string tmp = newTemp();
-    code += "\t\t" + op + " AX, BX\n";
-    code += "\t\tMOV " + tmp + ", AX\n";
-    addInCodeSegment(code);
-    return tmp;
-}
 string AssemblyGenerator::relOp(Expression *left, string op, Expression *right)
 {
     // string true_label = newLabel();
@@ -355,8 +356,8 @@ string AssemblyGenerator::relOp(Expression *left, string op, Expression *right)
     // AX = Left, BX = Right and Compare
     code += "\t\tMOV AX, " + left->getTmpVar() + "\n";
     code += "\t\tMOV BX, " + right->getTmpVar() + "\n";
+    code += "\t\tMOV " + tmp + ", 1\n"; // Default value as 1
     code += "\t\tCMP AX, BX\n";
-    code += "\t\tMOV " + tmp + ", 1\n";           // Default value as 1
     code += "\t\t" + op + " " + end_label + "\n"; // Jump to end_label if true
     code += "\t\tMOV " + tmp + ", 0\n";
     code += "\t\t" + end_label + ":\n";
@@ -380,31 +381,22 @@ string AssemblyGenerator::logicOp(Expression *left, string op, Expression *right
     string tmp = newTemp();
     if (op == "&&")
     {
+        code += "\t\tMOV " + tmp + ", 0\n"; // Default value as 0
         code += "\t\tCMP AX, 0\n";
-        code += "\t\tJE " + false_label + "\n";
+        code += "\t\tJE " + end_label + "\n"; // False
         code += "\t\tCMP BX, 0\n";
-        code += "\t\tJE " + false_label + "\n";
-        // True
-        code += "\t\tMOV " + tmp + ", 1\n";
-        code += "\t\tJMP " + end_label + "\n";
-        // False
-        code += "\t\t" + false_label + ":\n";
-        code += "\t\tMOV " + tmp + ", 0\n";
-
+        code += "\t\tJE " + end_label + "\n"; // False
+        code += "\t\tMOV " + tmp + ", 1\n";   // True
         code += "\t\t" + end_label + ":\n";
     }
     else if (op == "||")
     {
+        code += "\t\tMOV " + tmp + ", 1\n"; // Default value as 1
         code += "\t\tCMP AX, 0\n";
-        code += "\t\tJNE " + true_label + "\n";
+        code += "\t\tJNE " + end_label + "\n"; // True
         code += "\t\tCMP BX, 0\n";
-        code += "\t\tJNE " + true_label + "\n";
-        // False
-        code += "\t\tMOV " + tmp + ", 0\n";
-        code += "\t\tJMP " + end_label + "\n";
-        // True
-        code += "\t\t" + true_label + ":\n";
-        code += "\t\tMOV " + tmp + ", 1\n";
+        code += "\t\tJNE " + end_label + "\n"; // True
+        code += "\t\tMOV " + tmp + ", 0\n";    // False
         code += "\t\t" + end_label + ":\n";
     }
 
@@ -425,8 +417,9 @@ string AssemblyGenerator::arrayToFactor(Expression *var)
 {
     string tmp = newTemp();
     string code = "\n";
-    code += "\t\t; Converting array to factor\n";
+    code += "\t\t; Converting array call to factor\n";
     code += "\t\tMOV AX, " + var->getTmpVar() + "\n";
+    code += "\t\t; " + tmp + " = " + var->getSymbol() + "\n";
     code += "\t\tMOV " + tmp + ", AX\n";
     addInCodeSegment(code);
     return tmp;
@@ -459,6 +452,7 @@ void AssemblyGenerator::decrementOperation(Expression *var)
     code += "\t\t; " + var->getSymbol() + "--\n";
     code += "\t\tMOV AX, " + var->getTmpVar() + "\n";
     code += "\t\tDEC AX\n";
+    // code +=+ "\t\t; " + var->getTmpVar() + " = " + var->getSymbol() + "--\n";
     code += "\t\tMOV " + var->getTmpVar() + ", AX\n";
     addInCodeSegment(code);
 }
@@ -475,6 +469,7 @@ void AssemblyGenerator::incrementOperation(Expression *var)
     code += "\t\t; " + var->getSymbol() + "++\n";
     code += "\t\tMOV AX, " + var->getTmpVar() + "\n";
     code += "\t\tINC AX\n";
+    // code += "\t\t; " + var->getTmpVar() + " = " + var->getSymbol() + "++\n";
     code += "\t\tMOV " + var->getTmpVar() + ", AX\n";
     addInCodeSegment(code);
 }
@@ -511,25 +506,20 @@ string AssemblyGenerator::mulOp(Expression *left, string op, Expression *right)
     {
         // AX = AX * BX
         code += "\t\tIMUL BX\n";
-        // code += string("\t; Multiplying ") + left->getExpression() + " and " + right->getExpression() + "\n";
+    }
+    else if (op == "/")
+    {
+        // AX = AX / BX
+        code += "\t\tIDIV BX\n";
     }
     else
     {
+        //  and DX = AX % BX
         code += "\t\tXOR DX, DX\n";
-        // code += string("\t; Setting value of DX to 0") + "\n";
-
-        code += "\t\tIDIV BX\n";
-        // code += string("\t; Dividing ") + left->getExpression() + " by " + right->getExpression() + "\n";
-
-        // AX = AX / BX and DX = AX % BX
-        if (op == "%")
-        {
-            code += "\t\tMOV AX, DX\n";
-            // code += string("\t; Saving remainder after division from DX to AX") + "\n";
-        }
+        code += "\t\tMOV AX, DX\n";
     }
+    code += "\t\t; " + tmp + " = " + left->getSymbol() + op + right->getSymbol() + "\n";
     code += "\t\tMOV " + tmp + ", AX\n";
-    // code += string("\t; Saving result of ") + left->getExpression() + op + right->getExpression() + " in stack" + "\n";
 
     addInCodeSegment(code);
     return tmp;
@@ -546,6 +536,7 @@ string AssemblyGenerator::unaryOperation(string uniop, Expression *sym)
         code += "\t\t; -" + sym->getSymbol() + "\n";
         code += "\t\tMOV AX, " + sym->getTmpVar() + "\n";
         code += "\t\tNEG AX\n";
+        code += "\t\t; " + tmp + " = -" + sym->getSymbol() + "\n";
         code += "\t\tMOV " + tmp + ", AX\n";
 
         addInCodeSegment(code);
@@ -557,13 +548,13 @@ string AssemblyGenerator::notOperation(Expression *sym)
 {
     string false_label = newLabel();
     string end_label = newLabel();
-    string code = "";
-
-    // code += "\t\t; At line no " + to_string(line_count) + ": Evaluating !" + sym->getExpression() + "\n";
+    string code = "\n";
 
     string tmp = newTemp();
+    code += "\t\t; !" + sym->getSymbol() + "\n";
     code += "\t\tMOV AX, " + sym->getTmpVar() + "\n";
     code += "\t\tNOT AX\n";
+    code += "\t\t; " + tmp + " = !" + sym->getSymbol() + "\n";
     code += "\t\tMOV " + tmp + ", AX";
 
     addInCodeSegment(code);
@@ -644,7 +635,7 @@ string AssemblyGenerator::newLabel()
 
 string AssemblyGenerator::newTemp()
 {
-    string tmp = "T" + to_string(curr_tmp);
+    string tmp = "t" + to_string(curr_tmp);
     if (curr_tmp == tmp_count)
     {
         curr_tmp++;

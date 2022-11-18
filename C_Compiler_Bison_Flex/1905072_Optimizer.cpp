@@ -112,6 +112,7 @@ void Optimizer::optimize()
             continue;
         }
 
+        cout << lines[i] << endl;
         line = lines[i];
         nextLine = lines[i + 1];
         portions = split(line);
@@ -128,7 +129,7 @@ void Optimizer::optimize()
             }
         }
 
-        if (portions[0] == "POP")
+        else if (portions[0] == "POP")
         {
             if (nextPortions[0] == "PUSH")
             {
@@ -140,7 +141,7 @@ void Optimizer::optimize()
             }
         }
 
-        if (portions[0] == "MOV")
+        else if (portions[0] == "MOV")
         {
             if (portions[1] == portions[2])
             { // MOV AX, AX
@@ -159,15 +160,15 @@ void Optimizer::optimize()
                 }
             }
         }
-        if (nextPortions[0] == "MOV")
-        {
-            if (nextPortions[1] == nextPortions[2])
-            { // MOV AX, AX
-                lines[i + 1] = ";----Optimized Code----\n";
-                lines[i + 1] += "\t\t;" + lines[i + 1];
-            }
-        }
-        if (portions[0] == "ADD" || portions[0] == "SUB")
+        // else if (nextPortions[0] == "MOV")
+        // {
+        //     if (nextPortions[1] == nextPortions[2])
+        //     { // MOV AX, AX
+        //         lines[i + 1] = ";----Optimized Code----\n";
+        //         lines[i + 1] += "\t\t;" + lines[i + 1];
+        //     }
+        // }
+        else if (portions[0] == "ADD" || portions[0] == "SUB")
         {
             if (isNumber(portions[2]))
             {
@@ -180,19 +181,19 @@ void Optimizer::optimize()
             }
         }
 
-        if (portions[0] == "IMUL" || portions[0] == "IDIV")
+        else if (nextPortions[0] == "IMUL" || nextPortions[0] == "IDIV")
         {
             if (isNumber(portions[2]))
             {
                 if (strToInt(portions[2]) == 1)
                 {
-                    // IMUL AX, 1
-                    // IDIV AX, 1
+                    // IMUL AX
+                    // IDIV AX
                     lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
                 }
             }
         }
-        if ((portions[0] == "ADD" && nextPortions[0] == "ADD") || (portions[0] == "SUB" && nextPortions[0] == "SUB"))
+        else if ((portions[0] == "ADD" && nextPortions[0] == "ADD") || (portions[0] == "SUB" && nextPortions[0] == "SUB"))
         {
             if (isNumber(portions[2]) && isNumber(nextPortions[2]))
             {
@@ -208,11 +209,11 @@ void Optimizer::optimize()
             }
         }
 
-        if (isJump(portions[0]) && portions[1] == getLabel(nextPortions[0])) // L1: -> L1
+        else if (isJump(portions[0]) && portions[1] == getLabel(nextPortions[0])) // L1: -> L1
         {
             lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
         }
-        if (portions[0] == "CMP" && !isJump((nextPortions[0])))
+        else if (portions[0] == "CMP" && !isJump((nextPortions[0])))
         {
             lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
         }
@@ -221,7 +222,7 @@ void Optimizer::optimize()
     codeout.open("1905072_optimized_code.asm");
     for (int i = 0; i < lines.size(); i++)
     {
-        if ((split(lines[i]).size() == 0))
+        if (split(lines[i]).size() == 0)
         {
             continue;
         }

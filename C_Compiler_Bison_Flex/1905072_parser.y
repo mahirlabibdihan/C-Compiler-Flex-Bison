@@ -731,9 +731,9 @@ variable 				: ID
 							if($$->getDataType()!="NULL")
 							{
 								//asm_gen->addComment($$->getSymbol());
-								$3->setTmpVar(asm_gen->evaluateArrayIndex($3));
+								// $3->setTmpVar(asm_gen->evaluateArrayIndex($3));
 								$$->setTmpVar(asm_gen->callArray($1->getSymbol(),$3));
-								((ArrayCall*)$$)->setIndex($3);
+								((ArrayCall*)$$)->setIndex($3->getTmpVar());
 							}
 							// logout<<$$->getExpression()<<" "<<line_count<<endl;
 							freeMemory(child);
@@ -902,6 +902,7 @@ factor					: variable
 
 							if($1->getExpType() == "ARRAY_CALL")
 							{
+								asm_gen->moveIndex((ArrayCall*)$1);
 								$$->setTmpVar(asm_gen->arrayToFactor($1));
 							}
 							else

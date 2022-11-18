@@ -127,14 +127,26 @@ int main(int argc, char *argv[])
 
     if (error_count == 0)
     {
+
         codein.open("1905072_code.asm");
         optmzr->optimize(); // For first level pass
         codein.close();
+        
     }
     else
     {
         codeout.open("1905072_code.asm");
         codeout.close();
     }
+
+    delete table;
+    delete asm_gen;
+    delete sem_anlz;
+    delete optmzr;
+    delete tknzr;
+    delete logger;
+    delete err_hndlr;
+    delete hlpr;
+
     return EXIT_SUCCESS;
 }

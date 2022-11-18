@@ -112,7 +112,7 @@ void Optimizer::optimize()
             continue;
         }
 
-        cout << lines[i] << endl;
+        // cout << lines[i] << endl;
         line = lines[i];
         nextLine = lines[i + 1];
         portions = split(line);

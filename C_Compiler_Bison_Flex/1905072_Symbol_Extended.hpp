@@ -171,16 +171,17 @@ public:
 
 class ArrayCall : public Expression
 {
-    Expression *index;
+    // Expression *index;
+    string idx;
 
 public:
     ArrayCall();
     ArrayCall(Expression *);
     ArrayCall(const string &name, const string &type);
-    ArrayCall(const string &name, const string &type, Expression *);
+    ArrayCall(const string &name, const string &type, const string &);
     ~ArrayCall();
-    Expression *getIndex();
-    void setIndex(Expression *);
+    string getIndex();
+    void setIndex(string);
 };
 
 class Function : public Identifier

@@ -230,33 +230,35 @@ void Expression::setExpType(const string &type)
 }
 ArrayCall::ArrayCall() : Expression("ARRAY_CALL")
 {
-    this->index = NULL;
+    // this->index = NULL;
+    idx = "";
 }
 ArrayCall::ArrayCall(Expression *index) : Expression("ARRAY_CALL")
 {
-    this->index = new Expression(index);
+    // this->index = new Expression(index);
 }
 ArrayCall::ArrayCall(const string &name, const string &type) : Expression(name, type)
 {
-    this->index = NULL;
+    // this->index = NULL;
     this->exp_type = "ARRAY_CALL";
+    idx = "";
 }
-ArrayCall::ArrayCall(const string &name, const string &type, Expression *index) : Expression(name, type)
+ArrayCall::ArrayCall(const string &name, const string &type, const string &idx) : Expression(name, type)
 {
-    this->index = new Expression(index);
+    this->idx = idx;
     this->exp_type = "ARRAY_CALL";
 }
 ArrayCall::~ArrayCall()
 {
 }
 
-Expression *ArrayCall::getIndex()
+string ArrayCall::getIndex()
 {
-    return index;
+    return idx;
 }
-void ArrayCall::setIndex(Expression *index)
+void ArrayCall::setIndex(string idx)
 {
-    this->index = new Expression(index);
+    this->idx = idx;
 }
 
 Terminal::Terminal(const string &t_type) : SymbolInfo("blank", "")

@@ -84,7 +84,7 @@ bool SemanticAnalyzer::checkAssignment(string left, string right)
         return false;
     }
 
-    return (hlpr->getDataSize(left) >= hlpr->getDataSize(left))
+    return (hlpr->getDataSize(left) >= hlpr->getDataSize(left));
 }
 
 void matchTwoFunction(Function *f1, Function *f2)

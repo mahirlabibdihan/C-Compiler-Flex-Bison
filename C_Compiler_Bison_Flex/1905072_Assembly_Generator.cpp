@@ -415,8 +415,9 @@ string AssemblyGenerator::logicOp(Expression *left, string op, Expression *right
 void AssemblyGenerator::moveIndex(ArrayCall *var)
 {
     string code = "\n";
-    code += "\t\t; Assigning index into BX to access array element\n";
-    code += "\t\tMOV BX, " + var->getIndex()->getTmpVar() + "\n";
+    code += "\t\t; " + var->getSymbol() + "\n";
+    code += "\t\tMOV BX, " + var->getIndex() + "\n";
+    code += "\t\tSHL BX, 1\n";
     addInCodeSegment(code);
 }
 
@@ -615,18 +616,18 @@ string AssemblyGenerator::callFunction(Function *func, vector<Expression *> args
     return tmp;
 }
 
-string AssemblyGenerator::evaluateArrayIndex(Expression *index)
-{
-    string code = "\n";
-    string tmp = newTemp();
+// string AssemblyGenerator::evaluateArrayIndex(Expression *index)
+// {
+//     string code = "\n";
+//     string tmp = newTemp();
 
-    code += "\t\t; [" + index->getSymbol() + "]\n";
-    code += "\t\tMOV BX, " + index->getTmpVar() + "\n";
-    code += "\t\tSHL BX, 1\n";
-    code += "\t\tMOV " + tmp + ", BX\n";
-    addInCodeSegment(code);
-    return tmp;
-}
+//     code += "\t\t; [" + index->getSymbol() + "]\n";
+//     code += "\t\tMOV BX, " + index->getTmpVar() + "\n";
+//     code += "\t\tSHL BX, 1\n";
+//     code += "\t\tMOV " + tmp + ", BX\n";
+//     addInCodeSegment(code);
+//     return tmp;
+// }
 
 // string AssemblyGenerator::callConstant(Constant *cons)
 // {

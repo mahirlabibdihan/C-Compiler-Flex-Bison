@@ -1,3 +1,4 @@
+# Symbol Table
 - SymbolInfo
   - name
   - type

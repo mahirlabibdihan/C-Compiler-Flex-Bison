@@ -9,9 +9,9 @@
  */
 class ScopeTable
 {
-    ScopeTable *parent_scope;
     int id;
     size_t num_buckets;
+    ScopeTable *parent_scope;
     SymbolInfo **hash_table;
 
 private:

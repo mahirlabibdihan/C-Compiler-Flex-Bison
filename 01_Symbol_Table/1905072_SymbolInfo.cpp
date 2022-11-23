@@ -1,18 +1,6 @@
-#include "1905072_SymbolInfo.h"
+#include "1905072_SymbolInfo.hpp"
 
-SymbolInfo::SymbolInfo()
-{
-    this->next = nullptr;
-}
-
-SymbolInfo::SymbolInfo(const string &name, const string &type)
-{
-    this->name = name;
-    this->type = type;
-    this->next = nullptr;
-}
-
-SymbolInfo::SymbolInfo(const string &name, const string &type, SymbolInfo *next)
+SymbolInfo::SymbolInfo(const std::string &name, const std::string &type, SymbolInfo *next)
 {
     this->name = name;
     this->type = type;
@@ -21,22 +9,22 @@ SymbolInfo::SymbolInfo(const string &name, const string &type, SymbolInfo *next)
 
 SymbolInfo::~SymbolInfo() {}
 
-const string &SymbolInfo::getName() const
+const std::string &SymbolInfo::getSymbol() const
 {
     return name;
 }
 
-void SymbolInfo::setName(const string &name)
+void SymbolInfo::setSymbol(const std::string &name)
 {
     this->name = name;
 }
 
-const string &SymbolInfo::getType() const
+const std::string &SymbolInfo::getType() const
 {
     return type;
 }
 
-void SymbolInfo::setType(const string &type)
+void SymbolInfo::setType(const std::string &type)
 {
     this->type = type;
 }

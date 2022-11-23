@@ -1,15 +1,13 @@
-#include <iostream>
 #include <functional>
 #include <cassert>
-#include "1905072_ScopeTable.h"
-#include "1905072_SymbolTable.h"
-using namespace std;
+#include "1905072_SymbolTable.hpp"
+#include <string>
 
-SymbolTable::SymbolTable(const int &size, function<unsigned long(string)> hash_value)
+SymbolTable::SymbolTable(size_t size)
 {
-    this->n_buckets = size;
-    this->hash_value = hash_value;
-    this->current_scope = new ScopeTable(size, hash_value);
+    this->scope_count = 1;
+    this->num_buckets = size;
+    this->current_scope = new ScopeTable(size);
 }
 SymbolTable::~SymbolTable()
 {
@@ -31,24 +29,16 @@ void SymbolTable::setCurrentScope(ScopeTable *scope)
     this->current_scope = scope;
 }
 
-int SymbolTable::size() const
-{
-    return n_buckets;
-}
-
 bool SymbolTable::enterScope()
 {
-    ScopeTable *st = new ScopeTable(n_buckets, hash_value);
+    ScopeTable *st = new ScopeTable(num_buckets);
 
     st->setParentScope(current_scope);
-    current_scope->setChildCount(current_scope->getChildCount() + 1);
     current_scope = st;
 
     if (st->getParentScope() != nullptr)
     {
-        st->setId(st->getParentScope()->getId() + "." + to_string(st->getParentScope()->getChildCount()));
-        last_accessed_scope = st;
-        last_accessed_scope_id = st->getId();
+        st->setId(++scope_count);
         return true;
     }
     return false;
@@ -60,8 +50,6 @@ bool SymbolTable::exitScope()
     {
         ScopeTable *tmp = current_scope;
         current_scope = current_scope->getParentScope();
-        last_accessed_scope = tmp;
-        last_accessed_scope_id = tmp->getId();
         delete tmp;
         return true;
     }
@@ -71,46 +59,61 @@ bool SymbolTable::exitScope()
     }
 }
 
-bool SymbolTable::insert(const SymbolInfo &symbol)
+bool SymbolTable::insert(const std::string &name, const std::string &type)
 {
     if (current_scope == nullptr)
     {
-        current_scope = new ScopeTable(n_buckets, hash_value);
+        // error recovery
+        current_scope = new ScopeTable(num_buckets);
     }
-    last_accessed_scope = current_scope;
-    last_accessed_scope_id = current_scope->getId();
-    return current_scope->insert(symbol);
+    return current_scope->insert(name, type);
 }
 
-bool SymbolTable::remove(const string &key)
+bool SymbolTable::erase(const std::string &name)
 {
     if (current_scope == nullptr)
     {
         return false;
     }
-    last_accessed_scope = current_scope;
-    last_accessed_scope_id = current_scope->getId();
-    return current_scope->remove(key);
+    return current_scope->erase(name);
 }
 
-SymbolInfo *SymbolTable::search(const string &key)
+SymbolInfo *SymbolTable::find(const std::string &name) const
 {
-    ScopeTable *cur = current_scope;
-    while (cur != nullptr)
+    ScopeTable *curr = current_scope;
+    while (curr != nullptr)
     {
-        SymbolInfo *symbol = cur->search(key);
+        SymbolInfo *symbol = curr->find(name);
         if (symbol != nullptr)
         {
-            last_accessed_scope = cur;
-            last_accessed_scope_id = cur->getId();
             return symbol;
         }
-        cur = cur->getParentScope();
+        curr = curr->getParentScope();
     }
     return nullptr;
 }
 
-void SymbolTable::printCurrentScope()
+int SymbolTable::getScopeIdOfSymbol(const std::string &name) const
+{
+    ScopeTable *curr = current_scope;
+
+    while (curr != nullptr)
+    {
+        SymbolInfo *symbol = curr->find(name);
+        if (symbol != nullptr)
+        {
+            return curr->getId();
+        }
+        curr = curr->getParentScope();
+    }
+    return 0;
+}
+std::pair<int, int> SymbolTable::getLocationOfSymbol(const std::string &name) const
+{
+    return current_scope->getLocationOfSymbol(name);
+}
+
+void SymbolTable::printCurrentScope() const
 {
     if (current_scope != nullptr)
     {
@@ -118,21 +121,12 @@ void SymbolTable::printCurrentScope()
     }
 }
 
-void SymbolTable::printAllScope()
+void SymbolTable::printAllScope() const
 {
-    ScopeTable *cur = current_scope;
-    while (cur != nullptr)
+    ScopeTable *curr = current_scope;
+    while (curr != nullptr)
     {
-        cur->print();
-        cur = cur->getParentScope();
+        curr->print();
+        curr = curr->getParentScope();
     }
-}
-
-ScopeTable *SymbolTable::getLastAccessedScope()
-{
-    return last_accessed_scope;
-}
-string SymbolTable::getLastAccessedScopeId()
-{
-    return last_accessed_scope_id;
 }

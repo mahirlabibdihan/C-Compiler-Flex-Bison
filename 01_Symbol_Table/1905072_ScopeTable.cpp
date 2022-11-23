@@ -1,56 +1,30 @@
-#include <iostream>
-#include <cassert>
-#include "1905072_SymbolInfo.h"
-#include "1905072_ScopeTable.h"
-using namespace std;
+#include "1905072_ScopeTable.hpp"
 
-ScopeTable::ScopeTable(const int &size, function<unsigned long(string)> func)
+ScopeTable::ScopeTable(size_t size)
 {
-    this->id = "1";
-    this->child_count = 0;
+    this->id = 1;
     this->parent_scope = nullptr;
-    this->n_buckets = size;
-    this->hash_value = func;
-    this->hash_table = new SymbolInfo *[n_buckets];
-    for (int i = 0; i < n_buckets; i++)
+    this->num_buckets = size;
+    this->hash_table = new SymbolInfo *[num_buckets];
+    for (int i = 0; i < num_buckets; i++)
     {
         hash_table[i] = nullptr;
     }
 }
 ScopeTable::~ScopeTable()
 {
-    for (int i = 0; i < n_buckets; i++)
+    for (int i = 0; i < num_buckets; i++)
     {
-        SymbolInfo *cur = hash_table[i];
-        while (cur != nullptr)
+        SymbolInfo *curr = hash_table[i];
+        while (curr != nullptr)
         {
-            SymbolInfo *tmp = cur->getNext();
-            delete cur;
-            cur = tmp;
+            SymbolInfo *tmp = curr->getNext();
+            delete curr;
+            curr = tmp;
         }
     }
     delete[] hash_table;
 }
-
-// int ScopeTable::getBucketSize() const
-// {
-//     return n_buckets;
-// }
-
-// void ScopeTable::setBucketSize(const int &size)
-// {
-//     this->n_buckets = size;
-// }
-
-// SymbolInfo **ScopeTable::getHashTable() const
-// {
-//     return hash_table;
-// }
-
-// void ScopeTable::setHashTable(SymbolInfo **hashTable)
-// {
-//     this->hash_table = hash_table;
-// }
 
 ScopeTable *ScopeTable::getParentScope() const
 {
@@ -61,77 +35,89 @@ void ScopeTable::setParentScope(ScopeTable *parentScope)
     this->parent_scope = parentScope;
 }
 
-string ScopeTable::getId() const
+int ScopeTable::getId() const
 {
     return id;
 }
-void ScopeTable::setId(const string &id)
+void ScopeTable::setId(int id)
 {
     this->id = id;
 }
 
-int ScopeTable::getChildCount() const
+unsigned long ScopeTable::sdbmHash(const std::string &str) const
 {
-    return child_count;
-}
-void ScopeTable::setChildCount(const int &count)
-{
-    this->child_count = count;
+    unsigned long hash = 0;
+    for (auto c : str)
+    {
+        hash = c + (hash << 6) + (hash << 16) - hash;
+    }
+    return hash;
 }
 
-int ScopeTable::hash(const string &key)
+int ScopeTable::hash(const std::string &name) const
 {
-    int ret = hash_value(key) % n_buckets;
+    int ret = sdbmHash(name) % num_buckets;
     return ret;
 }
 
-SymbolInfo *ScopeTable::search(const string &key)
+SymbolInfo *ScopeTable::find(const std::string &name) const
 {
-    int hash_index = hash(key);
-    SymbolInfo *cur = hash_table[hash_index];
+    int hash_index = hash(name);
+    SymbolInfo *curr = hash_table[hash_index];
 
-    for (int i = 0; cur != nullptr; i++)
+    for (int i = 0; curr != nullptr; i++)
     {
-        if (cur->getName() == key)
+        if (curr->getSymbol() == name)
         {
-            last_accessed_location = {hash_index, i};
-            return cur;
+            return curr;
         }
-        cur = cur->getNext();
+        curr = curr->getNext();
     }
     return nullptr;
 }
 
-bool ScopeTable::insert(const SymbolInfo &s_info)
+std::pair<int, int> ScopeTable::getLocationOfSymbol(const std::string &name) const
 {
-    string name = s_info.getName();
-    string type = s_info.getType();
+    int hash_index = this->hash(name);
+
+    SymbolInfo *curr = hash_table[hash_index];
+
+    for (int i = 0; curr != nullptr; i++)
+    {
+        if (curr->getSymbol() == name)
+        {
+            return {hash_index + 1, i + 1};
+        }
+        curr = curr->getNext();
+    }
+    return {0, 0};
+}
+
+bool ScopeTable::insert(const std::string &name, const std::string &type)
+{
     int hash_index = hash(name);
     SymbolInfo *new_info = new SymbolInfo(name, type);
 
     if (hash_table[hash_index] == nullptr)
     {
-        last_accessed_location = {hash_index, 0};
         hash_table[hash_index] = new_info; // First symbol
     }
     else
     {
-        SymbolInfo *cur = hash_table[hash_index];
+        SymbolInfo *curr = hash_table[hash_index];
         for (int i = 1;; i++)
         {
-            if (cur->getName() == name)
+            if (curr->getSymbol() == name)
             {
                 return false;
             }
-            if (cur->getNext() != nullptr)
+            if (curr->getNext() != nullptr)
             {
-                cur = cur->getNext();
+                curr = curr->getNext();
             }
             else
             {
-                last_accessed_location = {hash_index, i};
-
-                cur->setNext(new_info);
+                curr->setNext(new_info);
                 break;
             }
         }
@@ -139,34 +125,32 @@ bool ScopeTable::insert(const SymbolInfo &s_info)
     return true;
 }
 
-bool ScopeTable::remove(const string &key)
+bool ScopeTable::erase(const std::string &name)
 {
-    int hash_index = hash(key);
+    int hash_index = hash(name);
     SymbolInfo *prv = nullptr;
-    SymbolInfo *cur = hash_table[hash_index];
-    SymbolInfo *location = search(key);
+    SymbolInfo *curr = hash_table[hash_index];
+    SymbolInfo *location = find(name);
 
     if (location != nullptr)
     {
-        for (int i = 0; cur != nullptr; i++)
+        for (int i = 0; curr != nullptr; i++)
         {
-            if (cur->getName() == key)
+            if (curr->getSymbol() == name)
             {
-                last_accessed_location = {hash_index, i};
-
                 if (prv != nullptr)
                 {
-                    prv->setNext(cur->getNext());
+                    prv->setNext(curr->getNext());
                 }
                 else
                 {
-                    hash_table[hash_index] = cur->getNext(); // First symbol
+                    hash_table[hash_index] = curr->getNext(); // First symbol
                 }
-                delete (cur);
+                delete (curr);
                 break;
             }
-            prv = cur;
-            cur = cur->getNext();
+            prv = curr;
+            curr = curr->getNext();
         }
         return true;
     }
@@ -174,9 +158,4 @@ bool ScopeTable::remove(const string &key)
     {
         return false;
     }
-}
-
-pair<int, int> ScopeTable::getLastAccessedLocation()
-{
-    return last_accessed_location;
 }

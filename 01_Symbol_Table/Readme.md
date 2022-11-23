@@ -1,0 +1,20 @@
+- SymbolInfo
+  - name
+  - type
+  - next
+- ScopeTable
+  - id
+  - num_buckets
+  - parent_scope
+  - insert()
+  - find()
+  - erase()
+- SymbolTable
+  - current_scope
+  - enterScope()
+  - exitScope()
+  - insert()
+  - find() 
+  - erase()
+  - printCurrentScope()
+  - printAllScope()

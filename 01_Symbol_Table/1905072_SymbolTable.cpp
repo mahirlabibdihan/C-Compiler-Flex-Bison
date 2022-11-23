@@ -93,6 +93,21 @@ SymbolInfo *SymbolTable::find(const std::string &name) const
     return nullptr;
 }
 
+std::pair<int, int> SymbolTable::getLocationOfSymbol(const std::string &name) const
+{
+    ScopeTable *curr = current_scope;
+    while (curr != nullptr)
+    {
+        std::pair<int, int> location = curr->getLocationOfSymbol(name);
+        if (location.first != 0)
+        {
+            return location;
+        }
+        curr = curr->getParentScope();
+    }
+    return {0, 0};
+}
+
 int SymbolTable::getScopeIdOfSymbol(const std::string &name) const
 {
     ScopeTable *curr = current_scope;
@@ -107,10 +122,6 @@ int SymbolTable::getScopeIdOfSymbol(const std::string &name) const
         curr = curr->getParentScope();
     }
     return 0;
-}
-std::pair<int, int> SymbolTable::getLocationOfSymbol(const std::string &name) const
-{
-    return current_scope->getLocationOfSymbol(name);
 }
 
 void SymbolTable::printCurrentScope() const

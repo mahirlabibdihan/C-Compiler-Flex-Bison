@@ -15,11 +15,11 @@ void ScopeTable::print() const
     fout << '\t' << "ScopeTable# " << id << std::endl;
     for (int i = 0; i < num_buckets; i++)
     {
-        fout << "\t" << i + 1 << " --> ";
+        fout << "\t" << i + 1 << "--> ";
         SymbolInfo *cur = hash_table[i];
         while (cur != nullptr)
         {
-            fout << "<" << cur->getSymbol() << " : " << cur->getType() << "> ";
+            fout << "<" << cur->getSymbol() << "," << cur->getType() << "> ";
             cur = cur->getNext();
         }
         fout << std::endl;
@@ -79,7 +79,7 @@ void insertCommand(std::vector<std::string> tokens)
     }
     else
     {
-        fout << '\t' << "<" << name << "," << type << " > already exists in current ScopeTable" << std::endl;
+        fout << '\t' << "'" << name << "' already exists in the current ScopeTable" << std::endl;
     }
 }
 
@@ -97,7 +97,7 @@ void lookupCommand(std::vector<std::string> tokens)
         int scope = table->getScopeIdOfSymbol(name);
 
         fout << '\t' << "'" << name << "' "
-             << "Found in ScopeTable# " << scope << " at position " << bucket_index << ", " << chain_index << std::endl;
+             << "found in ScopeTable# " << scope << " at position " << bucket_index << ", " << chain_index << std::endl;
     }
     else
     {
@@ -118,12 +118,7 @@ void deleteCommand(std::vector<std::string> tokens)
     int scope = table->getScopeIdOfSymbol(name);
     if (table->erase(name))
     {
-        // Search message
-        fout << '\t' << "'" << name << "' "
-             << "Found in ScopeTable# " << scope << " at position " << bucket_index << ", " << chain_index << std::endl;
-
-        // Remove message
-        fout << '\t' << "Deleted '" << name << "' from ScopeTable#" << scope << " at position " << bucket_index << ", " << chain_index << std::endl;
+        fout << '\t' << "Deleted '" << name << "' from ScopeTable# " << scope << " at position " << bucket_index << ", " << chain_index << std::endl;
     }
     else
     {
@@ -149,9 +144,16 @@ void exitScopeCommand(std::vector<std::string> tokens)
         return;
 
     int scope = table->getCurrentScope()->getId();
-    if (table->exitScope())
+    if (table->getCurrentScope()->getParentScope() != nullptr)
     {
-        fout << '\t' << "ScopeTable# " << scope << " removed" << std::endl;
+        if (table->exitScope())
+        {
+            fout << '\t' << "ScopeTable# " << scope << " removed" << std::endl;
+        }
+    }
+    else
+    {
+        fout << '\t' << "ScopeTable# " << scope << " cannot be removed" << std::endl;
     }
 }
 
@@ -168,6 +170,21 @@ void printCommand(std::vector<std::string> tokens)
     else if (print_type == 'A')
     {
         table->printAllScope();
+    }
+}
+
+void quitCommand(std::vector<std::string> tokens)
+{
+    if (!checkParameter(tokens, 1))
+        return;
+
+    while (table->getCurrentScope() != nullptr)
+    {
+        int scope = table->getCurrentScope()->getId();
+        if (table->exitScope())
+        {
+            fout << '\t' << "ScopeTable# " << scope << " removed" << std::endl;
+        }
     }
 }
 
@@ -209,11 +226,15 @@ int main()
         case 'P': // Print
             printCommand(tokens);
             break;
+        case 'Q':
+            quitCommand(tokens);
+            goto QUIT;
         default:
             break;
         }
     }
 
+QUIT:
     fin.close();
     fout.close();
     delete table;

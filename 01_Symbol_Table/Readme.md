@@ -1,21 +1,21 @@
 # Symbol Table
 - SymbolInfo
-  - name
-  - type
-  - next
+  - `name: string`
+  - `type: string`
+  - `next: SymbolInfo*`
 - ScopeTable
-  - id
-  - num_buckets
-  - parent_scope
-  - insert()
-  - find()
-  - erase()
+  - `id: int`
+  - `num_buckets: size_t`
+  - `parent_scope: ScopeTable*`
+  - `insert(name:string, type:string): bool`
+  - `find(name:string): SymbolInfo*`
+  - `erase(name:string): bool`
 - SymbolTable
-  - current_scope
-  - enterScope()
-  - exitScope()
-  - insert()
-  - find() 
-  - erase()
-  - printCurrentScope()
-  - printAllScope()
+  - `current_scope: ScopeTable*`
+  - `enterScope(): bool`
+  - `exitScope(): bool`
+  - `insert(name:string, type:string): bool`
+  - `find(name:string): bool` 
+  - `erase(name:string): bool`
+  - `printCurrentScope(): void`
+  - `printAllScope(): void`

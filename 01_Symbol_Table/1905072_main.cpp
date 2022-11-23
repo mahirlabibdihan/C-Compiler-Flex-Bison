@@ -1,3 +1,7 @@
+// Windows compile: g++ -std=c++17 1905072_SymbolInfo.cpp 1905072_ScopeTable.cpp 1905072_SymbolTable.cpp 1905072_main.cpp -o main
+
+// Linux compile: g++ 1905072_SymbolInfo.cpp 1905072_ScopeTable.cpp 1905072_SymbolTable.cpp 1905072_main.cpp -o main
+
 #include <iostream>
 #include <cstdio>
 #include <fstream>

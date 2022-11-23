@@ -24,9 +24,9 @@ public:
     /**
      * ScopeTable Constructor
      *
-     * @param size number of buckets in a scope table
+     * @param n number of buckets in a scope table
      */
-    ScopeTable(size_t size);
+    ScopeTable(size_t n);
 
     /**
      * ScopeTable Destructor

@@ -1,11 +1,11 @@
 #include "1905072_ScopeTable.hpp"
 
-ScopeTable::ScopeTable(size_t size)
+ScopeTable::ScopeTable(size_t n)
 {
     this->id = 1;
     this->parent_scope = nullptr;
-    this->num_buckets = size;
-    this->hash_table = new SymbolInfo *[num_buckets];
+    this->num_buckets = n;
+    this->hash_table = new SymbolInfo *[n];
     for (int i = 0; i < num_buckets; i++)
     {
         hash_table[i] = nullptr;

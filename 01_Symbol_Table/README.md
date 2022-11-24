@@ -1,4 +1,5 @@
 # Symbol Table
+
 - SymbolInfo
   - `name: string`
   - `type: string`
@@ -15,7 +16,7 @@
   - `enterScope(): bool`
   - `exitScope(): bool`
   - `insert(name:string, type:string): bool`
-  - `find(name:string): bool` 
+  - `find(name:string): SymbolInfo*`
   - `erase(name:string): bool`
   - `printCurrentScope(): void`
   - `printAllScope(): void`

@@ -44,9 +44,12 @@ void ScopeTable::setId(int id)
     this->id = id;
 }
 
-unsigned long ScopeTable::sdbmHash(const std::string &str) const
+// f
+// o
+// o
+int64_t ScopeTable::sdbmHash(const std::string &str) const
 {
-    unsigned long hash = 0;
+    int64_t hash = 0;
     for (auto c : str)
     {
         hash = c + (hash << 6) + (hash << 16) - hash;

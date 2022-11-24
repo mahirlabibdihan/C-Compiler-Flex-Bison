@@ -192,10 +192,31 @@ void quitCommand(std::vector<std::string> tokens)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    fin.open("input.txt");
-    fout.open("output.txt");
+    // Opening input output files
+    if (argc < 2)
+    {
+        std::cerr << "Please provide input file name and try again" << std::endl;
+        return EXIT_FAILURE;
+    }
+    fin.open(argv[1]);
+    if (!fin.is_open())
+    {
+        std::cerr << "Cannot open specified input file" << std::endl;
+        return EXIT_FAILURE;
+    }
+    if (argc < 3)
+    {
+        std::cerr << "Please provide output file name and try again" << std::endl;
+        return EXIT_FAILURE;
+    }
+    fout.open(argv[2]);
+    if (!fout.is_open())
+    {
+        std::cerr << "Cannot open specified output file" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     int n_buckets;
     fin >> n_buckets;

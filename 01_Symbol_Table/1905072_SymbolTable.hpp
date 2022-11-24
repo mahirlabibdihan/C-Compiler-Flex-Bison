@@ -9,7 +9,7 @@
 class SymbolTable
 {
     ScopeTable *current_scope; // Current scope table
-    size_t num_buckets;        // Number of buckets in a scope table
+    int num_buckets;           // Number of buckets in a scope table
     int scope_count;           // Unique number for every scope
 
 private:
@@ -22,7 +22,7 @@ public:
      *
      * @param size number of buckets in a scope table
      */
-    SymbolTable(size_t size);
+    SymbolTable(int n);
 
     /**
      * SymbolTable Destructor

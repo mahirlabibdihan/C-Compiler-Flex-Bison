@@ -10,15 +10,15 @@
 class ScopeTable
 {
     int id;
-    size_t num_buckets;
+    int num_buckets;
     ScopeTable *parent_scope;
     SymbolInfo **hash_table;
 
 private:
-    void operator=(const ScopeTable &) {} // Protect assignment
-    ScopeTable(const ScopeTable &) {}     // Protect copy constructor
-    unsigned long sdbmHash(const std::string &str) const;
-    int hash(const std::string &name) const;
+    void operator=(const ScopeTable &) {}                 // Protect assignment
+    ScopeTable(const ScopeTable &) {}                     // Protect copy constructor
+    unsigned long sdbmHash(const std::string &str) const; // Hash code
+    int hash(const std::string &name) const;              // Compression function
 
 public:
     /**
@@ -26,7 +26,7 @@ public:
      *
      * @param n number of buckets in a scope table
      */
-    ScopeTable(size_t n);
+    ScopeTable(int n);
 
     /**
      * ScopeTable Destructor

@@ -6,7 +6,7 @@
   - `next: SymbolInfo*`
 - ScopeTable
   - `id: int`
-  - `num_buckets: size_t`
+  - `num_buckets: int`
   - `parent_scope: ScopeTable*`
   - `insert(name:string, type:string): bool`
   - `find(name:string): SymbolInfo*`

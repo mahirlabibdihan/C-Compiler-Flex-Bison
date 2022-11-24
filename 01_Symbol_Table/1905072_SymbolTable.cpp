@@ -3,11 +3,11 @@
 #include "1905072_SymbolTable.hpp"
 #include <string>
 
-SymbolTable::SymbolTable(size_t size)
+SymbolTable::SymbolTable(int n)
 {
     this->scope_count = 1;
-    this->num_buckets = size;
-    this->current_scope = new ScopeTable(size);
+    this->num_buckets = n;
+    this->current_scope = new ScopeTable(n);
 }
 SymbolTable::~SymbolTable()
 {

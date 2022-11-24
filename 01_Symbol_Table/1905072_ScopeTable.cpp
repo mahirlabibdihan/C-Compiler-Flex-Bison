@@ -1,6 +1,6 @@
 #include "1905072_ScopeTable.hpp"
 
-ScopeTable::ScopeTable(size_t n)
+ScopeTable::ScopeTable(int n)
 {
     this->id = 1;
     this->parent_scope = nullptr;

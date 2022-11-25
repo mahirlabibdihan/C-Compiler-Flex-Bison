@@ -7,8 +7,8 @@ all: run
 run: main.exe
 	main.exe $(fin) ${fout}
 
-main.exe: 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_main.o
-	g++ -std=c++17 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_main.o -o main.exe
+main.exe: 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_Util.o 1905072_main.o
+	g++ -std=c++17 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_Util.o 1905072_main.o -o main.exe
 
 1905072_SymbolInfo.o: 1905072_SymbolInfo.cpp 1905072_SymbolInfo.hpp
 	g++ -std=c++17 1905072_SymbolInfo.cpp -c
@@ -18,6 +18,9 @@ main.exe: 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 190507
 
 1905072_SymbolTable.o: 1905072_SymbolTable.cpp 1905072_SymbolTable.hpp
 	g++ -std=c++17 1905072_SymbolTable.cpp -c
+
+1905072_Util.o: 1905072_Util.cpp 1905072_Util.hpp
+	g++ -std=c++17 1905072_Util.cpp -c
 
 1905072_main.o: 1905072_main.cpp
 	g++ -std=c++17 1905072_main.cpp -c

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include "1905072_Symboltable.hpp"
+#include "1905072_Util.hpp"
 
 // For file input output
 std::ifstream fin;
@@ -28,33 +29,6 @@ void ScopeTable::print() const
         }
         fout << std::endl;
     }
-}
-
-std::vector<std::string> split(const std::string &line, char delm = ' ')
-{
-    std::vector<std::string> tokens;
-    std::string token;
-    for (char c : line)
-    {
-        if (c != delm)
-        {
-            token += c;
-        }
-        else
-        {
-            if (!token.empty())
-            {
-                tokens.push_back(token);
-            }
-            token.clear();
-        }
-    }
-    if (!token.empty())
-    {
-        tokens.push_back(token);
-    }
-
-    return tokens;
 }
 
 bool checkParameter(std::vector<std::string> tokens, int num)
@@ -229,7 +203,7 @@ int main(int argc, char *argv[])
     for (int cmd_count = 1; std::getline(fin, cmd); cmd_count++)
     {
         fout << "Cmd " << cmd_count << ": " << cmd << std::endl;
-        std::vector<std::string> tokens = split(cmd, ' ');
+        std::vector<std::string> tokens = Util::split(cmd, ' ');
 
         switch (tokens[0][0])
         {
@@ -251,7 +225,7 @@ int main(int argc, char *argv[])
         case 'P': // Print
             printCommand(tokens);
             break;
-        case 'Q':
+        case 'Q': // Quit
             quitCommand(tokens);
             goto QUIT;
         default:

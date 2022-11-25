@@ -1,12 +1,12 @@
 
 fin?=io/input.txt
 fout?=io/output.txt
-OBJECTS=obj/1905072_SymbolInfo.o obj/1905072_ScopeTable.o obj/1905072_SymbolTable.o obj/1905072_Util.o obj/1905072_main.o
+OBJECTS=build/1905072_SymbolInfo.o build/1905072_ScopeTable.o build/1905072_SymbolTable.o build/1905072_Util.o build/1905072_main.o
 
 CXX = g++
 CXXFLAGS = -std=c++17 -O9
 SRCDIR = src/
-OBJDIR = obj/
+OBJDIR = build/
 BINDIR = bin/
 INCDIR = include/
 

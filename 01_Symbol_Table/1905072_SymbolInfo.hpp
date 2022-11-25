@@ -1,6 +1,10 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: November 25, 2022
+ */
 
-#ifndef __SYMBOL_INFO__
-#define __SYMBOL_INFO__
+#ifndef _SYMBOL_INFO_H
+#define _SYMBOL_INFO_H 1
 #include <string>
 /**
  * Class to store the scope information

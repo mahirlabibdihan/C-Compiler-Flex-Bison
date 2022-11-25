@@ -1,6 +1,10 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: November 25, 2022
+ */
 
-#ifndef __SYMBOL_TABLE__
-#define __SYMBOL_TABLE__
+#ifndef _SYMBOL_TABLE_H
+#define _SYMBOL_TABLE_H 1
 #include "1905072_ScopeTable.hpp"
 
 /**

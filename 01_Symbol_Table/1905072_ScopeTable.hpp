@@ -1,6 +1,11 @@
 
-#ifndef __SCOPE_TABLE__
-#define __SCOPE_TABLE__
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: November 25, 2022
+ */
+
+#ifndef _SCOPE_TABLE_H
+#define _SCOPE_TABLE_H 1
 #include <vector>
 #include "1905072_SymbolInfo.hpp"
 

@@ -1,4 +1,5 @@
 #include "1905072_ScopeTable.hpp"
+// #include <iostream>
 
 ScopeTable::ScopeTable(int n)
 {
@@ -44,23 +45,23 @@ void ScopeTable::setId(int id)
     this->id = id;
 }
 
-// f
-// o
-// o
-int64_t ScopeTable::sdbmHash(const std::string &str) const
+unsigned int ScopeTable::sdbmHash(const std::string &str) const
 {
-    int64_t hash = 0;
+    unsigned int hash = 0;
     for (auto c : str)
     {
+        // The actual function is hash = hash * 65599 + c; what is included below is the faster version used in gawk.
+        // 2^6 + 2^16 - 1 = 65599
         hash = c + (hash << 6) + (hash << 16) - hash;
+        hash %= num_buckets; // To solve overflow problem
     }
     return hash;
 }
 
 int ScopeTable::hash(const std::string &name) const
 {
-    int ret = sdbmHash(name) % num_buckets;
-    return ret;
+    int hash_value = sdbmHash(name) % num_buckets;
+    return hash_value;
 }
 
 SymbolInfo *ScopeTable::find(const std::string &name) const

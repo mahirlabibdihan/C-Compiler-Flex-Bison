@@ -7,7 +7,7 @@
 #ifndef _SCOPE_TABLE_H
 #define _SCOPE_TABLE_H 1
 #include <vector>
-#include "1905072_SymbolInfo.hpp"
+#include "../include/1905072_SymbolInfo.hpp"
 
 /**
  * Class to maintain the scope

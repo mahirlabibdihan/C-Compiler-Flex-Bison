@@ -1,6 +1,6 @@
 	ScopeTable# 1 created
 Cmd 1: I foo FUNCTION
-	Inserted in ScopeTable# 1 at position 5, 1
+	Inserted in ScopeTable# 1 at position 7, 1
 Cmd 2: I i VAR
 	Inserted in ScopeTable# 1 at position 1, 1
 Cmd 3: L i
@@ -10,16 +10,16 @@ Cmd 4: L i j
 Cmd 5: L j
 	'j' not found in any of the ScopeTables
 Cmd 6: I 23 NUMBER
-	Inserted in ScopeTable# 1 at position 5, 2
+	Inserted in ScopeTable# 1 at position 5, 1
 Cmd 7: P C
 	ScopeTable# 1
 	1--> <i,VAR> 
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 8: D i
 	Deleted 'i' from ScopeTable# 1 at position 1, 1
 Cmd 9: D j
@@ -30,9 +30,9 @@ Cmd 10: P A
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 11: S
 	ScopeTable# 2 created
 Cmd 12: I <= RELOP
@@ -53,9 +53,9 @@ Cmd 14: P A
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 15: I >= RELOP
 	Inserted in ScopeTable# 2 at position 4, 1
 Cmd 16: P C
@@ -70,7 +70,7 @@ Cmd 16: P C
 Cmd 17: I <= RELOP
 	'<=' already exists in the current ScopeTable
 Cmd 18: I foo FUNCTION
-	Inserted in ScopeTable# 2 at position 5, 1
+	Inserted in ScopeTable# 2 at position 7, 2
 Cmd 19: D ==
 	Deleted '==' from ScopeTable# 2 at position 2, 1
 Cmd 20: D 23
@@ -83,19 +83,19 @@ Cmd 22: P A
 	2--> 
 	3--> 
 	4--> <>=,RELOP> 
-	5--> <foo,FUNCTION> 
+	5--> 
 	6--> 
-	7--> <<=,RELOP> 
+	7--> <<=,RELOP> <foo,FUNCTION> 
 	ScopeTable# 1
 	1--> 
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 23: L 23
-	'23' found in ScopeTable# 1 at position 5, 2
+	'23' found in ScopeTable# 1 at position 5, 1
 Cmd 24: S
 	ScopeTable# 3 created
 Cmd 25: I x VAR
@@ -116,27 +116,27 @@ Cmd 27: P A
 	2--> 
 	3--> 
 	4--> <>=,RELOP> 
-	5--> <foo,FUNCTION> 
+	5--> 
 	6--> 
-	7--> <<=,RELOP> 
+	7--> <<=,RELOP> <foo,FUNCTION> 
 	ScopeTable# 1
 	1--> 
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 28: L foo
-	'foo' found in ScopeTable# 2 at position 5, 1
+	'foo' found in ScopeTable# 2 at position 7, 2
 Cmd 29: E
 	ScopeTable# 3 removed
 Cmd 30: I num VAR
-	Inserted in ScopeTable# 2 at position 1, 1
+	Inserted in ScopeTable# 2 at position 7, 3
 Cmd 31: S
 	ScopeTable# 4 created
 Cmd 32: I true BOOL
-	Inserted in ScopeTable# 4 at position 7, 1
+	Inserted in ScopeTable# 4 at position 5, 1
 Cmd 33: I a
 	Number of parameters mismatch for the command I
 Cmd 34: P A
@@ -145,25 +145,25 @@ Cmd 34: P A
 	2--> 
 	3--> 
 	4--> 
-	5--> 
+	5--> <true,BOOL> 
 	6--> 
-	7--> <true,BOOL> 
+	7--> 
 	ScopeTable# 2
-	1--> <num,VAR> 
+	1--> 
 	2--> 
 	3--> 
 	4--> <>=,RELOP> 
-	5--> <foo,FUNCTION> 
+	5--> 
 	6--> 
-	7--> <<=,RELOP> 
+	7--> <<=,RELOP> <foo,FUNCTION> <num,VAR> 
 	ScopeTable# 1
 	1--> 
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 35: E
 	ScopeTable# 4 removed
 Cmd 36: E
@@ -186,9 +186,9 @@ Cmd 39: P A
 	2--> 
 	3--> 
 	4--> 
-	5--> <foo,FUNCTION> <23,NUMBER> 
+	5--> <23,NUMBER> 
 	6--> 
-	7--> 
+	7--> <foo,FUNCTION> 
 Cmd 40: Q
 	ScopeTable# 5 removed
 	ScopeTable# 1 removed

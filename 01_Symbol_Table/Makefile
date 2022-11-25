@@ -1,29 +1,32 @@
 
-fin?=input.txt
-fout?=output.txt
+fin?=io/input.txt
+fout?=io/output.txt
+OBJECTS=obj/1905072_SymbolInfo.o obj/1905072_ScopeTable.o obj/1905072_SymbolTable.o obj/1905072_Util.o obj/1905072_main.o
 
-all: run
+CXX = g++
+CXXFLAGS = -std=c++17 -O9
+SRCDIR = src/
+OBJDIR = obj/
+BINDIR = bin/
+INCDIR = include/
 
-run: main.exe
-	main.exe $(fin) ${fout}
+.PHONY: all clean
 
-main.exe: 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_Util.o 1905072_main.o
-	g++ -std=c++17 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_Util.o 1905072_main.o -o main.exe
+all: build run
 
-1905072_SymbolInfo.o: 1905072_SymbolInfo.cpp 1905072_SymbolInfo.hpp
-	g++ -std=c++17 1905072_SymbolInfo.cpp -c
+run: $(BINDIR)main.exe
+	$< $(fin) ${fout}
 
-1905072_ScopeTable.o: 1905072_ScopeTable.cpp 1905072_ScopeTable.hpp
-	g++ -std=c++17 1905072_ScopeTable.cpp -c
+build: $(OBJECTS) 
 
-1905072_SymbolTable.o: 1905072_SymbolTable.cpp 1905072_SymbolTable.hpp
-	g++ -std=c++17 1905072_SymbolTable.cpp -c
+$(BINDIR)main.exe:
+	$(CXX) $(CXXFLAGS) -o $@ $^
+	
+$(OBJDIR)%.o: $(SRCDIR)%.cpp $(INCDIR)%.hpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-1905072_Util.o: 1905072_Util.cpp 1905072_Util.hpp
-	g++ -std=c++17 1905072_Util.cpp -c
-
-1905072_main.o: 1905072_main.cpp
-	g++ -std=c++17 1905072_main.cpp -c
+$(OBJDIR)1905072_main.o: $(SRCDIR)1905072_main.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm *.o
+	rm $(OBJDIR)*.o

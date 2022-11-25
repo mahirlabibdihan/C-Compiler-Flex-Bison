@@ -5,7 +5,7 @@
 
 #ifndef _SYMBOL_TABLE_H
 #define _SYMBOL_TABLE_H 1
-#include "1905072_ScopeTable.hpp"
+#include "../include/1905072_ScopeTable.hpp"
 
 /**
  * Class to keep track of the scopes

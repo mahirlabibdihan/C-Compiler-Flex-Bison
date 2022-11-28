@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <fstream>
 #include <string>
-#include "../include/1905072_Symboltable.hpp"
+#include "../include/1905072_SymbolTable.hpp"
 #include "../include/1905072_Util.hpp"
 
 // For file input output
@@ -31,18 +31,18 @@ void ScopeTable::print() const
     }
 }
 
-bool checkParameter(std::vector<std::string> tokens, int num)
+bool checkParameter(std::string opr, int n_params, int num)
 {
-    if (tokens.size() != num)
+    if (n_params != num)
     {
-        fout << '\t' << "Number of parameters mismatch for the command " << tokens[0] << std::endl;
+        fout << '\t' << "Number of parameters mismatch for the command " << opr << std::endl;
         return false;
     }
     return true;
 }
-void insertCommand(std::vector<std::string> tokens)
+void insertCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 3))
+    if (!checkParameter(tokens[0], n_params, 3))
         return;
 
     std::string name = tokens[1], type = tokens[2];
@@ -61,9 +61,9 @@ void insertCommand(std::vector<std::string> tokens)
     }
 }
 
-void lookupCommand(std::vector<std::string> tokens)
+void lookupCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 2))
+    if (!checkParameter(tokens[0], n_params, 2))
         return;
 
     std::string name = tokens[1];
@@ -84,9 +84,9 @@ void lookupCommand(std::vector<std::string> tokens)
     }
 }
 
-void deleteCommand(std::vector<std::string> tokens)
+void deleteCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 2))
+    if (!checkParameter(tokens[0], n_params, 2))
         return;
 
     std::string name = tokens[1];
@@ -104,9 +104,9 @@ void deleteCommand(std::vector<std::string> tokens)
     }
 }
 
-void enterScopeCommand(std::vector<std::string> tokens)
+void enterScopeCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 1))
+    if (!checkParameter(tokens[0], n_params, 1))
         return;
 
     if (table->enterScope())
@@ -116,9 +116,9 @@ void enterScopeCommand(std::vector<std::string> tokens)
     }
 }
 
-void exitScopeCommand(std::vector<std::string> tokens)
+void exitScopeCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 1))
+    if (!checkParameter(tokens[0], n_params, 1))
         return;
 
     int scope = table->getCurrentScope()->getId();
@@ -135,9 +135,9 @@ void exitScopeCommand(std::vector<std::string> tokens)
     }
 }
 
-void printCommand(std::vector<std::string> tokens)
+void printCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 2))
+    if (!checkParameter(tokens[0], n_params, 2))
         return;
 
     char print_type = tokens[1][0];
@@ -151,9 +151,9 @@ void printCommand(std::vector<std::string> tokens)
     }
 }
 
-void quitCommand(std::vector<std::string> tokens)
+void quitCommand(std::string *tokens, int n_params)
 {
-    if (!checkParameter(tokens, 1))
+    if (!checkParameter(tokens[0], n_params, 1))
         return;
 
     while (table->getCurrentScope() != nullptr)
@@ -192,6 +192,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    
     int n_buckets;
     fin >> n_buckets;
     table = new SymbolTable(n_buckets);
@@ -203,30 +204,31 @@ int main(int argc, char *argv[])
     for (int cmd_count = 1; std::getline(fin, cmd); cmd_count++)
     {
         fout << "Cmd " << cmd_count << ": " << cmd << std::endl;
-        std::vector<std::string> tokens = Util::split(cmd, ' ');
+        std::string *tokens = Util::split(cmd, ' ');
+        int n_params = Util::countTokens(cmd, ' ');
 
         switch (tokens[0][0])
         {
         case 'I': // Insert symbol
-            insertCommand(tokens);
+            insertCommand(tokens, n_params);
             break;
         case 'L': // Lookup symbol
-            lookupCommand(tokens);
+            lookupCommand(tokens, n_params);
             break;
         case 'D': // Delete symbol
-            deleteCommand(tokens);
+            deleteCommand(tokens, n_params);
             break;
         case 'S': // Start scope
-            enterScopeCommand(tokens);
+            enterScopeCommand(tokens, n_params);
             break;
         case 'E': // End scope
-            exitScopeCommand(tokens);
+            exitScopeCommand(tokens, n_params);
             break;
         case 'P': // Print
-            printCommand(tokens);
+            printCommand(tokens, n_params);
             break;
         case 'Q': // Quit
-            quitCommand(tokens);
+            quitCommand(tokens, n_params);
             goto QUIT;
         default:
             break;

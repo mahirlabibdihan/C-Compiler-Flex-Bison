@@ -17,7 +17,7 @@ all: build run
 run: $(BINDIR)main.exe
 	$< $(fin) ${fout}
 
-$(BINDIR)main.exe:
+$(BINDIR)main.exe: build
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJECTS) 
 
 build: $(OBJECTS) 
@@ -29,4 +29,4 @@ $(OBJDIR)1905072_main.o: $(SRCDIR)1905072_main.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm $(OBJDIR)*.o $(BINDIR)*.exe $(BINDIR)*.out
+	rm $(OBJDIR)*.o $(BINDIR)*.exe

@@ -91,10 +91,10 @@ char Util::getActualChar(std::string symbol)
     }
 }
 
-std::string Util::getActualString(std::string str)
+std::string Util::getActualString(std::string str, bool &is_multi)
 {
     int n = str.length();
-    std::string tmp = "\"";
+    std::string tmp = "";
     for (int i = 1; i < n - 1; i++)
     {
         if (str[i] == '\\')
@@ -106,6 +106,7 @@ std::string Util::getActualString(std::string str)
                 {
                     i++;
                 }
+                is_multi = true;
             }
             else
             {
@@ -117,5 +118,6 @@ std::string Util::getActualString(std::string str)
             tmp += str[i];
         }
     }
-    return tmp + "\"";
+
+    return tmp;
 }

@@ -26,8 +26,12 @@ void ScopeTable::print() const
     logout << '\t' << "ScopeTable# " << id << std::endl;
     for (int i = 0; i < num_buckets; i++)
     {
-        logout << "\t" << i + 1 << "--> ";
         SymbolInfo *cur = hash_table[i];
+        if (cur == nullptr)
+        {
+            continue;
+        }
+        logout << "\t" << i + 1 << "--> ";
         while (cur != nullptr)
         {
             logout << "<" << cur->getSymbol() << "," << cur->getType() << "> ";
@@ -65,7 +69,7 @@ int main(int argc, char *argv[])
     table->printAllScope();
 
     logout << "Total lines: " << yylineno << std::endl;
-    logout << "Total errors: " << error_count;
+    logout << "Total errors: " << error_count << std::endl;
 
     tokenout.close();
     logout.close();

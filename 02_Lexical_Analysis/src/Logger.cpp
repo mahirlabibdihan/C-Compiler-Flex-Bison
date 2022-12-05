@@ -8,12 +8,12 @@ extern int line_count;
 extern std::map<std::string, std::string> operatorType;
 void Logger::printLog(std::string token, std::string lexeme, int line)
 {
-    logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found\n"
+    logout << "Line# " << line << ": Token <" << token << "> Lexeme " << lexeme << " found"
            << std::endl;
 }
 void Logger::printLogWithToken(std::string token, std::string lexeme, std::string actual, int line)
 {
-    logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found --> <" << token << ", " << actual << ">\n"
+    logout << "Line# " << line << ": Token <" << token << "> Lexeme " << lexeme << " found --> <" << token << ", " << actual << ">"
            << std::endl;
 }
 void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
@@ -30,19 +30,33 @@ void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
         printLog("CONST_FLOAT", lexeme, line);
         break;
     case CHARACTER_LOG:
-        printLogWithToken("CONST_CHAR", lexeme, std::string(1, Util::getActualChar(lexeme)), line);
+        printLog("CONST_CHAR", std::string(1, Util::getActualChar(lexeme)), line);
         break;
     case STRING_LOG:
-        printLogWithToken("STRING", lexeme, Util::getActualString(lexeme), line);
+    {
+        bool is_multi = false;
+        std::string str = Util::getActualString(lexeme, is_multi);
+        if (is_multi)
+        {
+            printLog("MULTI LINE STRING", lexeme, line);
+        }
+        else
+        {
+            printLog("SINGLE LINE STRING", lexeme, line);
+        }
         break;
+    }
     case OPERATOR_LOG:
         printLog(operatorType[lexeme], lexeme, line);
         break;
     case IDENTIFIER_LOG:
         printLog("ID", lexeme, line);
         break;
-    case COMMENT_LOG:
-        printLog("COMMENT", lexeme, line);
+    case SINGLE_COMMENT_LOG:
+        printLog("SINGLE LINE COMMENT", lexeme, line);
+        break;
+    case MULTI_COMMENT_LOG:
+        printLog("MULTI LINE COMMENT", lexeme, line);
         break;
     default:
         break;

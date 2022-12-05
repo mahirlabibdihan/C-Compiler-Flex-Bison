@@ -19,7 +19,8 @@ namespace Logger
         STRING_LOG,
         OPERATOR_LOG,
         IDENTIFIER_LOG,
-        COMMENT_LOG
+        SINGLE_COMMENT_LOG,
+        MULTI_COMMENT_LOG
     };
 
     void printLog(std::string token, std::string lexeme, int line);

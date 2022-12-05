@@ -14,12 +14,12 @@ extern SymbolTable *table;
 void ErrorHandler::printError(string error, int line)
 {
     error_count++;
-    logout << "Error at line " << line << ": " << error << "\n";
+    logout << "Error at line# " << line << ": " << error << "\n";
 }
 void ErrorHandler::printLexicalError(string error, int line)
 {
     lexical_error_count++;
-    printError("lexical error, " + error, line);
+    printError(error, line);
 }
 
 void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme)
@@ -27,31 +27,31 @@ void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme
     switch (type)
     {
     case TOO_MANY_DECIMAL:
-        printLexicalError("Too Many Decimal Points " + lexeme, line);
+        printLexicalError("TOO_MANY_DECIMAL_POINTS " + lexeme, line);
         break;
     case ILL_NUMBER:
-        printLexicalError("Ill formed number " + lexeme, line);
+        printLexicalError("ILLFORMED_NUMBER " + lexeme, line);
         break;
     case INVALID_IDENTIFIER:
-        printLexicalError("Invalid prefix on ID or invalid suffix on Number " + lexeme, line);
+        printLexicalError("INVALID_ID_SUFFIX_NUM_PREFIX " + lexeme, line);
         break;
     case MULTI_CHARACTER:
-        printLexicalError("Multi Character Constant Error " + lexeme, line);
+        printLexicalError("MULTICHAR_CONST_CHAR " + lexeme, line);
         break;
     case UNTERMINATED_CHARACTER:
-        printLexicalError("Unterminated Character " + lexeme, line);
+        printLexicalError("UNFINISHED_CONST_CHAR " + lexeme, line);
         break;
     case EMPTY_CHARACTER:
-        printLexicalError("Empty Character Constant Error " + lexeme, line);
+        printLexicalError("EMPTY_CONST_CHAR " + lexeme, line);
         break;
     case UNTERMINATED_STRING:
-        printLexicalError("Unterminated String " + lexeme, line);
+        printLexicalError("UNFINISHED_STRING " + lexeme, line);
         break;
     case UNTERMINATED_COMMENT:
-        printLexicalError("Unterminated Comment " + lexeme, line);
+        printLexicalError("UNFINISHED_COMMENT " + lexeme, line);
         break;
     case UNRECOGNIZED:
-        printLexicalError("Unrecognized character " + lexeme, line);
+        printLexicalError("UNRECOGNIZED_CHAR " + lexeme, line);
         break;
     default:
         break;

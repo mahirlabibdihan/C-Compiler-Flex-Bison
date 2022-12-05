@@ -1,26 +1,27 @@
-#include "1905072_Logger.h"
-#include "1905072_Helper.h"
-#include "1905072_Tokenizer.h"
 #include <iostream>
 #include <fstream>
-extern ofstream logout;
-
-void printLog(string token, string lexeme, int line)
+#include "../include/Tokenizer.hpp"
+#include "../include/Logger.hpp"
+#include "../include/Util.hpp"
+extern std::ofstream logout;
+extern int line_count;
+extern std::map<std::string, std::string> operatorType;
+void Logger::printLog(std::string token, std::string lexeme, int line)
 {
     logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found\n"
-           << endl;
+           << std::endl;
 }
-void printLogWithToken(string token, string lexeme, string actual, int line)
+void Logger::printLogWithToken(std::string token, std::string lexeme, std::string actual, int line)
 {
     logout << "Line no " << line << ": Token <" << token << "> Lexeme " << lexeme << " found --> <" << token << ", " << actual << ">\n"
-           << endl;
+           << std::endl;
 }
-void printLogData(int type, int line, string lexeme)
+void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
 {
     switch (type)
     {
     case KEYWORD_LOG:
-        printLog(toUpper(lexeme), lexeme, line);
+        printLog(Util::toUpper(lexeme), lexeme, line);
         break;
     case INTEGER_LOG:
         printLog("CONST_INT", lexeme, line);
@@ -29,13 +30,13 @@ void printLogData(int type, int line, string lexeme)
         printLog("CONST_FLOAT", lexeme, line);
         break;
     case CHARACTER_LOG:
-        printLogWithToken("CONST_CHAR", lexeme, string(1, getActualChar(lexeme)), line);
+        printLogWithToken("CONST_CHAR", lexeme, std::string(1, Util::getActualChar(lexeme)), line);
         break;
     case STRING_LOG:
-        printLogWithToken("STRING", lexeme, getActualString(lexeme), line);
+        printLogWithToken("STRING", lexeme, Util::getActualString(lexeme), line);
         break;
     case OPERATOR_LOG:
-        printLog(operatorToken[lexeme], lexeme, line);
+        printLog(operatorType[lexeme], lexeme, line);
         break;
     case IDENTIFIER_LOG:
         printLog("ID", lexeme, line);

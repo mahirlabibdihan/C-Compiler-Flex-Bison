@@ -4,7 +4,6 @@
 #include "../include/Logger.hpp"
 #include "../include/Util.hpp"
 extern std::ofstream logout;
-extern int line_count;
 extern std::map<std::string, std::string> operatorType;
 void Logger::printLog(std::string token, std::string lexeme, int line)
 {
@@ -34,9 +33,9 @@ void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
         break;
     case STRING_LOG:
     {
-        bool is_multi = false;
-        std::string str = Util::getActualString(lexeme, is_multi);
-        if (is_multi)
+        int l_count = Util::getStringLineCount(lexeme);
+        std::string str = Util::getActualString(lexeme);
+        if (l_count > 1)
         {
             printLog("MULTI LINE STRING", lexeme, line);
         }

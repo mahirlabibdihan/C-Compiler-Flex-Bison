@@ -13,7 +13,10 @@ namespace Util
     std::string toLower(std::string s);
     char getSpecialChar(char c);
     char getActualChar(std::string symbol);
-    std::string getActualString(std::string str, bool &);
+    int getStringLineCount(std::string str);
+    int getSingleCommentLineCount(std::string str);
+    int getMultiCommentLineCount(std::string str);
+    std::string getActualString(std::string str);
     int countTokens(const std::string &line, char delim = ' ');
     std::string *split(const std::string &line, char delim = ' ');
 };

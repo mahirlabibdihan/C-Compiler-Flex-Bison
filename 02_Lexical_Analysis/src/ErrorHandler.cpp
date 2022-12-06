@@ -1,14 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "../include/Error_Handler.hpp"
+#include "../include/ErrorHandler.hpp"
 #include "../include/SymbolTable.hpp"
 using namespace std;
 
 extern ofstream logout;
 extern int error_count;
 extern int lexical_error_count;
-extern int line_count;
 extern SymbolTable *table;
 
 void ErrorHandler::printError(string error, int line)

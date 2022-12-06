@@ -91,7 +91,68 @@ char Util::getActualChar(std::string symbol)
     }
 }
 
-std::string Util::getActualString(std::string str, bool &is_multi)
+int Util::getStringLineCount(std::string str)
+{
+    int n = str.length();
+    int count = 1;
+    for (int i = 1; i < n - 1; i++)
+    {
+        if (str[i] == '\\')
+        {
+            i++;
+            if (str[i] == '\r' or str[i] == '\n')
+            {
+                if (str[i] == '\r')
+                {
+                    i++;
+                }
+                count++;
+            }
+        }
+    }
+    return count;
+}
+int Util::getSingleCommentLineCount(std::string str)
+{
+    int n = str.length();
+    int count = 1;
+    for (int i = 0; i < n; i++)
+    {
+        if (str[i] == '\\')
+        {
+            i++;
+            if (str[i] == '\r' or str[i] == '\n')
+            {
+                if (str[i] == '\r')
+                {
+                    i++;
+                }
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+int Util::getMultiCommentLineCount(std::string str)
+{
+    int n = str.length();
+    int count = 1;
+    for (int i = 0; i < n; i++)
+    {
+        if (str[i] == '\r' or str[i] == '\n')
+        {
+            if (str[i] == '\r')
+            {
+                i++;
+            }
+            count++;
+        }
+    }
+    return count;
+}
+
+std::string Util::getActualString(std::string str)
 {
     int n = str.length();
     std::string tmp = "";
@@ -106,7 +167,6 @@ std::string Util::getActualString(std::string str, bool &is_multi)
                 {
                     i++;
                 }
-                is_multi = true;
             }
             else
             {

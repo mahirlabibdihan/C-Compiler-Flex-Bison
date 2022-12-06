@@ -55,9 +55,9 @@ void Tokenizer::generateToken(TokenType type, std::string lexeme)
         break;
     case STRING_TOKEN:
     {
-        bool is_multi = false;
-        std::string str = Util::getActualString(lexeme, is_multi);
-        if (is_multi)
+        bool l_count = Util::getStringLineCount(lexeme);
+        std::string str = Util::getActualString(lexeme);
+        if (l_count > 1)
         {
             printToken("MULTI LINE STRING", str);
         }

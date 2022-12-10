@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     tokenout.open("io/token.txt");
     logout.open("io/log.txt");
 
-    table = new SymbolTable(7);
+    table = new SymbolTable(10);
     yyin = fin;
     line_count = yylineno = 1;
     error_count = lexical_error_count = 0;

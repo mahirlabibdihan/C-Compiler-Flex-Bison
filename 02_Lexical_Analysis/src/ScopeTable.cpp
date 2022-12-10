@@ -45,15 +45,15 @@ void ScopeTable::setId(int id)
     this->id = id;
 }
 
-unsigned int ScopeTable::sdbmHash(const std::string &str) const
+uint64_t ScopeTable::sdbmHash(const std::string &str) const
 {
-    unsigned int hash = 0;
+    uint64_t hash = 0;
     for (auto c : str)
     {
         // The actual function is hash = hash * 65599 + c; what is included below is the faster version used in gawk.
         // 2^6 + 2^16 - 1 = 65599
         hash = c + (hash << 6) + (hash << 16) - hash;
-        hash %= num_buckets; // To solve overflow problem
+        // hash %= num_buckets; // To solve overflow problem
     }
     return hash;
 }

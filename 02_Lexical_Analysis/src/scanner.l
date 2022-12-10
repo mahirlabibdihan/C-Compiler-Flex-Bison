@@ -186,7 +186,7 @@ ESCAPE_SEQUENCE (\\.)
 									}
 									else
 									{
-										logout<<yytext<<" already exisits in the current ScopeTable"<<std::endl;
+										logout<<"\t"<<yytext<<" already exisits in the current ScopeTable"<<std::endl;
 									}
 								}
 {NON_IDENTIFIER} 				{ 

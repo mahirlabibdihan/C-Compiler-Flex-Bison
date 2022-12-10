@@ -20,10 +20,10 @@ class ScopeTable
     SymbolInfo **hash_table;
 
 private:
-    void operator=(const ScopeTable &) {}                // Protect assignment
-    ScopeTable(const ScopeTable &) {}                    // Protect copy constructor
-    unsigned int sdbmHash(const std::string &str) const; // Hash code
-    int hash(const std::string &name) const;             // Compression function
+    void operator=(const ScopeTable &) {}            // Protect assignment
+    ScopeTable(const ScopeTable &) {}                // Protect copy constructor
+    uint64_t sdbmHash(const std::string &str) const; // Hash code
+    int hash(const std::string &name) const;         // Compression function
 
 public:
     /**

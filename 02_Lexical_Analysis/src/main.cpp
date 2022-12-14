@@ -8,12 +8,13 @@
 #include <string>
 #include "../include/SymbolTable.hpp"
 #include "../include/Util.hpp"
-
+#include "../include/LineTracker.hpp"
 // For file input output
 std::ifstream fin;
 std::ofstream logout;
 std::ofstream tokenout;
 SymbolTable *table;
+LineTracker *line_trkr;
 extern FILE *yyin;
 extern int yylineno;
 extern int yylex(void);
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
     logout.open("io/log.txt");
 
     table = new SymbolTable(10);
+    line_trkr = new LineTracker();
     yyin = fin;
     line_count = yylineno = 1;
     error_count = lexical_error_count = 0;

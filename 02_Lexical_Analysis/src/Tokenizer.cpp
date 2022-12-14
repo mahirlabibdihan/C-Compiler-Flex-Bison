@@ -3,6 +3,7 @@
 #include <map>
 #include "../include/Tokenizer.hpp"
 #include "../include/Util.hpp"
+#include <iostream>
 
 extern std::ofstream tokenout;
 
@@ -55,7 +56,7 @@ void Tokenizer::generateToken(TokenType type, std::string lexeme)
         break;
     case STRING_TOKEN:
     {
-        bool l_count = Util::getStringLineCount(lexeme);
+        int l_count = Util::getStringLineCount(lexeme);
         std::string str = Util::getActualString(lexeme);
         if (l_count > 1)
         {

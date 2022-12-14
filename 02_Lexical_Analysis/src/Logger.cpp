@@ -35,14 +35,7 @@ void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
     {
         int l_count = Util::getStringLineCount(lexeme);
         std::string str = Util::getActualString(lexeme);
-        if (l_count > 1)
-        {
-            printLog("MULTI LINE STRING", lexeme, line);
-        }
-        else
-        {
-            printLog("SINGLE LINE STRING", lexeme, line);
-        }
+        printLog(std::string(l_count > 1 ? "MULTI" : "SINGLE") + " LINE STRING", lexeme, line);
         break;
     }
     case OPERATOR_LOG:

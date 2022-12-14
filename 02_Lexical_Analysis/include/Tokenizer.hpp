@@ -20,11 +20,8 @@ namespace Tokenizer
         IDENTIFIER_TOKEN
     };
 
-    void printToken(std::string token);
     void printToken(std::string type, std::string token_type);
-    void printToken(std::string type, std::string symbol, std::string token_type);
     void generateToken(TokenType type, std::string lexeme);
-    int getToken(TokenType type, std::string lexeme);
 };
 
 #endif

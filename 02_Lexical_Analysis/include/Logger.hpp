@@ -1,6 +1,6 @@
 /**
  * Author: Mahir Labib Dihan
- * Last modified: December 05, 2022
+ * Last modified: December 14, 2022
  */
 #ifndef __LOGGER_H
 #define __LOGGER_H 1
@@ -24,7 +24,6 @@ namespace Logger
     };
 
     void printLog(std::string token, std::string lexeme, int line);
-    void printLogWithToken(std::string token, std::string lexeme, std::string actual, int line);
     void printLogData(LogType type, int line, std::string lexeme);
 };
 

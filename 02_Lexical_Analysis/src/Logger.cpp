@@ -10,11 +10,6 @@ void Logger::printLog(std::string token, std::string lexeme, int line)
     logout << "Line# " << line << ": Token <" << token << "> Lexeme " << lexeme << " found"
            << std::endl;
 }
-void Logger::printLogWithToken(std::string token, std::string lexeme, std::string actual, int line)
-{
-    logout << "Line# " << line << ": Token <" << token << "> Lexeme " << lexeme << " found --> <" << token << ", " << actual << ">"
-           << std::endl;
-}
 void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
 {
     switch (type)

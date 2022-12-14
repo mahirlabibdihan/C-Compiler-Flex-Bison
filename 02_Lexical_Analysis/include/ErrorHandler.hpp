@@ -10,7 +10,7 @@ using namespace std;
 
 namespace ErrorHandler
 {
-    // Lexical errors
+    // Lexical error types
     enum LexicalError
     {
         TOO_MANY_DECIMAL = 0,

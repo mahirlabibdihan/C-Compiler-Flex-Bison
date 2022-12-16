@@ -17,8 +17,6 @@ namespace Util
     int getSingleCommentLineCount(std::string str);
     int getMultiCommentLineCount(std::string str);
     std::string getActualString(std::string str);
-    int countTokens(const std::string &line, char delim = ' ');
-    std::string *split(const std::string &line, char delim = ' ');
 };
 
 #endif

@@ -3,8 +3,10 @@
 #include "../include/Tokenizer.hpp"
 #include "../include/Logger.hpp"
 #include "../include/Util.hpp"
-extern std::ofstream logout;
-extern std::map<std::string, std::string> operatorType;
+
+Logger::Logger(std::ofstream &log) : logout(log)
+{
+}
 void Logger::printLog(std::string token, std::string lexeme, int line)
 {
     logout << "Line# " << line << ": Token <" << token << "> Lexeme " << lexeme << " found"
@@ -34,7 +36,7 @@ void Logger::printLogData(Logger::LogType type, int line, std::string lexeme)
         break;
     }
     case OPERATOR_LOG:
-        printLog(operatorType[lexeme], lexeme, line);
+        printLog(Tokenizer::operatorType[lexeme], lexeme, line);
         break;
     case IDENTIFIER_LOG:
         printLog("ID", lexeme, line);

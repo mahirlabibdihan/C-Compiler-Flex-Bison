@@ -5,16 +5,14 @@
 #include "../include/Util.hpp"
 #include <iostream>
 
-extern std::ofstream tokenout;
-
-std::map<std::string, std::string> operatorType = {
+std::map<std::string, std::string> Tokenizer::operatorType = {
     {"+", "ADDOP"},
     {"-", "ADDOP"},
     {"*", "MULOP"},
     {"/", "MULOP"},
     {"%", "MULOP"},
     {"++", "INCOP"},
-    {"--", "DECOP"},
+    {"--", "INCOP"},
     {"<", "RELOP"},
     {"<=", "RELOP"},
     {">", "RELOP"},
@@ -24,6 +22,11 @@ std::map<std::string, std::string> operatorType = {
     {"=", "ASSIGNOP"},
     {"||", "LOGICOP"},
     {"&&", "LOGICOP"},
+    {"&", "BITOP"},
+    {"|", "BITOP"},
+    {"^", "BITOP"},
+    {"<<", "BITOP"},
+    {">>", "BITOP"},
     {"!", "NOT"},
     {"(", "LPAREN"},
     {")", "RPAREN"},
@@ -34,6 +37,10 @@ std::map<std::string, std::string> operatorType = {
     {",", "COMMA"},
     {";", "SEMICOLON"}};
 
+Tokenizer::Tokenizer()
+{
+    tokenout.open("io/token.txt");
+}
 void Tokenizer::printToken(std::string type, std::string symbol)
 {
     tokenout << "<" << type << ", " << symbol << ">" << std::endl;
@@ -58,14 +65,7 @@ void Tokenizer::generateToken(TokenType type, std::string lexeme)
     {
         int l_count = Util::getStringLineCount(lexeme);
         std::string str = Util::getActualString(lexeme);
-        if (l_count > 1)
-        {
-            printToken("MULTI LINE STRING", str);
-        }
-        else
-        {
-            printToken("SINGLE LINE STRING", str);
-        }
+        printToken(std::string(l_count > 1 ? "MULTI" : "SINGLE") + " LINE STRING", str);
         break;
     }
     case OPERATOR_TOKEN:

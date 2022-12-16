@@ -5,19 +5,17 @@
 #include "../include/SymbolTable.hpp"
 using namespace std;
 
-extern ofstream logout;
-extern int error_count;
-extern int lexical_error_count;
-extern SymbolTable *table;
-
+ErrorHandler::ErrorHandler(std::ofstream &err) : errout(err)
+{
+    error_count = 0;
+}
 void ErrorHandler::printError(string error, int line)
 {
     error_count++;
-    logout << "Error at line# " << line << ": " << error << "\n";
+    errout << "Error at line# " << line << ": " << error << "\n";
 }
 void ErrorHandler::printLexicalError(string error, int line)
 {
-    lexical_error_count++;
     printError(error, line);
 }
 
@@ -37,16 +35,16 @@ void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme
     case MULTI_CHARACTER:
         printLexicalError("MULTICHAR_CONST_CHAR " + lexeme, line);
         break;
-    case UNTERMINATED_CHARACTER:
+    case UNFINISHED_CHARACTER:
         printLexicalError("UNFINISHED_CONST_CHAR " + lexeme, line);
         break;
     case EMPTY_CHARACTER:
         printLexicalError("EMPTY_CONST_CHAR " + lexeme, line);
         break;
-    case UNTERMINATED_STRING:
+    case UNFINISHED_STRING:
         printLexicalError("UNFINISHED_STRING " + lexeme, line);
         break;
-    case UNTERMINATED_COMMENT:
+    case UNFINISHED_COMMENT:
         printLexicalError("UNFINISHED_COMMENT " + lexeme, line);
         break;
     case UNRECOGNIZED:
@@ -55,4 +53,9 @@ void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme
     default:
         break;
     }
+}
+
+int ErrorHandler::getErrorCount()
+{
+    return error_count;
 }

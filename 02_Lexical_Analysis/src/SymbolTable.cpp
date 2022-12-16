@@ -1,7 +1,4 @@
-#include <functional>
-#include <cassert>
 #include "../include/SymbolTable.hpp"
-#include <string>
 
 SymbolTable::SymbolTable(int n)
 {
@@ -53,10 +50,7 @@ bool SymbolTable::exitScope()
         delete tmp;
         return true;
     }
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 bool SymbolTable::insert(const std::string &name, const std::string &type)

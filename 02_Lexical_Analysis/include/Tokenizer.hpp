@@ -4,11 +4,16 @@
  */
 #ifndef __TOKENIZER_H
 #define __TOKENIZER_H 1
+#include <fstream>
 #include <string>
 #include <map>
 
-namespace Tokenizer
+class Tokenizer
 {
+    std::ofstream tokenout;
+
+public:
+    static std::map<std::string, std::string> operatorType;
     enum TokenType
     {
         KEYWORD_TOKEN = 0,
@@ -20,6 +25,7 @@ namespace Tokenizer
         IDENTIFIER_TOKEN
     };
 
+    Tokenizer();
     void printToken(std::string type, std::string token_type);
     void generateToken(TokenType type, std::string lexeme);
 };

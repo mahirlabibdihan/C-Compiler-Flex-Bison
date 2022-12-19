@@ -37,44 +37,41 @@ std::map<std::string, std::string> Tokenizer::operatorType = {
     {",", "COMMA"},
     {";", "SEMICOLON"}};
 
-Tokenizer::Tokenizer()
+std::string Tokenizer::getToken(std::string type, std::string symbol)
 {
-    tokenout.open("io/token.txt");
+    return std::string() + "<" + type + ", " + symbol + ">";
 }
-void Tokenizer::printToken(std::string type, std::string symbol)
-{
-    tokenout << "<" << type << ", " << symbol << ">" << std::endl;
-}
-void Tokenizer::generateToken(TokenType type, std::string lexeme)
+std::string Tokenizer::generateToken(TokenType type, std::string lexeme)
 {
     switch (type)
     {
     case KEYWORD_TOKEN:
-        printToken(Util::toUpper(lexeme), lexeme);
+        return getToken(Util::toUpper(lexeme), lexeme);
         break;
     case INTEGER_TOKEN:
-        printToken("CONST_INT", lexeme);
+        return getToken("CONST_INT", lexeme);
         break;
     case FLOAT_TOKEN:
-        printToken("CONST_FLOAT", lexeme);
+        return getToken("CONST_FLOAT", lexeme);
         break;
     case CHARACTER_TOKEN:
-        printToken("CONST_CHAR", std::string(1, Util::getActualChar(lexeme)));
+        return getToken("CONST_CHAR", std::string(1, Util::getActualChar(lexeme)));
         break;
     case STRING_TOKEN:
     {
         int l_count = Util::getStringLineCount(lexeme);
         std::string str = Util::getActualString(lexeme);
-        printToken(std::string(l_count > 1 ? "MULTI" : "SINGLE") + " LINE STRING", str);
+        return getToken(std::string(l_count > 1 ? "MULTI" : "SINGLE") + " LINE STRING", str);
         break;
     }
     case OPERATOR_TOKEN:
-        printToken(operatorType[lexeme], lexeme);
+        return getToken(operatorType[lexeme], lexeme);
         break;
     case IDENTIFIER_TOKEN:
-        printToken("ID", lexeme);
+        return getToken("ID", lexeme);
         break;
     default:
         break;
     }
+    return getToken("", lexeme);
 }

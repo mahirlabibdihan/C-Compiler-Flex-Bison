@@ -5,54 +5,55 @@
 #include "../include/SymbolTable.hpp"
 using namespace std;
 
-ErrorHandler::ErrorHandler(std::ofstream &err) : errout(err)
+ErrorHandler::ErrorHandler()
 {
     error_count = 0;
 }
-void ErrorHandler::printError(string error, int line)
+std::string ErrorHandler::getError(string error, int line)
 {
     error_count++;
-    errout << "Error at line# " << line << ": " << error << "\n";
+    return "Error at line# " + std::to_string(line) + ": " + error;
 }
-void ErrorHandler::printLexicalError(string error, int line)
+std::string ErrorHandler::getLexicalError(string error, int line)
 {
-    printError(error, line);
+    return getError(error, line);
 }
 
-void ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme)
+std::string ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme)
 {
     switch (type)
     {
     case TOO_MANY_DECIMAL:
-        printLexicalError("TOO_MANY_DECIMAL_POINTS " + lexeme, line);
+        return getLexicalError("TOO_MANY_DECIMAL_POINTS " + lexeme, line);
         break;
     case ILL_NUMBER:
-        printLexicalError("ILLFORMED_NUMBER " + lexeme, line);
+        return getLexicalError("ILLFORMED_NUMBER " + lexeme, line);
         break;
     case INVALID_IDENTIFIER:
-        printLexicalError("INVALID_ID_SUFFIX_NUM_PREFIX " + lexeme, line);
+        return getLexicalError("INVALID_ID_SUFFIX_NUM_PREFIX " + lexeme, line);
         break;
     case MULTI_CHARACTER:
-        printLexicalError("MULTICHAR_CONST_CHAR " + lexeme, line);
+        return getLexicalError("MULTICHAR_CONST_CHAR " + lexeme, line);
         break;
     case UNFINISHED_CHARACTER:
-        printLexicalError("UNFINISHED_CONST_CHAR " + lexeme, line);
+        return getLexicalError("UNFINISHED_CONST_CHAR " + lexeme, line);
         break;
     case EMPTY_CHARACTER:
-        printLexicalError("EMPTY_CONST_CHAR " + lexeme, line);
+        return getLexicalError("EMPTY_CONST_CHAR " + lexeme, line);
         break;
     case UNFINISHED_STRING:
-        printLexicalError("UNFINISHED_STRING " + lexeme, line);
+        return getLexicalError("UNFINISHED_STRING " + lexeme, line);
         break;
     case UNFINISHED_COMMENT:
-        printLexicalError("UNFINISHED_COMMENT " + lexeme, line);
+        return getLexicalError("UNFINISHED_COMMENT " + lexeme, line);
         break;
     case UNRECOGNIZED:
-        printLexicalError("UNRECOGNIZED_CHAR " + lexeme, line);
+        return getLexicalError("UNRECOGNIZED_CHAR " + lexeme, line);
         break;
     default:
         break;
     }
+    return getLexicalError("Unknown Lexical Error", line);
 }
 
 int ErrorHandler::getErrorCount()

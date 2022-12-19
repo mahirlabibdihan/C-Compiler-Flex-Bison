@@ -8,11 +8,8 @@
 #include <vector>
 #include "../include/SymbolTable.hpp"
 
-class Logger
+namespace Logger
 {
-    std::ofstream &logout;
-
-public:
     enum LogType
     {
         KEYWORD_LOG = 0,
@@ -25,9 +22,8 @@ public:
         SINGLE_COMMENT_LOG,
         MULTI_COMMENT_LOG
     };
-    Logger(std::ofstream &logout);
-    void printLog(std::string token, std::string lexeme, int line);
-    void printLogData(LogType type, int line, std::string lexeme);
+    std::string getMsg(std::string token, std::string lexeme, int line);
+    std::string getLogData(LogType type, int line, std::string lexeme);
 };
 
 #endif

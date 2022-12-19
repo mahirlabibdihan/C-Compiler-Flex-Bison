@@ -10,10 +10,10 @@
 #include "../include/Logger.hpp"
 #include "../include/Tokenizer.hpp"
 // For file input output
-
 std::ofstream logout;
+std::ofstream tokenout;
 LexicalAnalyzer *lexer;
-void run(FILE *fin);
+void runFlex(FILE *fin);
 void ScopeTable::print() const
 {
     logout << '\t' << "ScopeTable# " << id << std::endl;
@@ -50,13 +50,14 @@ int main(int argc, char *argv[])
     }
 
     logout.open("io/log.txt");
+    tokenout.open("io/token.txt");
+
     SymbolTable *table = new SymbolTable(10);
-    ErrorHandler *error_hndlr = new ErrorHandler(logout);
-    Logger *logger = new Logger(logout);
+    ErrorHandler *error_hndlr = new ErrorHandler();
 
-    lexer = new LexicalAnalyzer(table, error_hndlr, logger, logout);
+    lexer = new LexicalAnalyzer(table, error_hndlr, logout, tokenout);
 
-    run(fin); // Main lexer
+    runFlex(fin); // Main lexer
 
     table->printAllScope();
     logout << "Total lines: " << lexer->getLineCount() << std::endl;
@@ -66,7 +67,6 @@ int main(int argc, char *argv[])
     logout.close();
 
     delete lexer;
-    delete logger;
     delete error_hndlr;
     delete table;
 

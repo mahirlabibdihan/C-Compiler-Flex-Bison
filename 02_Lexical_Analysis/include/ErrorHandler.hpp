@@ -12,7 +12,6 @@ using namespace std;
 class ErrorHandler
 {
     int error_count;
-    std::ofstream &errout;
     // Lexical error types
 public:
     enum LexicalError
@@ -27,11 +26,10 @@ public:
         UNFINISHED_COMMENT,
         UNRECOGNIZED
     };
-
-    ErrorHandler(std::ofstream &errout);
-    void printError(string error, int line);
-    void printLexicalError(string error, int line);
-    void handleLexicalError(LexicalError type, int line, string lexeme = "");
+    ErrorHandler();
+    std::string getError(string error, int line);
+    std::string getLexicalError(string error, int line);
+    std::string handleLexicalError(LexicalError type, int line, string lexeme = "");
     int getErrorCount();
 };
 

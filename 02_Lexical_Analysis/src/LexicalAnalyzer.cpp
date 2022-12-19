@@ -5,19 +5,16 @@
 #include "../include/SymbolTable.hpp"
 #include <fstream>
 
-LexicalAnalyzer::LexicalAnalyzer(SymbolTable *table, ErrorHandler *error_hndlr, Logger *logger, std::ofstream &log) : logout(log)
+LexicalAnalyzer::LexicalAnalyzer(SymbolTable *table, ErrorHandler *error_hndlr, std::ofstream &log, std::ofstream &token) : logout(log), tokenout(token)
 {
     this->table = table;
     this->error_hndlr = error_hndlr;
-    this->logger = logger;
-    this->tokenizer = new Tokenizer();
     this->line_trkr = new LineTracker(1);
 }
 
 LexicalAnalyzer::~LexicalAnalyzer()
 {
     delete line_trkr;
-    delete tokenizer;
 }
 void LexicalAnalyzer::installID(std::string yytext)
 {
@@ -43,12 +40,14 @@ void LexicalAnalyzer::handleNewLine(std::string yytext)
 
 void LexicalAnalyzer::handleKeyword(std::string yytext)
 {
-    tokenizer->generateToken(
-        Tokenizer::TokenType::KEYWORD_TOKEN,
-        yytext);
-    logger->printLogData(
-        Logger::LogType::KEYWORD_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(
+                    Tokenizer::TokenType::KEYWORD_TOKEN,
+                    yytext)
+             << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::KEYWORD_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleOperator(std::string yytext)
@@ -65,131 +64,149 @@ void LexicalAnalyzer::handleOperator(std::string yytext)
         }
     }
 
-    tokenizer->generateToken(Tokenizer::OPERATOR_TOKEN, yytext);
-    logger->printLogData(
-        Logger::LogType::OPERATOR_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(Tokenizer::OPERATOR_TOKEN, yytext) << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::OPERATOR_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleInteger(std::string yytext)
 {
-    tokenizer->generateToken(Tokenizer::INTEGER_TOKEN, yytext);
-    logger->printLogData(
-        Logger::LogType::INTEGER_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(Tokenizer::INTEGER_TOKEN, yytext) << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::INTEGER_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleFloatingPoint(std::string yytext)
 {
-    tokenizer->generateToken(Tokenizer::FLOAT_TOKEN, yytext);
-    logger->printLogData(
-        Logger::LogType::FLOAT_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(Tokenizer::FLOAT_TOKEN, yytext) << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::FLOAT_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleTooManyDecimal(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::TOO_MANY_DECIMAL,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::TOO_MANY_DECIMAL,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleIllNum(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::ILL_NUMBER,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::ILL_NUMBER,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleIdentifier(std::string yytext)
 {
-    tokenizer->generateToken(
-        Tokenizer::IDENTIFIER_TOKEN,
-        yytext);
-    logger->printLogData(
-        Logger::LogType::IDENTIFIER_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(
+                    Tokenizer::IDENTIFIER_TOKEN,
+                    yytext)
+             << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::IDENTIFIER_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
     installID(yytext);
 }
 
 void LexicalAnalyzer::handleNonIdentifier(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::INVALID_IDENTIFIER,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::INVALID_IDENTIFIER,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleEmptyChar(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::EMPTY_CHARACTER,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::EMPTY_CHARACTER,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleUnfinishedChar(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::UNFINISHED_CHARACTER,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::UNFINISHED_CHARACTER,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleValidChar(std::string yytext)
 {
-    tokenizer->generateToken(Tokenizer::CHARACTER_TOKEN, yytext);
-    logger->printLogData(
-        Logger::LogType::CHARACTER_LOG,
-        line_trkr->getLineNumber(), yytext);
+    tokenout << Tokenizer::generateToken(Tokenizer::CHARACTER_TOKEN, yytext) << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::CHARACTER_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleMultiChar(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::MULTI_CHARACTER,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::MULTI_CHARACTER,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleUnfinishedString(std::string yytext)
 {
     line_trkr->handleString(yytext);
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::UNFINISHED_STRING,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::UNFINISHED_STRING,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 
 void LexicalAnalyzer::handleValidString(std::string yytext)
 {
-    tokenizer->generateToken(Tokenizer::STRING_TOKEN, yytext);
-    logger->printLogData(
-        Logger::LogType::STRING_LOG, line_trkr->getLineNumber(),
-        yytext);
+    tokenout << Tokenizer::generateToken(Tokenizer::STRING_TOKEN, yytext) << std::endl;
+    logout << Logger::getLogData(
+                  Logger::LogType::STRING_LOG, line_trkr->getLineNumber(),
+                  yytext)
+           << std::endl;
     line_trkr->handleString(yytext);
 }
 void LexicalAnalyzer::handleSingleComment(std::string yytext)
 {
-    logger->printLogData(
-        Logger::LogType::SINGLE_COMMENT_LOG,
-        line_trkr->getLineNumber(), yytext);
+    logout << Logger::getLogData(
+                  Logger::LogType::SINGLE_COMMENT_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
     line_trkr->handleSingleComment(yytext);
 }
 void LexicalAnalyzer::handleUnfinishedComment(std::string yytext)
 {
     line_trkr->handleMultiComment(yytext);
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::UNFINISHED_COMMENT,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::UNFINISHED_COMMENT,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 void LexicalAnalyzer::handleMultiComment(std::string yytext)
 {
-    logger->printLogData(
-        Logger::LogType::MULTI_COMMENT_LOG,
-        line_trkr->getLineNumber(), yytext);
+    logout << Logger::getLogData(
+                  Logger::LogType::MULTI_COMMENT_LOG,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
     line_trkr->handleMultiComment(yytext);
 }
 void LexicalAnalyzer::handleUnrecognized(std::string yytext)
 {
-    error_hndlr->handleLexicalError(
-        ErrorHandler::LexicalError::UNRECOGNIZED,
-        line_trkr->getLineNumber(), yytext);
+    logout << error_hndlr->handleLexicalError(
+                  ErrorHandler::LexicalError::UNRECOGNIZED,
+                  line_trkr->getLineNumber(), yytext)
+           << std::endl;
 }
 int LexicalAnalyzer::getLineCount()
 {

@@ -8,12 +8,9 @@
 #include <string>
 #include <map>
 
-class Tokenizer
+namespace Tokenizer
 {
-    std::ofstream tokenout;
-
-public:
-    static std::map<std::string, std::string> operatorType;
+    extern std::map<std::string, std::string> operatorType;
     enum TokenType
     {
         KEYWORD_TOKEN = 0,
@@ -24,10 +21,8 @@ public:
         OPERATOR_TOKEN,
         IDENTIFIER_TOKEN
     };
-
-    Tokenizer();
-    void printToken(std::string type, std::string token_type);
-    void generateToken(TokenType type, std::string lexeme);
+    std::string getToken(std::string type, std::string token_type);
+    std::string generateToken(TokenType type, std::string lexeme);
 };
 
 #endif

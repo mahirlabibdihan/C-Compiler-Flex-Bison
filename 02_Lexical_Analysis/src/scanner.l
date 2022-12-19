@@ -5,36 +5,15 @@
 extern LexicalAnalyzer *lexer;
 %}
 
-WHITESPACE [ \t\f\r\v]+ 
+WS [ \t\f\r\v]+ 
 NEWLINE ([\r]?\n)
-KEYWORD (break|case|char|continue|default|do|double|else|float|for|if|int|return|switch|void|while)
-OPERATOR ("+"|"-"|"*"|"/"|"%"|"++"|"--"|">>"|"<<"|"^"|"|"|"&"|"<"|"<="|">"|">="|"=="|"!="|=|"&&"|"||"|"!"|"("|")"|"["|"]"|","|";"|"{"|"}")
-
-DIGIT [0-9]
-DIGITS {DIGIT}+
-INTEGER {DIGITS}
-EXPONENT ([Ee][+-]?{INTEGER})
-FLOATING_POINT {INTEGER}?(\.)?{INTEGER}{EXPONENT}?
-TOO_MANY_DECIMAL {INTEGER}?(\.{DIGIT}*)+{EXPONENT}?
-ILL_NUM {FLOATING_POINT}+
-
-
-LETTER [a-zA-Z]
-ALPHABET {LETTER}|_
-ALPHANUMERIC {ALPHABET}|{DIGIT}
-IDENTIFIER {ALPHABET}({ALPHANUMERIC})*
-NON_IDENTIFIER {INTEGER}({ALPHANUMERIC})*
-
-%{
-    /*ESCAPE_SEQUENCE (\\['\"nt\\afrbv0])*/
-%}
 
 ESCAPE_SEQUENCE (\\.)
 EMPTY_CHAR ''
 CHAR_CONST ({ESCAPE_SEQUENCE}|[^(\')(\\)(\r\n)])
 VALID_CHAR ('{CHAR_CONST}')
 MULTI_CHAR ('{CHAR_CONST}{2,}')
-UNFINISHED_CHAR '({CHAR_CONST})*(\\)?
+UNFINISHED_CHAR '({CHAR_CONST}|\\)?
 
 STRING_CONST ({ESCAPE_SEQUENCE}|[^(\")(\\)(\r\n)])
 UNFINISHED_STRING (\"((\\{NEWLINE})?({STRING_CONST})*)*)(\\)?
@@ -44,8 +23,25 @@ SINGLE_COMMENT "//"((\\{NEWLINE})?.*)*
 
 UNFINISHED_COMMENT ("/*"([^\/]|([^(\*)(\/)][\/]+))*)
 MULTI_COMMENT {UNFINISHED_COMMENT}"*/"
+
+KEYWORD (break|case|char|continue|default|do|double|else|float|for|if|int|return|switch|void|while)
+OPERATOR ("+"|"-"|"*"|"/"|"%"|"++"|"--"|">>"|"<<"|"^"|"|"|"&"|"<"|"<="|">"|">="|"=="|"!="|=|"&&"|"||"|"!"|"("|")"|"["|"]"|","|";"|"{"|"}")
+
+LETTER [a-zA-Z]
+ALPHABET {LETTER}|_
+ALPHANUMERIC {ALPHABET}|{DIGIT}
+IDENTIFIER {ALPHABET}({ALPHANUMERIC})*
+NON_IDENTIFIER {INTEGER}({ALPHANUMERIC})*
+
+DIGIT [0-9]
+INTEGER {DIGIT}+
+EXPONENT ([Ee][+-]?{INTEGER})
+FLOATING_POINT {INTEGER}?(\.)?{INTEGER}{EXPONENT}?
+TOO_MANY_DECIMAL {INTEGER}?((\.{DIGIT}*){2,}){EXPONENT}?
+ILL_NUM {FLOATING_POINT}+
+
 %%
-{WHITESPACE}  			{ lexer->handleWhiteSpace(yytext); }
+{WS}  			        { lexer->handleWhiteSpace(yytext); }
 {NEWLINE} 				{ lexer->handleNewLine(yytext); }
 {KEYWORD}				{ lexer->handleKeyword(yytext); }
 {OPERATOR}				{ lexer->handleOperator(yytext); }
@@ -66,7 +62,7 @@ MULTI_COMMENT {UNFINISHED_COMMENT}"*/"
 {MULTI_COMMENT} 		{ lexer->handleMultiComment(yytext); }
 . 						{ lexer->handleUnrecognized(yytext); }
 %%
-void run(FILE* fin)
+void runFlex(FILE* fin)
 {
     yyin = fin;
     yylex();

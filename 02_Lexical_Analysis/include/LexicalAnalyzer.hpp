@@ -15,13 +15,12 @@ class LexicalAnalyzer
     LineTracker *line_trkr;
     ErrorHandler *error_hndlr;
     SymbolTable *table;
-    Logger *logger;
-    Tokenizer *tokenizer;
     std::ofstream &logout;
+    std::ofstream &tokenout;
     void installID(std::string yytext);
 
 public:
-    LexicalAnalyzer(SymbolTable *table, ErrorHandler *error_hndlr, Logger *logger, std::ofstream &logout);
+    LexicalAnalyzer(SymbolTable *table, ErrorHandler *error_hndlr, std::ofstream &logout, std::ofstream &tokenout);
     ~LexicalAnalyzer();
     void handleWhiteSpace(std::string yytext);
     void handleNewLine(std::string yytext);

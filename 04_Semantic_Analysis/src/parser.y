@@ -18,9 +18,13 @@ using namespace std;
 int yylex(void);
 extern FILE *yyin;
 extern SemanticAnalyzer* sem_anlzr;
+extern ofstream parseout;
+extern ErrorHandler *error_hndlr;
+extern ofstream logout;
+extern ofstream errorout;
 
 void yyerror(string error){
-	// err_hndlr->handlSyntaxError(error, sem_anlzr->getLineCount());
+	errorout<<error_hndlr->handleSyntaxError(error, sem_anlzr->getLineCount())<<std::endl;
 }
 
 void erm_s(SymbolInfo* s) // erase memory of SymbolInfo pointer
@@ -68,15 +72,15 @@ void freeMemory(vector<SymbolInfo*> symbols)
 	DeclarationList *vars;
 }
 
-%token <terminal> IF ELSE THEN SWITCH CASE DEFAULT FOR DO WHILE INT FLOAT DOUBLE CHAR STRING VOID BREAK RETURN CONTINUE INCOP DECOP ASSIGNOP NOT PRINTLN LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD COMMA SEMICOLON ID CONST_INT CONST_FLOAT CONST_CHAR ADDOP MULOP LOGICOP RELOP BITOP
+%token <terminal> IF ELSE THEN SWITCH CASE DEFAULT FOR DO WHILE INT FLOAT DOUBLE CHAR STRING VOID BREAK RETURN CONTINUE INCOP DECOP ASSIGNOP NOT PRINTLN LPAREN RPAREN LCURL RCURL LSQUARE RSQUARE COMMA SEMICOLON ID CONST_INT CONST_FLOAT CONST_CHAR ADDOP MULOP LOGICOP RELOP BITOP
 
+%type <terminal> constant
+%type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement expression_statement
 
-%type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement expression_statement 
- 
 %type <args> argument_list arguments
 %type <params> parameter_list
 %type <vars> declaration_list
-%type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor variable constant
+%type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor variable
 
 %destructor { erm_t($$); } <terminal>
 %destructor { erm_nt($$); } <non_terminal>
@@ -103,7 +107,8 @@ start 					: program
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"start");
 							cout<<"Code compiled successfully"<<endl;
-							freeMemory(child);
+							parseout<<ParseTreeGenerator::getTree($$)<<std::endl;
+							//freeMemory(child);
 						}
 						;
 
@@ -111,13 +116,13 @@ program 				:  program  unit
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"program");
-							freeMemory(child);			 
+							//freeMemory(child);			 
 						}
 						|  unit 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"program");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	
@@ -125,19 +130,19 @@ unit 					: var_declaration
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| func_declaration 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| func_definition 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -147,56 +152,56 @@ func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN parameter_list RPAREN error
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());	
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN parameter_list error RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$7};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN parameter_list error RPAREN error
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN RPAREN error
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN error RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$5,$6};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN error RPAREN error
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 		 
@@ -210,7 +215,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$7};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
 							sem_anlzr->endFunction();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN parameter_list error RPAREN 
 						{
@@ -221,7 +226,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$8};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
 							sem_anlzr->endFunction();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN RPAREN 
 						{
@@ -232,37 +237,18 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
 							sem_anlzr->endFunction();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID LPAREN error RPAREN 
 						{
-							sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), {});
-						}
-						compound_statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$5,$7};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
-							sem_anlzr->endFunction();
-							freeMemory(child);
-						}
-						;				
-
-// No temporary variables
-parameter_list  		: parameter_list COMMA type_specifier ID
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-							$$->addParams($1);
-							$$->addParam($3->getSymbol(),$4->getSymbol());
-							freeMemory(child);
-						}
+							declareFunction	}
 						| parameter_list error COMMA type_specifier ID
 						{
 							vector<SymbolInfo*> child = {$1,$3,$4,$5};
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParams($1);
 							$$->addParam($4->getSymbol(),$5->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| parameter_list COMMA type_specifier
 						{
@@ -270,7 +256,7 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParams($1);
 							$$->addParam($3->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| parameter_list error COMMA type_specifier
 						{
@@ -278,22 +264,29 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParams($1);
 							$$->addParam($4->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier ID
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParam($1->getSymbol(),$2->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParam($1->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
+						// | error
+						// {
+						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	vector<SymbolInfo*> child = {s};
+						// 	$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
+						// 	//freeMemory(child);
+						// }
 						;
  		
 compound_statement 		: LCURL create_scope statements RCURL
@@ -301,35 +294,35 @@ compound_statement 		: LCURL create_scope statements RCURL
 							vector<SymbolInfo*> child = {$1,$3,$4};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
 							sem_anlzr->endScope();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| LCURL create_scope statements error RCURL
 						{
 							vector<SymbolInfo*> child = {$1,$3,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
 							sem_anlzr->endScope();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| LCURL create_scope error statements RCURL
 						{
 							vector<SymbolInfo*> child = {$1,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
 							sem_anlzr->endScope();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| LCURL create_scope RCURL
 						{
 							vector<SymbolInfo*> child = {$1,$3};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
 							sem_anlzr->endScope();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| LCURL create_scope error RCURL
 						{
 							vector<SymbolInfo*> child = {$1,$4};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
 							sem_anlzr->endScope();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -345,14 +338,14 @@ var_declaration 		: type_specifier declaration_list SEMICOLON
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"var_declaration");
 							sem_anlzr->declareVariables($1->getSymbol(),$2->getSymbol(),$2->getDeclarations());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| type_specifier declaration_list error SEMICOLON 
 						{ 			
 							vector<SymbolInfo*> child = {$1,$2,$4};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"var_declaration");
 							sem_anlzr->declareVariables($1->getSymbol(),$2->getSymbol(),$2->getDeclarations());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -361,19 +354,19 @@ type_specifier			: INT
 						{ 
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| FLOAT
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| VOID
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -384,7 +377,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
 							$$->addVariables($1);
 							$$->addVariable($3->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| declaration_list error COMMA ID
 						{
@@ -392,136 +385,152 @@ declaration_list 		: declaration_list COMMA ID
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
 							$$->addVariables($1);
 							$$->addVariable($4->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| declaration_list COMMA ID LTHIRD constant RTHIRD
+						| declaration_list COMMA ID LSQUARE CONST_INT RSQUARE
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							sem_anlzr->checkArraySize($5);
+							// sem_anlzr->checkArraySize($5);
 							$$->addVariables($1);
 							$$->addArray($3->getSymbol(),$5->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| declaration_list error COMMA ID LTHIRD constant RTHIRD
+						| declaration_list error COMMA ID LSQUARE CONST_INT RSQUARE
 						{
 							vector<SymbolInfo*> child = {$1,$3,$4,$5,$6,$7};
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							sem_anlzr->checkArraySize($6);
+							// sem_anlzr->checkArraySize($6);
 							$$->addVariables($1);
 							$$->addArray($4->getSymbol(),$6->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| ID 
 						{ 
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");	
 							$$->addVariable($1->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| ID LTHIRD constant RTHIRD // handleArrayDeclaration({$1,$2,$3,$4})
+						| ID LSQUARE CONST_INT RSQUARE // handleArrayDeclaration({$1,$2,$3,$4})
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							sem_anlzr->checkArraySize($3);
+							// sem_anlzr->checkArraySize($3);
 							$$->addArray($1->getSymbol(),$3->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
+						// | error
+						// {
+						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	vector<SymbolInfo*> child = {s};
+						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
+						// 	//freeMemory(child);
+						// }
 						;
  		  
 statements 				: statement
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| statements statement
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| statements error statement
 						{
 							vector<SymbolInfo*> child = {$1,$3};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-							freeMemory(child);
+							//freeMemory(child);
 						}
+						// | error
+						// {
+						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	vector<SymbolInfo*> child = {s};
+						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
+						// 	//freeMemory(child);
+						// }
 						;
 	   
 statement 				: var_declaration
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| func_definition {
+						| func_definition 
+						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
 							sem_anlzr->handleInvalidFunctionScoping();
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| func_declaration {
+						| func_declaration 
+						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
 							sem_anlzr->handleInvalidFunctionScoping();
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| expression_statement
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| compound_statement
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| FOR LPAREN expression_statement expression_statement expression RPAREN statement
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| IF LPAREN expression RPAREN statement %prec THEN
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}		
 						| IF LPAREN expression RPAREN statement ELSE statement
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| WHILE LPAREN expression RPAREN statement
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| PRINTLN LPAREN ID RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");	
 							sem_anlzr->handlePrintfCall($3->getSymbol());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| RETURN expression SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
 							sem_anlzr->returnFunction($2);
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| RETURN SEMICOLON {
 							// New rule
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -529,13 +538,14 @@ expression_statement 	: SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}	
 						| expression SEMICOLON 
 						{
+						
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	  
@@ -544,14 +554,14 @@ variable 				: ID
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"variable");
 							$$->setDataType(sem_anlzr->callVariable($1->getSymbol()));
-							freeMemory(child);
+							//freeMemory(child);
 						}
-						| ID LTHIRD expression RTHIRD 
+						| ID LSQUARE expression RSQUARE 
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ = createArrayCall(child,"variable");
+							$$ =  ParseTreeGenerator::createArrayCall(child,"variable");
 							$$->setDataType(sem_anlzr->callArray($1->getSymbol(),$3));
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	 
@@ -560,15 +570,23 @@ variable 				: ID
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"expression");
 							$$->setDataType($1->getDataType());				
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| variable ASSIGNOP logic_expression 
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"expression");
 							$$->setDataType(sem_anlzr->assignOp($1,$3));
-							freeMemory(child);
-						}	
+							//freeMemory(child);
+						}
+						// | error
+						// {
+						// 	std::cout<<"Here"<<std::endl;
+						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	vector<SymbolInfo*> child = {s};
+						// 	$$ = ParseTreeGenerator::createExpression(child,"expression");
+						// 	//freeMemory(child);
+						// }	
 						;
 			
 logic_expression 		: rel_expression 	
@@ -576,14 +594,14 @@ logic_expression 		: rel_expression
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"logic_expression");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| rel_expression LOGICOP rel_expression 	
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"logic_expression");
 							$$->setDataType(sem_anlzr->logicOp($1,$2->getSymbol(),$3));
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 			
@@ -592,14 +610,14 @@ rel_expression			: simple_expression
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| simple_expression RELOP simple_expression	
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
 							$$->setDataType(sem_anlzr->relOp($1,$2->getSymbol(),$3));
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 				
@@ -608,14 +626,14 @@ simple_expression 		: term
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"simple_expression");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| simple_expression ADDOP term 
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"simple_expression");
 							$$->setDataType(sem_anlzr->addOp($1,$2->getSymbol(),$3));
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 					
@@ -624,14 +642,14 @@ term 					:	unary_expression
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"term");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						|  term MULOP unary_expression
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"term");
 							$$->setDataType(sem_anlzr->mulOp($1,$2->getSymbol(),$3));						
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
@@ -640,21 +658,21 @@ unary_expression 		: ADDOP unary_expression
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression({$1,$2},"unary_expression");
 							$$->setDataType($2->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}  
 						| NOT unary_expression 
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression(child,"unary_expression");
 							$$->setDataType($2->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| factor 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"unary_expression");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	
@@ -663,49 +681,49 @@ factor					: variable
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| ID LPAREN argument_list RPAREN
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType(sem_anlzr->callFunction($1->getSymbol(), $3->getArgs()));
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| LPAREN expression RPAREN
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($2->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| CONST_INT 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType("int");
-							freeMemory(child);
+							$$->setDataType("INT");
+							//freeMemory(child);
 						}
 						| CONST_FLOAT
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType("float");
-							freeMemory(child);
+							$$->setDataType("FLOAT");
+							//freeMemory(child);
 						}
 						| variable INCOP 
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($1->getDataType());	
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| variable DECOP
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($1->getDataType());
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	
@@ -714,13 +732,13 @@ argument_list 			: arguments
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
 							$$->addArgs($1);
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| 
 						{ 
 							vector<SymbolInfo*> child = {};
 							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 	
@@ -730,32 +748,20 @@ arguments 				: arguments COMMA logic_expression // handleArguments({$1,$2,$3})
 							$$ = ParseTreeGenerator::createArgumentList(child,"arguments");
 							$$->addArgs($1);
 							$$->addArg($3);
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						| logic_expression // handleArgument($1)
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createArgumentList(child,"arguments");
 							$$->addArg($1);
-							freeMemory(child);
+							//freeMemory(child);
 						}
 						;
 
 // No temporary variables
-constant 				: CONST_INT // handleConstant({$1},"int")
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"constant");
-							$$->setDataType("int");
-							freeMemory(child);
-						}
-						| CONST_FLOAT // handleConstant({$1},"float")
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"constant");
-							$$->setDataType("float");
-							freeMemory(child);
-						}
+// constant 				: CONST_INT // handleConstant({$1},"int")
+// 						| CONST_FLOAT // handleConstant({$1},"float")
 %%
 
 void runParser(FILE *fin)

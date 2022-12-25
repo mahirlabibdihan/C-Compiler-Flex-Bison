@@ -12,6 +12,7 @@ ErrorHandler::ErrorHandler()
 std::string ErrorHandler::getError(string error, int line)
 {
     error_count++;
+    std::cout << error << std::endl;
     return "Error at line# " + std::to_string(line) + ": " + error;
 }
 std::string ErrorHandler::getLexicalError(string error, int line)
@@ -23,6 +24,12 @@ std::string ErrorHandler::getLexicalError(string error, int line)
 std::string ErrorHandler::getSemanticError(string error, int line)
 {
     semantic_error_count++;
+    return getError(error, line);
+}
+
+std::string ErrorHandler::getSyntaxError(string error, int line)
+{
+    syntax_error_count++;
     return getError(error, line);
 }
 
@@ -144,7 +151,10 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
     }
     return getLexicalError("Unknown Semantic Error", line);
 }
-
+std::string ErrorHandler::handleSyntaxError(string error, int line)
+{
+    return getSyntaxError(error, line);
+}
 int ErrorHandler::getErrorCount()
 {
     return error_count;

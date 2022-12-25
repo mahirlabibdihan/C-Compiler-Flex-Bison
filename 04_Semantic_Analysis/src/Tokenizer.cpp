@@ -4,9 +4,10 @@
 #include "../include/Tokenizer.hpp"
 #include "../include/Util.hpp"
 #include "../include/ExtendedSymbol.hpp"
+#include "../include/LexicalAnalyzer.hpp"
 #include "../include/y.tab.h"
 #include <iostream>
-
+extern LexicalAnalyzer *lexer;
 std::map<std::string, std::string> Tokenizer::operatorType = {
     {"+", "ADDOP"},
     {"-", "ADDOP"},
@@ -39,7 +40,7 @@ std::map<std::string, std::string> Tokenizer::operatorType = {
     {",", "COMMA"},
     {";", "SEMICOLON"}};
 
-std::map<std::string, int> operatorToken = {
+std::map<std::string, int> Tokenizer::operatorToken = {
     {"+", ADDOP},
     {"-", ADDOP},
     {"*", MULOP},
@@ -56,17 +57,22 @@ std::map<std::string, int> operatorToken = {
     {"=", ASSIGNOP},
     {"||", LOGICOP},
     {"&&", LOGICOP},
+    {"&", BITOP},
+    {"|", BITOP},
+    {"^", BITOP},
+    {"<<", BITOP},
+    {">>", BITOP},
     {"!", NOT},
     {"(", LPAREN},
     {")", RPAREN},
     {"{", LCURL},
     {"}", RCURL},
-    {"[", LTHIRD},
-    {"]", RTHIRD},
+    {"[", LSQUARE},
+    {"]", RSQUARE},
     {",", COMMA},
     {";", SEMICOLON}};
 
-std::map<std::string, int> keywordToken = {
+std::map<std::string, int> Tokenizer::keywordToken = {
     {"if", IF},
     {"else", ELSE},
     {"switch", SWITCH},
@@ -87,6 +93,8 @@ std::map<std::string, int> keywordToken = {
 std::string Tokenizer::getToken(std::string type, std::string symbol)
 {
     yylval.terminal = new Terminal(symbol, type);
+    yylval.terminal->setStartLine(lexer->getLineCount());
+    yylval.terminal->setEndLine(lexer->getLineCount());
     return std::string() + "<" + type + ", " + symbol + ">";
 }
 

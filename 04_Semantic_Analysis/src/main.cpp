@@ -13,6 +13,8 @@
 // For file input output
 std::ofstream logout;
 std::ofstream tokenout;
+std::ofstream errorout;
+std::ofstream parseout;
 LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
 ErrorHandler *error_hndlr;
@@ -31,7 +33,31 @@ void ScopeTable::print() const
         logout << "\t" << i + 1 << "--> ";
         while (cur != nullptr)
         {
-            logout << "<" << cur->getSymbol() << "," << cur->getType() << "> ";
+            if (cur->getType() == "TERMINAL")
+            {
+                Terminal *cur_2 = (Terminal *)cur;
+                if (cur_2->getTerminalType() == "ID")
+                {
+                    Identifier *cur_3 = (Identifier *)cur_2;
+                    if (cur_3->getIdentity() == "FUNCTION")
+                    {
+                        Function *cur_4 = (Function *)cur_3;
+                        logout << "<" << cur_4->getSymbol() << ", " << cur_4->getIdentity() << ", " << cur_4->getReturnType() << "> ";
+                    }
+                    else if (cur_3->getIdentity() == "VARIABLE")
+                    {
+                        Variable *cur_4 = (Variable *)cur_3;
+                        if (cur_4->getVarType() == "ARRAY")
+                        {
+                            logout << "<" << cur_4->getSymbol() << ", " << cur_4->getVarType() << ", " << cur_4->getDataType() << "> ";
+                        }
+                        else if (cur_4->getVarType() == "PRIMITIVE")
+                        {
+                            logout << "<" << cur_4->getSymbol() << ", " << cur_4->getDataType() << "> ";
+                        }
+                    }
+                }
+            }
             cur = cur->getNext();
         }
         logout << std::endl;
@@ -55,11 +81,13 @@ int main(int argc, char *argv[])
 
     logout.open("io/log.txt");
     tokenout.open("io/token.txt");
+    errorout.open("io/error.txt");
+    parseout.open("io/parsetree.txt");
 
-    table = new SymbolTable(10);
+    table = new SymbolTable(11);
     error_hndlr = new ErrorHandler();
     lexer = new LexicalAnalyzer(error_hndlr, logout, tokenout);
-    sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr);
+    sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
 
     runParser(fin); // Main Parser
 

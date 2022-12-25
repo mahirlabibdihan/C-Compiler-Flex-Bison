@@ -176,23 +176,23 @@ std::string Util::formatCode(std::vector<SymbolInfo *> tokens)
 
 int Util::getDataSize(std::string type)
 {
-    if (type == "void")
+    if (type == "VOID")
     {
         return 0;
     }
-    else if (type == "char")
+    else if (type == "CHAR")
     {
         return 1;
     }
-    else if (type == "int")
+    else if (type == "INT")
     {
         return 4;
     }
-    else if (type == "float")
+    else if (type == "FLOAT")
     {
         return 4;
     }
-    else if (type == "double")
+    else if (type == "DOUBLE")
     {
         return 8;
     }

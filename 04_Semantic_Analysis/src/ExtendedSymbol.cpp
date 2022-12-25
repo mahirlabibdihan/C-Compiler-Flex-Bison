@@ -250,11 +250,11 @@ void ArrayCall::setIndex(string idx)
     this->idx = idx;
 }
 
-Terminal::Terminal(const string &t_type) : SymbolInfo("blank", "")
+Terminal::Terminal(const string &t_type) : SymbolInfo("blank", "TERMINAL")
 {
     this->t_type = t_type;
 }
-Terminal::Terminal(const string &name, const string &type) : SymbolInfo(name, "TERMINAL")
+Terminal::Terminal(const string &name, const string &t_type) : SymbolInfo(name, "TERMINAL")
 {
     this->t_type = t_type;
 }

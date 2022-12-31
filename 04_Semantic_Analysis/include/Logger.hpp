@@ -24,7 +24,9 @@ namespace Logger
     };
     std::string getMsg(std::string token, std::string lexeme, int line);
     std::string getLogData(LogType type, int line, std::string lexeme);
-    std::string getRuleAndLine(std::string left_part, std::string right_part);
+    std::string getRule(SymbolInfo *parent, std::vector<SymbolInfo *> children);
+    std::string getRule(std::string left_part, std::string right_part);
+    std::string getRuleAndLine(SymbolInfo *terminal);
     std::string getRuleAndLine(SymbolInfo *parent, std::vector<SymbolInfo *> children);
 };
 

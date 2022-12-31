@@ -140,3 +140,23 @@ std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
     }
     return tree;
 }
+
+void ParseTreeGenerator::deleteTree(SymbolInfo *node)
+{
+    if (node->getType() == "error")
+    {
+        return;
+    }
+    if (node->getType() == "NON_TERMINAL")
+    {
+        std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChidren();
+        for (auto c : child)
+        {
+            deleteTree(c);
+        }
+    }
+    else
+    {
+    }
+    delete node;
+}

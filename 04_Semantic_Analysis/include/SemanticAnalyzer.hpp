@@ -14,12 +14,15 @@ class SemanticAnalyzer
     SymbolTable *table;
     ErrorHandler *error_hndlr;
     LexicalAnalyzer *lexer;
+    bool in_function;
+    ofstream &logout;
+    ofstream &errorout;
 
 private:
     void matchTwoFunction(Function *f1, Function *f2);
 
 public:
-    SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr);
+    SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
     ~SemanticAnalyzer();
 
     string callFunction(string id, vector<Expression *> args);
@@ -52,7 +55,7 @@ public:
     void handlePrintfCall(std::string id_name);
     void endScope();
     void startScope();
-    void checkArraySize(Expression *size);
+    void checkArraySize(Terminal *size);
     int getLineCount();
 };
 #endif

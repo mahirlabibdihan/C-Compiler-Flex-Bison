@@ -47,7 +47,7 @@ std::map<std::string, int> Tokenizer::operatorToken = {
     {"/", MULOP},
     {"%", MULOP},
     {"++", INCOP},
-    {"--", DECOP},
+    {"--", INCOP},
     {"<", RELOP},
     {"<=", RELOP},
     {">", RELOP},

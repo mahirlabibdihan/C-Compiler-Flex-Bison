@@ -12,25 +12,25 @@ ErrorHandler::ErrorHandler()
 std::string ErrorHandler::getError(string error, int line)
 {
     error_count++;
-    std::cout << error << std::endl;
-    return "Error at line# " + std::to_string(line) + ": " + error;
+    // std::cout << error << std::endl;
+    return error;
 }
 std::string ErrorHandler::getLexicalError(string error, int line)
 {
     lexical_error_count++;
-    return getError(error, line);
+    return "Error at line# " + std::to_string(line) + ": " + getError(error, line);
 }
 
 std::string ErrorHandler::getSemanticError(string error, int line)
 {
     semantic_error_count++;
-    return getError(error, line);
+    return "Line# " + std::to_string(line) + ": " + getError(error, line);
 }
 
 std::string ErrorHandler::getSyntaxError(string error, int line)
 {
     syntax_error_count++;
-    return getError(error, line);
+    return "Line# " + std::to_string(line) + ": " + getError(error, line);
 }
 
 std::string ErrorHandler::handleLexicalError(LexicalError type, int line, string lexeme)
@@ -82,7 +82,7 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("Non-integer Array size " + lexeme, line);
         break;
     case INVALID_ARRAY_INDEX:
-        return getSemanticError("Non-integer Array index " + lexeme, line);
+        return getSemanticError("Array subscript is not an integer", line);
         break;
     case INVALID_OPERAND:
         return getSemanticError("Invalid Operands " + lexeme, line);
@@ -91,7 +91,7 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("Incompatible Operands " + lexeme, line);
         break;
     case MOD_BY_ZERO:
-        return getSemanticError("Modulus by Zero " + lexeme, line);
+        return getSemanticError("Warning: division by zero", line);
         break;
     case UNDECLARED_VARIABLE:
         return getSemanticError("Undeclared variable '" + lexeme + "'", line);
@@ -106,16 +106,16 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("A function is defined inside function '" + lexeme + "'", line);
         break;
     case NOT_FUNCTION:
-        return getSemanticError("'" + lexeme + "' cannot be used as a function ", line);
+        return getSemanticError("'" + lexeme + "' cannot be used as a function", line);
         break;
     case NOT_ARRAY:
-        return getSemanticError("'" + lexeme + "' cannot be used as an array ", line);
+        return getSemanticError("'" + lexeme + "' is not an array", line);
         break;
     case MISSING_PARAM_NAME:
         return getSemanticError("Parameter's name not given in definition of function '" + lexeme + "'", line);
         break;
     case VOID_VARIABLE:
-        return getSemanticError("Variable '" + lexeme + "' declared void", line);
+        return getSemanticError("Variable or field '" + lexeme + "' declared void", line);
         break;
     case INVALID_CONVERSION:
         // function return type conflict
@@ -123,7 +123,7 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("Invalid conversion " + lexeme, line);
         break;
     case PARAM_TYPE_MISMATCH:
-        return getSemanticError("Type of paramters mismatch with function-declaration in function '" + lexeme + "'", line);
+        return getSemanticError("Type of parameters mismatch with function-declaration in function '" + lexeme + "'", line);
         break;
     case PARAM_NUMBER_MISMATCH:
         return getSemanticError("Total number of paramters mismatch with function-declaration in function '" + lexeme + "'", line);
@@ -132,7 +132,7 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("Return type mismatch with function-declaration in function '" + lexeme + "'", line);
         break;
     case ARGUMENT_TYPE_MISMATCH:
-        return getSemanticError("Type of arguments mismatch with declaration in function '" + lexeme + "'", line);
+        return getSemanticError("Type mismatch for argument " + lexeme, line);
         break;
     case TOO_FEW_ARGUMENTS:
         return getSemanticError("Too few arguments to function '" + lexeme + "'", line);
@@ -145,6 +145,24 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         break;
     case FUNCTION_NOT_RETURNED:
         return getSemanticError("Not returned from function '" + lexeme + "'", line);
+        break;
+    case PARAM_REDEFINITION:
+        return getSemanticError("Redefinition of parameter '" + lexeme + "'", line);
+        break;
+    case DATA_LOSS:
+        return getSemanticError("Warning: possible loss of data in assignment of " + lexeme, line);
+        break;
+    case TYPE_CONFLICT:
+        return getSemanticError("Conflicting types for '" + lexeme + "'", line);
+        break;
+    case DIFF_DECLARATION:
+        return getSemanticError("'" + lexeme + "' redeclared as different kind of symbol", line);
+        break;
+    case VOID_FUNCTION_EXP:
+        return getSemanticError("Void cannot be used in expression", line);
+        break;
+    case NONINT_MOD:
+        return getSemanticError("Operands of modulus must be integers", line);
         break;
     default:
         break;

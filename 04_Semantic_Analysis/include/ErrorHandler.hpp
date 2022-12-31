@@ -59,7 +59,12 @@ public:
         INVALID_CONVERSION,
         TOO_FEW_ARGUMENTS,
         TOO_MANY_ARGUMENTS,
-        FUNCTION_NOT_RETURNED
+        FUNCTION_NOT_RETURNED,
+        PARAM_REDEFINITION,
+        DATA_LOSS,
+        TYPE_CONFLICT,
+        DIFF_DECLARATION,
+        NONINT_MOD
     };
 
     ErrorHandler();

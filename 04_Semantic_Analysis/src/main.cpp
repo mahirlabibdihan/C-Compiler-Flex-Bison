@@ -10,6 +10,7 @@
 #include "../include/Logger.hpp"
 #include "../include/Tokenizer.hpp"
 #include "../include/SemanticAnalyzer.hpp"
+#include "../include/ParseTreeGenerator.hpp"
 // For file input output
 std::ofstream logout;
 std::ofstream tokenout;
@@ -19,6 +20,7 @@ LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
 ErrorHandler *error_hndlr;
 SymbolTable *table;
+
 void runParser(FILE *fin);
 void ScopeTable::print() const
 {
@@ -91,12 +93,15 @@ int main(int argc, char *argv[])
 
     runParser(fin); // Main Parser
 
-    table->printAllScope();
-    logout << "Total lines: " << lexer->getLineCount() << std::endl;
-    logout << "Total errors: " << lexer->getErrorCount() << std::endl;
+    // table->printAllScope();
+    logout << "Total Lines: " << lexer->getLineCount() << std::endl;
+    logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
 
     fclose(fin);
     logout.close();
+    parseout.close();
+    errorout.close();
+    tokenout.close();
 
     delete sem_anlzr;
     delete lexer;

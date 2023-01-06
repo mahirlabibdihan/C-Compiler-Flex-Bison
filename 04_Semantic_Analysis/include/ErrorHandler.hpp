@@ -74,7 +74,8 @@ public:
     std::string getSyntaxError(string error, int line);
     std::string handleLexicalError(LexicalError type, int line, string lexeme = "");
     std::string handleSemanticError(SemanticError type, int line, string lexeme = "");
-    std::string handleSyntaxError(string error, int line);
+    std::string handleSyntaxError(string parent, string error_child, int line);
+    std::string handleSyntaxError(string parent, int line);
     int getErrorCount();
 };
 

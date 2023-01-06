@@ -169,11 +169,13 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
     }
     return getLexicalError("Unknown Semantic Error", line);
 }
-std::string ErrorHandler::handleSyntaxError(string error, int line)
+
+std::string ErrorHandler::handleSyntaxError(string parent, string error_child, int line)
 {
-    return getSyntaxError(error, line);
+    return getSyntaxError("Syntax error at " + error_child + " of " + parent, line);
 }
-int ErrorHandler::getErrorCount()
+
+std::string ErrorHandler::handleSyntaxError(string parent, int line)
 {
-    return error_count;
+    return getSyntaxError("Syntax error at " + parent, line);
 }

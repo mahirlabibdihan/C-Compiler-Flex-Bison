@@ -203,3 +203,8 @@ int LexicalAnalyzer::getErrorCount()
 {
     return error_hndlr->getErrorCount();
 }
+
+int ErrorHandler::getErrorCount()
+{
+    return error_count;
+}

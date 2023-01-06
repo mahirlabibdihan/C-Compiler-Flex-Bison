@@ -23,6 +23,7 @@ void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> chil
 SymbolInfo *ParseTreeGenerator::createErrorNode(int line_no)
 {
     SymbolInfo *node = new SymbolInfo("error", "error");
+    logout << "Error at line no " << line_no << " : syntax error" << std::endl;
     node->setStartLine(line_no);
     node->setEndLine(line_no);
     return node;

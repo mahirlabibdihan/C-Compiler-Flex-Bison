@@ -158,17 +158,18 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
         if (id->getIdentity() != "FUNCTION") // Already declared as non-function type or Defined as function
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, lexer->getLineCount(), new_func->getSymbol()) << std::endl;
-            curr_func = new_func;
-        }
-        else if (new_func->isDeclaredAndDefined())
-        {
         }
         else
         {
             Function *func = (Function *)id;
-            func->defineFunction();
+            if (func->isDeclaredAndDefined())
+            {
+            }
+            else
+            {
+                func->defineFunction();
+            }
             matchTwoFunction(func, new_func);
-            curr_func = func;
         }
     }
     else
@@ -180,10 +181,9 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MISSING_PARAM_NAME, lexer->getLineCount(), new_func->getSymbol()) << std::endl;
             }
         }
-
-        curr_func = new_func;
         new_func->defineFunction();
     }
+    curr_func = new_func;
 }
 
 void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<Variable *> params)

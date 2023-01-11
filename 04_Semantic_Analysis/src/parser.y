@@ -28,7 +28,7 @@ void yyerror(string error){
 }
 
 void syntax_error(string parent,string error_child){
-	errorout << error_hndlr->handleSyntaxError(error_child, parent, sem_anlzr->getLineCount()) << std::endl;
+	errorout << error_hndlr->handleSyntaxError(parent, error_child, sem_anlzr->getLineCount()) << std::endl;
 }
 
 void syntax_error(string parent){
@@ -81,7 +81,6 @@ start 					: program
 							cout<<"Code compiled successfully"<<endl;
 							parseout<<ParseTreeGenerator::getTree($$);
 							ParseTreeGenerator::deleteTree($$);
-							// delete $$;
 						}
 						;
 

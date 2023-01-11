@@ -79,7 +79,7 @@ start 					: program
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"start");
 							cout<<"Code compiled successfully"<<endl;
-							parseout<<ParseTreeGenerator::getTree($$)<<std::endl;
+							parseout<<ParseTreeGenerator::getTree($$);
 							ParseTreeGenerator::deleteTree($1);
 							//freeMemory(child);
 						}

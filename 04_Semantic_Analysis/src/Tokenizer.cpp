@@ -5,7 +5,6 @@
 #include "../include/Util.hpp"
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/LexicalAnalyzer.hpp"
-#include "../include/y.tab.h"
 #include <iostream>
 extern LexicalAnalyzer *lexer;
 std::map<std::string, std::string> Tokenizer::operatorType = {

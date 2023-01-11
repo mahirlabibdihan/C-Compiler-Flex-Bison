@@ -7,7 +7,8 @@
 #include <fstream>
 #include <string>
 #include <map>
-
+#include "../include/ExtendedSymbol.hpp"
+#include "y.tab.h"
 namespace Tokenizer
 {
     extern std::map<std::string, std::string> operatorType;

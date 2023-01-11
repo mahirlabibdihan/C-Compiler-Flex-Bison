@@ -87,6 +87,7 @@ void SemanticAnalyzer::matchTwoFunction(Function *f1, Function *f2)
     if (!f1->matchReturnType(f2))
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, lexer->getLineCount(), f2->getSymbol()) << std::endl;
+
         return;
     }
     if (!f1->matchParamsNum(f2))
@@ -138,6 +139,7 @@ void SemanticAnalyzer::declareFunctionParams()
         if (!table->insert(var))
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::PARAM_REDEFINITION, lexer->getLineCount(), i->getSymbol()) << std::endl;
+            break;
         }
     }
 }

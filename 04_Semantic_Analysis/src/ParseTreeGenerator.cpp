@@ -1,22 +1,36 @@
 #include "../include/ParseTreeGenerator.hpp"
 #include "../include/Logger.hpp"
 #include "../include/Util.hpp"
+#include "../include/SemanticAnalyzer.hpp"
 #include <iostream>
 #include <fstream>
 // Terminal - Symbol - <Line: Line_Count>
 // NonTerminal - Children - <Line: Start - Line_Count>
 extern std::ofstream logout;
+extern SemanticAnalyzer *sem_anlzr;
 void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> child)
 {
+
     node->setChidren(child);
-    node->setStartLine(child.front()->getStartLine());
-    node->setEndLine(child.back()->getEndLine());
+
+    if (child.empty())
+    {
+        node->setStartLine(sem_anlzr->getLineCount());
+        node->setEndLine(sem_anlzr->getLineCount());
+    }
+    else
+    {
+        node->setStartLine(child.front()->getStartLine());
+        node->setEndLine(child.back()->getEndLine());
+    }
+
     if (child.size() == 1 && child.front()->getType() == "error")
     {
         logout << "Syntax error" << std::endl;
     }
     // else
     {
+        // std::cout << node->getNonTerminalType() << std::endl;
         logout << Logger::getRule(node, child) << std::endl;
     }
 }

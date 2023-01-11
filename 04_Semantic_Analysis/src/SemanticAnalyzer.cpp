@@ -220,6 +220,7 @@ void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<V
 string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
 {
     // cout << id_name << endl;
+    // std::cout << "Error" << std::endl;
     Identifier *id = (Identifier *)table->find(id_name);
     if (id == NULL)
     {
@@ -234,12 +235,14 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
     }
 
     Function *func = (Function *)id;
+
     // cout << func->isDeclaredAndDefined() << endl;
-    if (func->isDeclaredNotDefined())
-    {
-        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDEFINED_FUNCTION, lexer->getLineCount(), id_name) << std::endl;
-    }
-    else if (func->getNumberOfParams() < args.size())
+    // if (func->isDeclaredNotDefined())
+    // {
+    //     errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDEFINED_FUNCTION, lexer->getLineCount(), id_name) << std::endl;
+    // }
+    // else
+    if (func->getNumberOfParams() < args.size())
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TOO_MANY_ARGUMENTS, lexer->getLineCount(), id_name) << std::endl;
     }
@@ -249,6 +252,7 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
     }
     else
     {
+
         vector<Variable *> params = func->getParams();
         for (int i = 0; i < params.size(); i++)
         {

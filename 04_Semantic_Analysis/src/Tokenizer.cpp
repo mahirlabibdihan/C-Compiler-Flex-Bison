@@ -15,7 +15,7 @@ std::map<std::string, std::string> Tokenizer::operatorType = {
     {"/", "MULOP"},
     {"%", "MULOP"},
     {"++", "INCOP"},
-    {"--", "INCOP"},
+    {"--", "DECOP"},
     {"<", "RELOP"},
     {"<=", "RELOP"},
     {">", "RELOP"},

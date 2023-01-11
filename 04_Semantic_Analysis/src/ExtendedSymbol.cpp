@@ -1,7 +1,6 @@
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/Util.hpp"
 #include "../include/Logger.hpp"
-
 extern int line_count;
 NonTerminal::NonTerminal()
 {
@@ -405,7 +404,7 @@ bool Function::matchParamsType(Function *func)
 {
     for (int i = 0; i < params.size(); i++)
     {
-        if (func->params[i] != this->params[i])
+        if (func->params[i]->getDataType() != this->params[i]->getDataType())
         {
             return false;
         }

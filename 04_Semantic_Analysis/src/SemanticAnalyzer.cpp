@@ -82,29 +82,32 @@ bool SemanticAnalyzer::checkAssignment(string left, string right)
     return (Util::getDataSize(left) >= Util::getDataSize(left));
 }
 
-void SemanticAnalyzer::matchTwoFunction(Function *f1, Function *f2)
+bool SemanticAnalyzer::matchTwoFunction(Function *f1, Function *f2)
 {
     if (!f1->matchReturnType(f2))
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, lexer->getLineCount(), f2->getSymbol()) << std::endl;
-
-        return;
+        return false;
     }
     if (!f1->matchParamsNum(f2))
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, lexer->getLineCount(), f2->getSymbol()) << std::endl;
+        return false;
     }
-    else if (!f1->matchParamsType(f2))
+
+    if (!f1->matchParamsType(f2))
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, lexer->getLineCount(), f2->getSymbol()) << std::endl;
+        return false;
     }
+    return true;
 }
 
 void SemanticAnalyzer::returnFunction(Expression *ret)
 {
     if (ret->getDataType() != curr_func->getReturnType())
     {
-        // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
+        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
         curr_func = NULL;
     }
     else
@@ -117,15 +120,17 @@ void SemanticAnalyzer::endFunction()
 {
     if (curr_func != NULL)
     {
-        if (curr_func->getReturnType() == "VOID" or curr_func->getSymbol() == "main")
-        {
-            curr_func = NULL;
-        }
-        else
-        {
-            // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::FUNCTION_NOT_RETURNED, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
-            curr_func = NULL;
-        }
+        curr_func = NULL;
+        // if (curr_func->getReturnType() == "VOID" or curr_func->getSymbol() == "main")
+        // {
+        //     curr_func = NULL;
+        // }
+        // else
+        // {
+        //     // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::FUNCTION_NOT_RETURNED, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
+        //     curr_func = NULL;
+        // }
+        in_function = false;
     }
 }
 
@@ -146,8 +151,15 @@ void SemanticAnalyzer::declareFunctionParams()
 
 void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Variable *> params)
 {
+    if (curr_func != NULL)
+    {
+        handleInvalidFunctionScoping();
+    }
     in_function = true;
     Function *new_func = new Function(id_name);
+    curr_func = new_func;
+    // std::cout << curr_func << std::endl;
+
     new_func->setReturnType(Util::toUpper(ret_type));
     for (auto p : params)
     {
@@ -166,12 +178,18 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
             Function *func = (Function *)id;
             if (func->isDeclaredAndDefined())
             {
+                if (matchTwoFunction(func, new_func))
+                {
+                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MULTIPLE_DEFINITION, lexer->getLineCount(), new_func->getSymbol()) << std::endl;
+                }
             }
             else
             {
-                func->defineFunction();
+                if (matchTwoFunction(func, new_func))
+                {
+                    func->defineFunction();
+                }
             }
-            matchTwoFunction(func, new_func);
         }
     }
     else
@@ -185,11 +203,14 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
         }
         new_func->defineFunction();
     }
-    curr_func = new_func;
 }
 
 void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<Variable *> params)
 {
+    if (curr_func != NULL)
+    {
+        handleInvalidFunctionScoping();
+    }
     Function *new_func = new Function(id_name);
 
     new_func->setReturnType(Util::toUpper(ret_type));
@@ -596,7 +617,8 @@ int SemanticAnalyzer::getLineCount()
 
 void SemanticAnalyzer::handleInvalidFunctionScoping()
 {
-    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, lexer->getLineCount()) << std::endl;
+    // std::cout << curr_func << std::endl;
+    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
 }
 
 void SemanticAnalyzer::handlePrintfCall(std::string id_name)
@@ -628,7 +650,7 @@ void SemanticAnalyzer::startScope()
     if (in_function)
     {
         this->declareFunctionParams();
-        in_function = false;
+        // in_function = false;
     }
 }
 void SemanticAnalyzer::checkArraySize(Terminal *size)

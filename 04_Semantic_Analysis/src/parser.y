@@ -36,9 +36,6 @@ void syntax_error(string parent){
 }
 
 %}
-
-%define parse.error verbose
-
 %union{
 	Terminal *terminal;
 	NonTerminal *non_terminal;
@@ -50,7 +47,6 @@ void syntax_error(string parent){
 
 %token <terminal> IF ELSE THEN SWITCH CASE DEFAULT FOR DO WHILE INT FLOAT DOUBLE CHAR STRING VOID BREAK RETURN CONTINUE INCOP DECOP ASSIGNOP NOT PRINTLN LPAREN RPAREN LCURL RCURL LSQUARE RSQUARE COMMA SEMICOLON ID CONST_INT CONST_FLOAT CONST_CHAR ADDOP MULOP LOGICOP RELOP BITOP
 
-%type <terminal> constant
 %type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement expression_statement
 
 %type <args> argument_list arguments
@@ -58,20 +54,8 @@ void syntax_error(string parent){
 %type <vars> declaration_list
 %type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor variable
 
-%left COMMA
-%right ASSIGNOP
-%left LOGICOP
-%left RELOP
-%left ADDOP
-%left MULOP
-%left LCURL RCURL
-%left LPAREN RPAREN
-%left NOT INCOP DECOP
-
 %nonassoc THEN
 %nonassoc ELSE
-
-
 %%
 
 start 					: program
@@ -487,14 +471,14 @@ statement 				: var_declaration
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							sem_anlzr->handleInvalidFunctionScoping();
+							// sem_anlzr->handleInvalidFunctionScoping();
 							
 						}
 						| func_declaration 
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							sem_anlzr->handleInvalidFunctionScoping();
+							// sem_anlzr->handleInvalidFunctionScoping();
 							
 						}
 						| expression_statement

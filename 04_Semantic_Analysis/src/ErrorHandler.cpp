@@ -12,7 +12,6 @@ ErrorHandler::ErrorHandler()
 std::string ErrorHandler::getError(string error, int line)
 {
     error_count++;
-    // std::cout << error << std::endl;
     return error;
 }
 std::string ErrorHandler::getLexicalError(string error, int line)
@@ -118,8 +117,6 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         return getSemanticError("Variable or field '" + lexeme + "' declared void", line);
         break;
     case INVALID_CONVERSION:
-        // function return type conflict
-        // function arguments mismatch
         return getSemanticError("Invalid conversion " + lexeme, line);
         break;
     case PARAM_TYPE_MISMATCH:
@@ -163,6 +160,12 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
         break;
     case NONINT_MOD:
         return getSemanticError("Operands of modulus must be integers", line);
+        break;
+    case FUNCTION_REDEFINITION:
+        return getSemanticError("Redefinition of function '" + lexeme + "'", line);
+        break;
+    case MULTIPLE_DEFINITION:
+        return getSemanticError("Multiple definition of '" + lexeme + "'", line);
         break;
     default:
         break;

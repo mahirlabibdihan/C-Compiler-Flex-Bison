@@ -16,7 +16,6 @@ class LexicalAnalyzer
     ErrorHandler *error_hndlr;
     std::ofstream &logout;
     std::ofstream &tokenout;
-    // void installID(std::string yytext);
 
 public:
     LexicalAnalyzer(ErrorHandler *error_hndlr, std::ofstream &logout, std::ofstream &tokenout);

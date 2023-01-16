@@ -34,6 +34,7 @@ public:
     enum SemanticError
     {
         MULTIPLE_DECLARATION = 10,
+        MULTIPLE_DEFINITION,
         INVALID_ARRAY_SIZE,
         INVALID_ARRAY_INDEX,
         INCOMPATIBLE_OPERAND,
@@ -61,6 +62,7 @@ public:
         TOO_MANY_ARGUMENTS,
         FUNCTION_NOT_RETURNED,
         PARAM_REDEFINITION,
+        FUNCTION_REDEFINITION,
         DATA_LOSS,
         TYPE_CONFLICT,
         DIFF_DECLARATION,

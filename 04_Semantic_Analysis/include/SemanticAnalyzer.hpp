@@ -19,7 +19,7 @@ class SemanticAnalyzer
     ofstream &errorout;
 
 private:
-    void matchTwoFunction(Function *f1, Function *f2);
+    bool matchTwoFunction(Function *f1, Function *f2);
 
 public:
     SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);

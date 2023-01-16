@@ -3,26 +3,7 @@
 #include "../include/ExtendedSymbol.hpp"
 #include <vector>
 #include <string>
-// NonTerminal - child
-// Terminal - no child
-// class Node
-// {
-//     std::string name;
-//     std::vector<Node *> children;
-//     Node *parent;
-//     void operator=(const Node &) {} // Protect assignment
-//     Node(const Node &) {}           // Protect copy constructor
-// public:
-//     // Constructor
-//     Node(std::string name)
-//     {
-//         this->name = name;
-//         this->parent = NULL;
-//         children = std::vector<Node *>();
-//     }
-//     // Destructor
-//     ~Node() {}
-// };
+
 namespace ParseTreeGenerator
 {
     void createNode(NonTerminal *node, vector<SymbolInfo *> child);

@@ -1,6 +1,6 @@
 
 fin?=io/input.txt
-OBJECTS=build/SymbolInfo.o build/ScopeTable.o build/SymbolTable.o build/Util.o build/Logger.o build/ErrorHandler.o build/Tokenizer.o build/LineTracker.o build/main.o
+OBJECTS=build/SymbolInfo.o build/ScopeTable.o build/SymbolTable.o build/Util.o build/Logger.o build/ErrorHandler.o build/Tokenizer.o build/LexicalAnalyzer.o build/LineTracker.o build/main.o
 
 CXX = g++
 CXXFLAGS = -std=c++17 -O9

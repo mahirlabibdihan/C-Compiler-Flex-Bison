@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #ifndef __SEMANTIC_ANALYZER__
 #define __SEMANTIC_ANALYZER__
 #include <string>

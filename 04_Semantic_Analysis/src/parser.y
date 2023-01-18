@@ -1,4 +1,8 @@
 %{
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -165,7 +169,6 @@ func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 						// 	// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
 						// 	syntax_error("function declaration","parameter list");
-							
 						// }
 						// | type_specifier ID LPAREN error RPAREN error
 						// {
@@ -241,7 +244,6 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParams($1);
 							$$->addParam($3->getSymbol(),$4->getSymbol());
-							// freeMemory(child);
 						}
 						// | parameter_list error COMMA type_specifier ID
 						// {
@@ -258,7 +260,6 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
 							$$->addParams($1);
 							$$->addParam($3->getSymbol());
-							
 						}
 						// | parameter_list error COMMA type_specifier
 						// {
@@ -665,8 +666,7 @@ rel_expression			: simple_expression
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
-							$$->setDataType(sem_anlzr->relOp($1,$2->getSymbol(),$3));
-							
+							$$->setDataType(sem_anlzr->relOp($1,$2->getSymbol(),$3));	
 						}
 						;
 				
@@ -732,16 +732,22 @@ factor					: variable
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							
 							$$->setDataType(sem_anlzr->callFunction($1->getSymbol(), $3->getArgs()));						
-							// std::cout<<$$->getDataType()<<std::endl;
 						}
+						// | ID LPAREN argument_list error RPAREN
+						// {
+						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	$3->setChildren({s});
+						// 	vector<SymbolInfo*> child = {$1,$2,$3,$5};
+						// 	$$ = ParseTreeGenerator::createExpression(child,"factor");
+						// 	$$->setDataType(sem_anlzr->callFunction($1->getSymbol(), $3->getArgs()));	
+						// 	syntax_error("function call","argument list");							
+						// }
 						| LPAREN expression RPAREN
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($2->getDataType());
-							
 						}
 						| CONST_INT 
 						{
@@ -780,16 +786,16 @@ argument_list 			: arguments
 							$$->addArgs($1);
 							
 						}
-						| arguments error
-						{
-							vector<SymbolInfo*> child = {$1};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
-							$$->addArgs($1);
-							syntax_error("argument list","arguments");
-							
-						}
-						| { 
+						// | arguments error
+						// {
+						// 	vector<SymbolInfo*> child = {$1};
+						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+						// 	$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
+						// 	$$->addArgs($1);
+						// 	syntax_error("argument list","arguments");		
+						// }
+						| 
+						{ 
 							vector<SymbolInfo*> child = {};
 							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");			
 						}

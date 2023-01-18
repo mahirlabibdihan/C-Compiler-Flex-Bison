@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <string>
 #include "../include/SymbolInfo.hpp"
 #include "../include/ErrorHandler.hpp"

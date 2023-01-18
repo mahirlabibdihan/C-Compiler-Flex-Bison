@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/Util.hpp"
 #include "../include/Logger.hpp"

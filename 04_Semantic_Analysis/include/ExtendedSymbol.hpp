@@ -1,3 +1,8 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
+
 #ifndef __SYMBOL__
 #define __SYMBOL__
 #include "../include/SymbolInfo.hpp"

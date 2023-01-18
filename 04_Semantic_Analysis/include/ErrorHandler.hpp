@@ -1,6 +1,6 @@
 /**
  * Author: Mahir Labib Dihan
- * Last modified: December 05, 2022
+ * Last modified: January 18, 2023
  */
 #ifndef __ERROR_HANDLER_H
 #define __ERROR_HANDLER_H 1

@@ -1,6 +1,10 @@
 %option noyywrap
 
 %{
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include "../include/LexicalAnalyzer.hpp"
 extern LexicalAnalyzer *lexer;
 %}

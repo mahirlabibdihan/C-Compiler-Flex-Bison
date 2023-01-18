@@ -97,8 +97,8 @@ public:
     virtual ~NonTerminal();
     string getNonTerminalType();
     void setNonTerminalType(string nt_type);
-    void setChidren(std::vector<SymbolInfo *> children);
-    std::vector<SymbolInfo *> getChidren();
+    void setChildren(std::vector<SymbolInfo *> children);
+    std::vector<SymbolInfo *> getChildren();
 };
 
 class Expression : public NonTerminal

@@ -544,20 +544,22 @@ statement 				: var_declaration
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
+						}
+						| PRINTLN LPAREN ID RPAREN SEMICOLON
+						{
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
+							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");	
 						}
 						| RETURN expression SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
 							sem_anlzr->returnFunction($2);
-							
 						}
 						| RETURN SEMICOLON {
 							// New rule
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
 						}
 						;
 

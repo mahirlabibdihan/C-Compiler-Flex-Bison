@@ -28,7 +28,7 @@ SINGLE_COMMENT "//"((\\{NEWLINE})?.*)*
 UNFINISHED_COMMENT ("/*"([^\/]|([^(\*)(\/)][\/]+))*)
 MULTI_COMMENT {UNFINISHED_COMMENT}"*/"
 
-KEYWORD (break|case|char|continue|default|do|double|else|float|for|if|int|return|switch|void|while)
+KEYWORD (break|case|char|continue|default|do|double|else|float|for|if|int|return|switch|void|while|println)
 OPERATOR ("+"|"-"|"*"|"/"|"%"|"++"|"--"|">>"|"<<"|"^"|"|"|"&"|"<"|"<="|">"|">="|"=="|"!="|=|"&&"|"||"|"!"|"("|")"|"["|"]"|","|";"|"{"|"}")
 
 LETTER [a-zA-Z]

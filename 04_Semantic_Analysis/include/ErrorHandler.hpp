@@ -15,6 +15,7 @@ class ErrorHandler
     int lexical_error_count;
     int semantic_error_count;
     int syntax_error_count;
+    int syntax_error_line;
 
 public:
     // Lexical error types
@@ -78,6 +79,7 @@ public:
     std::string handleSemanticError(SemanticError type, int line, string lexeme = "");
     std::string handleSyntaxError(string parent, string error_child, int line);
     std::string handleSyntaxError(string parent, int line);
+    std::string handleSyntaxError(int line);
     int getErrorCount();
 };
 

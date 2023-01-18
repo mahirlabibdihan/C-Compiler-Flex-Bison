@@ -175,10 +175,16 @@ std::string ErrorHandler::handleSemanticError(SemanticError type, int line, stri
 
 std::string ErrorHandler::handleSyntaxError(string parent, string error_child, int line)
 {
-    return getSyntaxError("Syntax error at " + error_child + " of " + parent, line);
+    return getSyntaxError("Syntax error at " + error_child + " of " + parent, syntax_error_line);
 }
 
 std::string ErrorHandler::handleSyntaxError(string parent, int line)
 {
-    return getSyntaxError("Syntax error at " + parent, line);
+    return getSyntaxError("Syntax error at " + parent, syntax_error_line);
+}
+
+std::string ErrorHandler::handleSyntaxError(int line)
+{
+    syntax_error_line = line;
+    return "Error at line no " + std::to_string(line) + " : syntax error";
 }

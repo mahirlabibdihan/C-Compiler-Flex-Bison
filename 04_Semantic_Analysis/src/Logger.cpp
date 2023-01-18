@@ -86,7 +86,7 @@ std::string Logger::getRule(SymbolInfo *parent, std::vector<SymbolInfo *> childr
     {
         if (i->getType() == "error")
         {
-            right += "error ";
+            right += "error";
         }
         else if (i->getType() == "TERMINAL")
         {

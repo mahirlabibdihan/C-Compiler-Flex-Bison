@@ -87,7 +87,8 @@ std::map<std::string, int> Tokenizer::keywordToken = {
     {"default", DEFAULT},
     {"break", BREAK},
     {"return", RETURN},
-    {"continue", CONTINUE}};
+    {"continue", CONTINUE},
+    {"println", PRINTLN}};
 
 std::string Tokenizer::getToken(std::string type, std::string symbol)
 {

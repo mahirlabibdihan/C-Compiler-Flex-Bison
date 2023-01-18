@@ -11,7 +11,7 @@ extern SemanticAnalyzer *sem_anlzr;
 void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> child)
 {
 
-    node->setChidren(child);
+    node->setChildren(child);
 
     if (child.empty())
     {
@@ -26,9 +26,9 @@ void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> chil
 
     if (child.size() == 1 && child.front()->getType() == "error")
     {
-        logout << "Syntax error" << std::endl;
+        // logout << "Syntax error" << std::endl;
     }
-    // else
+    else
     {
         // std::cout << node->getNonTerminalType() << std::endl;
         logout << Logger::getRule(node, child) << std::endl;
@@ -37,7 +37,7 @@ void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> chil
 SymbolInfo *ParseTreeGenerator::createErrorNode(int line_no)
 {
     SymbolInfo *node = new SymbolInfo("error", "error");
-    logout << "Error at line no " << line_no << " : syntax error" << std::endl;
+    // logout << "Error at line no " << line_no << " : syntax error" << std::endl;
     node->setStartLine(line_no);
     node->setEndLine(line_no);
     return node;
@@ -114,7 +114,7 @@ std::string ParseTreeGenerator::getParseTree(SymbolInfo *curr)
     }
     else
     {
-        std::vector<SymbolInfo *> child = ((NonTerminal *)curr)->getChidren();
+        std::vector<SymbolInfo *> child = ((NonTerminal *)curr)->getChildren();
         rule += Logger::getRuleAndLine(curr, child);
         for (auto &c : child)
         {
@@ -133,6 +133,7 @@ std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
 {
     if (node->getType() == "error")
     {
+        // std::cout << node->getSymbol() << " " << node->getType() << std::endl;
         return "";
     }
     std::string tree;
@@ -142,7 +143,7 @@ std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
     }
     if (node->getType() == "NON_TERMINAL")
     {
-        std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChidren();
+        std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChildren();
         tree += Logger::getRuleAndLine(node, child) + "\n";
         for (auto c : child)
         {
@@ -164,7 +165,7 @@ void ParseTreeGenerator::deleteTree(SymbolInfo *node)
     }
     if (node->getType() == "NON_TERMINAL")
     {
-        std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChidren();
+        std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChildren();
         for (auto c : child)
         {
             deleteTree(c);

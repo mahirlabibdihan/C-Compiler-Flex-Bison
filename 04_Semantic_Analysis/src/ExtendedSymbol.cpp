@@ -25,12 +25,12 @@ void NonTerminal::setNonTerminalType(string type)
     this->nt_type = type;
 }
 
-void NonTerminal::setChidren(std::vector<SymbolInfo *> children)
+void NonTerminal::setChildren(std::vector<SymbolInfo *> children)
 {
     this->children = children;
 }
 
-std::vector<SymbolInfo *> NonTerminal::getChidren()
+std::vector<SymbolInfo *> NonTerminal::getChildren()
 {
     return children;
 }

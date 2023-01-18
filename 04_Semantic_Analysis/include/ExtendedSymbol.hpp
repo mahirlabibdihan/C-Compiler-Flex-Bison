@@ -3,8 +3,8 @@
  * Last modified: January 18, 2023
  */
 
-#ifndef __SYMBOL__
-#define __SYMBOL__
+#ifndef __EXTENDED_SYMBOL_H
+#define __EXTENDED_SYMBOL_H 1
 #include "../include/SymbolInfo.hpp"
 #include <string>
 #include <vector>
@@ -24,8 +24,6 @@ class DeclarationList;
 
 class Terminal : public SymbolInfo
 {
-    // Just to maintain the stucture
-    // Identifier, Constant
     string t_type;
 
 public:
@@ -77,19 +75,6 @@ public:
     void setArraySize(string);
 };
 
-class Constant : public Terminal
-{
-    string data_type;
-
-public:
-    Constant(const string &);
-    Constant(const string &, const string &);
-    Constant(const string &, const string &, const string &);
-    virtual ~Constant();
-    const string &getDataType();
-    void setDataType(const string &);
-};
-
 class NonTerminal : public SymbolInfo
 {
     // Just to maintain the stucture
@@ -129,7 +114,7 @@ public:
 
 class ParameterList : public NonTerminal
 {
-    vector<Variable *> list;
+    vector<Variable *> list; // Need to destruct
 
 public:
     ParameterList();
@@ -144,7 +129,7 @@ public:
 
 class ArgumentList : public NonTerminal
 {
-    vector<Expression *> list;
+    vector<Expression *> list; // Need to destruct
 
 public:
     ArgumentList();
@@ -157,7 +142,7 @@ public:
 
 class DeclarationList : public NonTerminal
 {
-    vector<Variable *> list;
+    vector<Variable *> list; // Need to destruct
 
 public:
     DeclarationList();

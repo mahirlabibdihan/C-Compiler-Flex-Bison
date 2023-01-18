@@ -1,0 +1,12 @@
+                                            SymbolInfo
+                        _________________________|___________________________
+                        |                                                   |
+                    NonTerminal                                         Terminal 
+    ____________________|____________________                               |
+    |               |       |               |                           Identifier
+Expression ParameterList  ArgumentList  DeclarationList             ________|________
+    |                                                               |               |
+ArrayCall                                                       Variable        Function
+                                                                    |
+                                                                  Array
+                                                                  

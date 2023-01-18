@@ -5,7 +5,7 @@
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/Util.hpp"
 #include "../include/Logger.hpp"
-extern int line_count;
+#include <iostream>
 NonTerminal::NonTerminal()
 {
     this->nt_type = "";
@@ -362,7 +362,6 @@ Function::Function(const string &func_name) : Identifier(func_name, "FUNCTION")
 }
 Function::~Function()
 {
-    // cout << name << " destructed" << line_count << endl;
 }
 const string &Function::getReturnType()
 {
@@ -410,6 +409,7 @@ bool Function::matchParamsType(Function *func)
     {
         if (func->params[i]->getDataType() != this->params[i]->getDataType())
         {
+            // std::cout << func->params[i]->getDataType() << " " << this->params[i]->getDataType() << std::endl;
             return false;
         }
     }
@@ -426,23 +426,4 @@ void Function::declareFunction()
 void Function::defineFunction()
 {
     is_definition = true;
-}
-Constant::Constant(const string &data_type) : Terminal("CONSTANT")
-{
-    this->data_type = data_type;
-}
-Constant::Constant(const string &name, const string &data_type) : Terminal(name, "CONSTANT")
-{
-    this->data_type = data_type;
-}
-Constant::~Constant()
-{
-}
-const string &Constant::getDataType()
-{
-    return data_type;
-}
-void Constant::setDataType(const string &data_type)
-{
-    this->data_type = data_type;
 }

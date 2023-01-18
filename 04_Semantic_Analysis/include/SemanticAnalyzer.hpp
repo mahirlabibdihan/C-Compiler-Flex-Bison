@@ -2,8 +2,8 @@
  * Author: Mahir Labib Dihan
  * Last modified: January 18, 2023
  */
-#ifndef __SEMANTIC_ANALYZER__
-#define __SEMANTIC_ANALYZER__
+#ifndef __SEMANTIC_ANALYZER_H
+#define __SEMANTIC_ANALYZER_H 1
 #include <string>
 #include <vector>
 #include "../include/SymbolInfo.hpp"
@@ -14,11 +14,9 @@ using namespace std;
 class SemanticAnalyzer
 {
     Function *curr_func;
-    Expression *curr_exp;
     SymbolTable *table;
     ErrorHandler *error_hndlr;
     LexicalAnalyzer *lexer;
-    bool in_function;
     ofstream &logout;
     ofstream &errorout;
 
@@ -53,13 +51,10 @@ public:
     bool isConvertible(string to, string from);
     bool checkAssignment(string left, string right);
 
-    void setCurrentExp(Expression *);
-
     void handleInvalidFunctionScoping();
-    void handlePrintfCall(std::string id_name);
+    void handlePrintlnCall(std::string id_name);
     void endScope();
     void startScope();
-    void checkArraySize(Terminal *size);
     int getLineCount();
 };
 #endif

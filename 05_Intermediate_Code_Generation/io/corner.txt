@@ -1,0 +1,26 @@
+int f();
+int f(){
+
+}
+int f(){
+
+}
+int main(){
+	int a;
+	float a;
+	void f()
+	{
+		int c()
+		{
+			
+		}
+	}
+}
+
+int f(){
+
+}
+int main(){
+	float a;
+	a = f(); 
+}

@@ -1,0 +1,861 @@
+Line 1: type_specifier : INT 
+
+int
+
+Line 1: type_specifier : INT 
+
+int
+
+Line 1: parameter_list : type_specifier ID 
+
+int a
+
+Line 1: type_specifier : INT 
+
+int
+
+Line 1: parameter_list : parameter_list COMMA type_specifier ID 
+
+int a,int b
+
+Line 2: variable : ID 
+
+a
+
+Line 2: factor : variable 
+
+a
+
+Line 2: unary_expression : factor 
+
+a
+
+Line 2: term : unary_expression 
+
+a
+
+Line 2: simple_expression : term 
+
+a
+
+Line 2: variable : ID 
+
+b
+
+Line 2: factor : variable 
+
+b
+
+Line 2: unary_expression : factor 
+
+b
+
+Line 2: term : unary_expression 
+
+b
+
+Line 2: simple_expression : simple_expression ADDOP term 
+
+a+b
+
+Line 2: factor : CONST_INT 
+
+5
+
+Line 2: unary_expression : factor 
+
+5
+
+Line 2: term : unary_expression 
+
+5
+
+Line 2: simple_expression : term 
+
+5
+
+Line 2: rel_expression : simple_expression RELOP simple_expression 
+
+a+b<=5
+
+Line 2: logic_expression : rel_expression 
+
+a+b<=5
+
+Line 2: expression : logic_expression 
+
+a+b<=5
+
+Line 3: factor : CONST_INT 
+
+7
+
+Line 3: unary_expression : factor 
+
+7
+
+Line 3: term : unary_expression 
+
+7
+
+Line 3: simple_expression : term 
+
+7
+
+Line 3: rel_expression : simple_expression 
+
+7
+
+Line 3: logic_expression : rel_expression 
+
+7
+
+Line 3: expression : logic_expression 
+
+7
+
+Line 3: statement : RETURN expression SEMICOLON 
+
+return 7;
+
+Line 3: statements : statement 
+
+return 7;
+
+
+Line 4: compound_statement : LCURL statements RCURL 
+
+{
+return 7;
+}
+
+ScopeTable # 1.1.1
+
+ScopeTable # 1.1
+ 0 --> < b : ID> 
+ 6 --> < a : ID> 
+
+ScopeTable # 1
+ 6 --> < foo : ID> 
+
+Line 4: statement : compound_statement 
+
+{
+return 7;
+}
+
+Line 5: statement : IF LPAREN expression RPAREN statement 
+
+if(a+b<=5){
+return 7;
+}
+
+
+Line 5: statements : statement 
+
+if(a+b<=5){
+return 7;
+}
+
+
+
+Line 5: variable : ID 
+
+a
+
+Line 5: factor : variable 
+
+a
+
+Line 5: unary_expression : factor 
+
+a
+
+Line 5: term : unary_expression 
+
+a
+
+Line 5: simple_expression : term 
+
+a
+
+Line 5: factor : CONST_INT 
+
+2
+
+Line 5: unary_expression : factor 
+
+2
+
+Line 5: term : unary_expression 
+
+2
+
+Line 5: simple_expression : simple_expression ADDOP term 
+
+a-2
+
+Line 5: rel_expression : simple_expression 
+
+a-2
+
+Line 5: logic_expression : rel_expression 
+
+a-2
+
+Line 5: arguments : logic_expression 
+
+a-2
+
+Line 5: variable : ID 
+
+b
+
+Line 5: factor : variable 
+
+b
+
+Line 5: unary_expression : factor 
+
+b
+
+Line 5: term : unary_expression 
+
+b
+
+Line 5: simple_expression : term 
+
+b
+
+Line 5: factor : CONST_INT 
+
+1
+
+Line 5: unary_expression : factor 
+
+1
+
+Line 5: term : unary_expression 
+
+1
+
+Line 5: simple_expression : simple_expression ADDOP term 
+
+b-1
+
+Line 5: rel_expression : simple_expression 
+
+b-1
+
+Line 5: logic_expression : rel_expression 
+
+b-1
+
+Line 5: arguments : arguments COMMA logic_expression 
+
+a-2,b-1
+
+Line 5: argument_list : arguments 
+
+a-2,b-1
+
+Line 5: factor : ID LPAREN argument_list RPAREN 
+
+foo(a-2,b-1)
+
+Line 5: unary_expression : factor 
+
+foo(a-2,b-1)
+
+Line 5: term : unary_expression 
+
+foo(a-2,b-1)
+
+Line 5: simple_expression : term 
+
+foo(a-2,b-1)
+
+Line 5: factor : CONST_INT 
+
+2
+
+Line 5: unary_expression : factor 
+
+2
+
+Line 5: term : unary_expression 
+
+2
+
+Line 5: variable : ID 
+
+a
+
+Line 5: factor : variable 
+
+a
+
+Line 5: unary_expression : factor 
+
+a
+
+Line 5: term : unary_expression 
+
+a
+
+Line 5: simple_expression : term 
+
+a
+
+Line 5: factor : CONST_INT 
+
+1
+
+Line 5: unary_expression : factor 
+
+1
+
+Line 5: term : unary_expression 
+
+1
+
+Line 5: simple_expression : simple_expression ADDOP term 
+
+a-1
+
+Line 5: rel_expression : simple_expression 
+
+a-1
+
+Line 5: logic_expression : rel_expression 
+
+a-1
+
+Line 5: arguments : logic_expression 
+
+a-1
+
+Line 5: variable : ID 
+
+b
+
+Line 5: factor : variable 
+
+b
+
+Line 5: unary_expression : factor 
+
+b
+
+Line 5: term : unary_expression 
+
+b
+
+Line 5: simple_expression : term 
+
+b
+
+Line 5: factor : CONST_INT 
+
+2
+
+Line 5: unary_expression : factor 
+
+2
+
+Line 5: term : unary_expression 
+
+2
+
+Line 5: simple_expression : simple_expression ADDOP term 
+
+b-2
+
+Line 5: rel_expression : simple_expression 
+
+b-2
+
+Line 5: logic_expression : rel_expression 
+
+b-2
+
+Line 5: arguments : arguments COMMA logic_expression 
+
+a-1,b-2
+
+Line 5: argument_list : arguments 
+
+a-1,b-2
+
+Line 5: factor : ID LPAREN argument_list RPAREN 
+
+foo(a-1,b-2)
+
+Line 5: unary_expression : factor 
+
+foo(a-1,b-2)
+
+Line 5: term : term MULOP unary_expression 
+
+2*foo(a-1,b-2)
+
+Line 5: simple_expression : simple_expression ADDOP term 
+
+foo(a-2,b-1)+2*foo(a-1,b-2)
+
+Line 5: rel_expression : simple_expression 
+
+foo(a-2,b-1)+2*foo(a-1,b-2)
+
+Line 5: logic_expression : rel_expression 
+
+foo(a-2,b-1)+2*foo(a-1,b-2)
+
+Line 5: expression : logic_expression 
+
+foo(a-2,b-1)+2*foo(a-1,b-2)
+
+Line 5: statement : RETURN expression SEMICOLON 
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+
+Line 5: statements : statements statement 
+
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+
+
+Line 6: compound_statement : LCURL statements RCURL 
+
+{
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+
+ScopeTable # 1.1
+ 0 --> < b : ID> 
+ 6 --> < a : ID> 
+
+ScopeTable # 1
+ 6 --> < foo : ID> 
+
+Line 6: func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+
+int foo(int a,int b){
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+
+Line 6: unit : func_definition 
+
+int foo(int a,int b){
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+
+Line 6: program : unit 
+
+int foo(int a,int b){
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+
+
+Line 9: type_specifier : INT 
+
+int
+
+Line 10: type_specifier : INT 
+
+int
+
+Line 10: declaration_list : ID 
+
+i
+
+Line 10: declaration_list : declaration_list COMMA ID 
+
+i,j
+
+Line 10: declaration_list : declaration_list COMMA ID 
+
+i,j,k
+
+Line 10: var_declaration : type_specifier declaration_list SEMICOLON 
+
+int i,j,k;
+
+Line 10: statement : var_declaration 
+
+int i,j,k;
+
+Line 10: statements : statement 
+
+int i,j,k;
+
+
+Line 11: variable : ID 
+
+i
+
+Line 11: factor : CONST_INT 
+
+7
+
+Line 11: unary_expression : factor 
+
+7
+
+Line 11: term : unary_expression 
+
+7
+
+Line 11: simple_expression : term 
+
+7
+
+Line 11: rel_expression : simple_expression 
+
+7
+
+Line 11: logic_expression : rel_expression 
+
+7
+
+Line 11: expression : variable ASSIGNOP logic_expression 
+
+i=7
+
+Line 11: expression_statement : expression SEMICOLON 
+
+i=7;
+
+Line 11: statement : expression_statement 
+
+i=7;
+
+Line 11: statements : statements statement 
+
+int i,j,k;
+i=7;
+
+
+Line 12: variable : ID 
+
+j
+
+Line 12: factor : CONST_INT 
+
+3
+
+Line 12: unary_expression : factor 
+
+3
+
+Line 12: term : unary_expression 
+
+3
+
+Line 12: simple_expression : term 
+
+3
+
+Line 12: rel_expression : simple_expression 
+
+3
+
+Line 12: logic_expression : rel_expression 
+
+3
+
+Line 12: expression : variable ASSIGNOP logic_expression 
+
+j=3
+
+Line 12: expression_statement : expression SEMICOLON 
+
+j=3;
+
+Line 12: statement : expression_statement 
+
+j=3;
+
+Line 12: statements : statements statement 
+
+int i,j,k;
+i=7;
+j=3;
+
+
+Line 14: variable : ID 
+
+k
+
+Line 14: variable : ID 
+
+i
+
+Line 14: factor : variable 
+
+i
+
+Line 14: unary_expression : factor 
+
+i
+
+Line 14: term : unary_expression 
+
+i
+
+Line 14: simple_expression : term 
+
+i
+
+Line 14: rel_expression : simple_expression 
+
+i
+
+Line 14: logic_expression : rel_expression 
+
+i
+
+Line 14: arguments : logic_expression 
+
+i
+
+Line 14: variable : ID 
+
+j
+
+Line 14: factor : variable 
+
+j
+
+Line 14: unary_expression : factor 
+
+j
+
+Line 14: term : unary_expression 
+
+j
+
+Line 14: simple_expression : term 
+
+j
+
+Line 14: rel_expression : simple_expression 
+
+j
+
+Line 14: logic_expression : rel_expression 
+
+j
+
+Line 14: arguments : arguments COMMA logic_expression 
+
+i,j
+
+Line 14: argument_list : arguments 
+
+i,j
+
+Line 14: factor : ID LPAREN argument_list RPAREN 
+
+foo(i,j)
+
+Line 14: unary_expression : factor 
+
+foo(i,j)
+
+Line 14: term : unary_expression 
+
+foo(i,j)
+
+Line 14: simple_expression : term 
+
+foo(i,j)
+
+Line 14: rel_expression : simple_expression 
+
+foo(i,j)
+
+Line 14: logic_expression : rel_expression 
+
+foo(i,j)
+
+Line 14: expression : variable ASSIGNOP logic_expression 
+
+k=foo(i,j)
+
+Line 14: expression_statement : expression SEMICOLON 
+
+k=foo(i,j);
+
+Line 14: statement : expression_statement 
+
+k=foo(i,j);
+
+Line 14: statements : statements statement 
+
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+
+
+Line 15: statement : PRINTLN LPAREN ID RPAREN SEMICOLON 
+
+println(k);
+
+Line 15: statements : statements statement 
+
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+
+
+Line 17: factor : CONST_INT 
+
+0
+
+Line 17: unary_expression : factor 
+
+0
+
+Line 17: term : unary_expression 
+
+0
+
+Line 17: simple_expression : term 
+
+0
+
+Line 17: rel_expression : simple_expression 
+
+0
+
+Line 17: logic_expression : rel_expression 
+
+0
+
+Line 17: expression : logic_expression 
+
+0
+
+Line 17: statement : RETURN expression SEMICOLON 
+
+return 0;
+
+Line 17: statements : statements statement 
+
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+
+
+Line 18: compound_statement : LCURL statements RCURL 
+
+{
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+}
+
+ScopeTable # 1.2
+ 0 --> < i : ID> 
+ 1 --> < j : ID> 
+ 2 --> < k : ID> 
+
+ScopeTable # 1
+ 5 --> < main : ID> 
+ 6 --> < foo : ID> 
+
+Line 18: func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+
+int main(){
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+}
+
+Line 18: unit : func_definition 
+
+int main(){
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+}
+
+Line 18: program : program unit 
+
+int foo(int a,int b){
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+int main(){
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+}
+
+
+Line 19: start : program 
+
+int foo(int a,int b){
+if(a+b<=5){
+return 7;
+}
+
+return foo(a-2,b-1)+2*foo(a-1,b-2);
+}
+int main(){
+int i,j,k;
+i=7;
+j=3;
+k=foo(i,j);
+println(k);
+return 0;
+}
+
+
+ScopeTable # 1
+ 5 --> < main : ID> 
+ 6 --> < foo : ID> 
+
+Total lines: 19
+Total errors: 0

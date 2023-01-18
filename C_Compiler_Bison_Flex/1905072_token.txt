@@ -1,0 +1,1 @@
+<INT> <ID,main> <LPAREN,(> <RPAREN,)> <LCURL,{> <ID,f> <LPAREN,(> <RPAREN,)> <SEMICOLON,;> <RCURL,}> 

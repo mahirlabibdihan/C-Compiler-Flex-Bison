@@ -131,8 +131,7 @@ int main(int argc, char *argv[])
         codein.open("1905072_code.asm");
         optmzr->optimize(); // For first level pass
         codein.close();
-        
-    }
+        }
     else
     {
         codeout.open("1905072_code.asm");

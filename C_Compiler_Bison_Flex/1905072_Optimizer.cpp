@@ -217,6 +217,8 @@ void Optimizer::optimize()
         {
             lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
         }
+
+        // Add condition for dead codes
     }
 
     codeout.open("1905072_optimized_code.asm");

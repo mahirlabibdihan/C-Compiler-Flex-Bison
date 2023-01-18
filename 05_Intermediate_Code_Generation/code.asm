@@ -1,0 +1,11 @@
+.MODEL SMALL
+
+.STACk 100H
+
+
+.DATA
+a DW ?b DW 0 DUP(0) 
+c DW ?
+
+.CODE
+

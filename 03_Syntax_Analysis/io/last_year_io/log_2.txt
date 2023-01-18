@@ -1,0 +1,22 @@
+Error at line# 1: TOO_MANY_DECIMAL_POINTS 1.2.345
+Error at line# 2: ILLFORMED_NUMBER 1E10.7
+Error at line# 3: INVALID_ID_SUFFIX_NUM_PREFIX 12abcd
+Error at line# 4: MULTICHAR_CONST_CHAR 'ab'
+Error at line# 5: UNFINISHED_CONST_CHAR 'a
+Error at line# 6: UNFINISHED_CONST_CHAR '
+Error at line# 7: MULTICHAR_CONST_CHAR 'ab cd'
+Error at line# 8: UNFINISHED_CONST_CHAR '\'
+Error at line# 9: EMPTY_CONST_CHAR ''
+Error at line# 10: UNFINISHED_STRING "abcd
+Error at line# 12: UNFINISHED_STRING "abcd\
+efgh
+Line# 13: Token <ID> Lexeme ijk found
+	ScopeTable# 1
+	7--> <ijk,ID> 
+Error at line# 13: UNFINISHED_STRING "
+Error at line# 15: UNFINISHED_COMMENT /**abc
+def
+	ScopeTable# 1
+	7--> <ijk,ID> 
+Total lines: 15
+Total errors: 13

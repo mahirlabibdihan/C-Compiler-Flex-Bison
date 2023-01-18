@@ -192,7 +192,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    
     int n_buckets;
     fin >> n_buckets;
     table = new SymbolTable(n_buckets);

@@ -1,0 +1,112 @@
+Line# 1: Token <INT> Lexeme int found
+Line# 1: Token <ID> Lexeme main found
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 1: Token <LPAREN> Lexeme ( found
+Line# 1: Token <RPAREN> Lexeme ) found
+Line# 1: Token <LCURL> Lexeme { found
+Line# 3: Token <CHAR> Lexeme char found
+Line# 3: Token <ID> Lexeme str1 found
+	ScopeTable# 2
+	7--> <str1,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 3: Token <LSQUARE> Lexeme [ found
+Line# 3: Token <CONST_INT> Lexeme 100 found
+Line# 3: Token <RSQUARE> Lexeme ] found
+Line# 3: Token <ASSIGNOP> Lexeme = found
+Line# 3: Token <SINGLE LINE STRING> Lexeme "I own a dog." found
+Line# 3: Token <SEMICOLON> Lexeme ; found
+Line# 4: Token <CHAR> Lexeme char found
+Line# 4: Token <ID> Lexeme str2 found
+	ScopeTable# 2
+	7--> <str1,ID> 
+	8--> <str2,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 4: Token <LSQUARE> Lexeme [ found
+Line# 4: Token <CONST_INT> Lexeme 100 found
+Line# 4: Token <RSQUARE> Lexeme ] found
+Line# 4: Token <ASSIGNOP> Lexeme = found
+Line# 4: Token <MULTI LINE STRING> Lexeme "I own a dog.\
+    His name is Jack." found
+Line# 5: Token <SEMICOLON> Lexeme ; found
+Line# 6: Token <CHAR> Lexeme char found
+Line# 6: Token <ID> Lexeme str3 found
+	ScopeTable# 2
+	7--> <str1,ID> 
+	8--> <str2,ID> 
+	9--> <str3,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 6: Token <LSQUARE> Lexeme [ found
+Line# 6: Token <CONST_INT> Lexeme 100 found
+Line# 6: Token <RSQUARE> Lexeme ] found
+Line# 6: Token <ASSIGNOP> Lexeme = found
+Line# 6: Token <MULTI LINE STRING> Lexeme "He said, \" I own a dog\"\
+    so I asked, \"What is his name?\"" found
+Line# 7: Token <SEMICOLON> Lexeme ; found
+Line# 9: Token <SINGLE LINE COMMENT> Lexeme //This is a single line comment. found
+Line# 10: Token <SINGLE LINE COMMENT> Lexeme //This is also a\
+    single line comment. found
+Line# 12: Token <SINGLE LINE COMMENT> Lexeme //This is also a /*Multi-line just for\
+    fun */ single line comment. found
+Line# 14: Token <SINGLE LINE COMMENT> Lexeme //This is another single line comment\  found
+Line# 15: Token <CHAR> Lexeme char found
+Line# 15: Token <ID> Lexeme str4 found
+	ScopeTable# 2
+	7--> <str1,ID> 
+	8--> <str2,ID> 
+	9--> <str3,ID> 
+	10--> <str4,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 15: Token <LSQUARE> Lexeme [ found
+Line# 15: Token <CONST_INT> Lexeme 100 found
+Line# 15: Token <RSQUARE> Lexeme ] found
+Line# 15: Token <ASSIGNOP> Lexeme = found
+Line# 15: Token <SINGLE LINE STRING> Lexeme "But this line is valid." found
+Line# 15: Token <SEMICOLON> Lexeme ; found
+Line# 16: Token <SINGLE LINE COMMENT> Lexeme //This is another /*Multi-line again\  found
+Line# 17: Token <CHAR> Lexeme char found
+Line# 17: Token <ID> Lexeme str5 found
+	ScopeTable# 2
+	1--> <str5,ID> 
+	7--> <str1,ID> 
+	8--> <str2,ID> 
+	9--> <str3,ID> 
+	10--> <str4,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 17: Token <LSQUARE> Lexeme [ found
+Line# 17: Token <CONST_INT> Lexeme 100 found
+Line# 17: Token <RSQUARE> Lexeme ] found
+Line# 17: Token <ASSIGNOP> Lexeme = found
+Line# 17: Token <SINGLE LINE STRING> Lexeme "This line is also valid." found
+Line# 17: Token <SEMICOLON> Lexeme ; found
+Line# 18: Token <SINGLE LINE COMMENT> Lexeme //Tony said, \"This is still easy.\" found
+Line# 19: Token <CHAR> Lexeme char found
+Line# 19: Token <ID> Lexeme str6 found
+	ScopeTable# 2
+	1--> <str5,ID> 
+	2--> <str6,ID> 
+	7--> <str1,ID> 
+	8--> <str2,ID> 
+	9--> <str3,ID> 
+	10--> <str4,ID> 
+	ScopeTable# 1
+	4--> <main,ID> 
+Line# 19: Token <LSQUARE> Lexeme [ found
+Line# 19: Token <CONST_INT> Lexeme 100 found
+Line# 19: Token <RSQUARE> Lexeme ] found
+Line# 19: Token <ASSIGNOP> Lexeme = found
+Line# 19: Token <SINGLE LINE STRING> Lexeme "Really Tony?" found
+Line# 19: Token <SEMICOLON> Lexeme ; found
+Line# 22: Token <RETURN> Lexeme return found
+Line# 22: Token <CONST_INT> Lexeme 0 found
+Line# 22: Token <SEMICOLON> Lexeme ; found
+Line# 25: Token <RCURL> Lexeme } found
+	ScopeTable# 1
+	4--> <main,ID> 
+Total lines: 26
+Total errors: 0

@@ -1,0 +1,57 @@
+<INT, int>
+<ID, main>
+<LPAREN, (>
+<RPAREN, )>
+<LCURL, {>
+<CHAR, char>
+<ID, str1>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<SINGLE LINE STRING, I own a dog.>
+<SEMICOLON, ;>
+<CHAR, char>
+<ID, str2>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<MULTI LINE STRING, I own a dog.    His name is Jack.>
+<SEMICOLON, ;>
+<CHAR, char>
+<ID, str3>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<MULTI LINE STRING, He said, " I own a dog"    so I asked, "What is his name?">
+<SEMICOLON, ;>
+<CHAR, char>
+<ID, str4>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<SINGLE LINE STRING, But this line is valid.>
+<SEMICOLON, ;>
+<CHAR, char>
+<ID, str5>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<SINGLE LINE STRING, This line is also valid.>
+<SEMICOLON, ;>
+<CHAR, char>
+<ID, str6>
+<LSQUARE, [>
+<CONST_INT, 100>
+<RSQUARE, ]>
+<ASSIGNOP, =>
+<SINGLE LINE STRING, Really Tony?>
+<SEMICOLON, ;>
+<RETURN, return>
+<CONST_INT, 0>
+<SEMICOLON, ;>
+<RCURL, }>

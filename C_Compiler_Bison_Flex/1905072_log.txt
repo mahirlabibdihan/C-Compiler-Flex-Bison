@@ -1,0 +1,95 @@
+Line 1: type_specifier : INT 
+
+int
+
+Line 3: argument_list : 
+
+
+
+Line 3: factor : ID LPAREN argument_list RPAREN 
+
+f()
+
+Error at line 3: semantic error, Undeclared function 'f'
+
+Line 3: unary_expression : factor 
+
+f()
+
+Line 3: term : unary_expression 
+
+f()
+
+Line 3: simple_expression : term 
+
+f()
+
+Line 3: rel_expression : simple_expression 
+
+f()
+
+Line 3: logic_expression : rel_expression 
+
+f()
+
+Line 3: expression : logic_expression 
+
+f()
+
+Line 3: expression_statement : expression SEMICOLON 
+
+f();
+
+Line 3: statement : expression_statement 
+
+f();
+
+Line 3: statements : statement 
+
+f();
+
+
+Line 4: compound_statement : LCURL statements RCURL 
+
+{
+f();
+}
+
+ScopeTable # 1.1
+
+ScopeTable # 1
+ 5 --> < main : ID> 
+
+Line 4: func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+
+int main(){
+f();
+}
+
+Line 4: unit : func_definition 
+
+int main(){
+f();
+}
+
+Line 4: program : unit 
+
+int main(){
+f();
+}
+
+
+Line 4: start : program 
+
+int main(){
+f();
+}
+
+
+ScopeTable # 1
+ 5 --> < main : ID> 
+
+Total lines: 4
+Total Lexical Errors: 0
+Total Syntax Errors: 0
+Total Semantic Errors: 1

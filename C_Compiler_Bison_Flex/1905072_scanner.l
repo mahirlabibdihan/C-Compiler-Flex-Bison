@@ -97,7 +97,7 @@ ESCAPE_SEQUENCE (\\.)
 									tknzr->generateToken(CHARACTER_TOKEN, yytext); 
 									logger->printLogData(STRING_LOG,line_count,yytext);
 									line_count = yylineno; 
-									return tknzr->getToken(CHARACTER_TOKEN, yytext); 
+									return tknzr->getToken(STRING_TOKEN, yytext); 
 								}
 {UNTERMINATED_STRING} 			{ 
 									err_hndlr->handleLexicalError(UNTERMINATED_STRING, line_count, yytext); 

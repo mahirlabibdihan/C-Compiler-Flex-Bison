@@ -64,6 +64,7 @@ bool SemanticAnalyzer::isConvertible(string to, string from)
         return false;
     }
 
+    // Add conversion in syntax tree
     return hlpr->getDataSize(to) >= hlpr->getDataSize(from);
 }
 

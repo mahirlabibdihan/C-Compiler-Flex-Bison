@@ -10,7 +10,6 @@ class Terminal;
 class Identifier;
 class Variable;
 class Function;
-class Contant;
 class NonTerminal;
 class Expression;
 class ArrayCall;

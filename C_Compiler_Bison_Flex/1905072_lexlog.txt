@@ -1,0 +1,20 @@
+Line no 1: Token <INT> Lexeme int found
+
+Line no 1: Token <ID> Lexeme main found
+
+Line no 1: Token <LPAREN> Lexeme ( found
+
+Line no 1: Token <RPAREN> Lexeme ) found
+
+Line no 2: Token <LCURL> Lexeme { found
+
+Line no 3: Token <ID> Lexeme f found
+
+Line no 3: Token <LPAREN> Lexeme ( found
+
+Line no 3: Token <RPAREN> Lexeme ) found
+
+Line no 3: Token <SEMICOLON> Lexeme ; found
+
+Line no 4: Token <RCURL> Lexeme } found
+

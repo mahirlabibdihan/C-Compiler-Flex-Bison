@@ -1,0 +1,5 @@
+Error at line 3: semantic error, Undeclared function 'f'
+
+Total Lexical Errors: 0
+Total Syntax Errors: 0
+Total Semantic Errors: 1

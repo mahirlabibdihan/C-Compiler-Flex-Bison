@@ -1,0 +1,4 @@
+resolve 1 conflicts: reduce/shift
+
+Data Type: Size(Byte)
+From it we can determine typecast easily

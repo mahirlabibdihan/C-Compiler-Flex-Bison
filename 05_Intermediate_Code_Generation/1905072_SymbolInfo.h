@@ -20,7 +20,7 @@ public:
     SymbolInfo(const string &name, const string &type, SymbolInfo *next);
     ~SymbolInfo();
     const string &getName() const;
-    void setName(const string &name);
+    void setSymbol(const string &name);
     const string &getType() const;
     void setType(const string &type);
     SymbolInfo *getNext() const;

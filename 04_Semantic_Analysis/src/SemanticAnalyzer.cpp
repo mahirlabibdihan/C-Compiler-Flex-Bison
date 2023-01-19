@@ -15,6 +15,7 @@ SemanticAnalyzer::SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, E
     this->lexer = lexer;
     this->table = table;
     this->error_hndlr = error_hndlr;
+    curr_func = NULL;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
 {
@@ -22,7 +23,6 @@ SemanticAnalyzer::~SemanticAnalyzer()
 
 string SemanticAnalyzer::implicitTypecast(string left, string right)
 {
-    // cout << left << "," << right << endl;
     if (left == "NULL" || right == "NULL")
     {
         return "NULL"; // already reported , now supressing more errors
@@ -50,25 +50,8 @@ string SemanticAnalyzer::implicitTypecast(string left, string right)
     return "ERROR";
 }
 
-// Can be merged with checkAssignment
-bool SemanticAnalyzer::isConvertible(string to, string from)
-{
-    if (from == "NULL")
-    {
-        return true; // already error reported and converted to NULL , this is made true to supress more error
-    }
-    if (from == "VOID")
-    {
-        return false;
-    }
-
-    // Add conversion in syntax tree
-    return Util::getDataSize(to) >= Util::getDataSize(from);
-}
-
 bool SemanticAnalyzer::checkAssignment(string left, string right)
 {
-    // cout << lexer->getLineCount() << " " << left << " " << right << endl;
     if (left == "NULL" || right == "NULL")
     {
         return true; // already error reported and converted to NULL , this is made true to supress more error
@@ -115,11 +98,10 @@ void SemanticAnalyzer::returnFunction(Expression *ret)
     if (ret->getDataType() != curr_func->getReturnType())
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
-        curr_func = NULL;
     }
-    else
+    // else
     {
-        // delete curr_func;
+        delete curr_func;
         curr_func = NULL;
     }
 }
@@ -127,16 +109,8 @@ void SemanticAnalyzer::endFunction()
 {
     if (curr_func != NULL)
     {
+        delete curr_func;
         curr_func = NULL;
-        // if (curr_func->getReturnType() == "VOID" or curr_func->getSymbol() == "main")
-        // {
-        //     curr_func = NULL;
-        // }
-        // else
-        // {
-        //     // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::FUNCTION_NOT_RETURNED, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
-        //     curr_func = NULL;
-        // }
     }
 }
 
@@ -150,7 +124,11 @@ void SemanticAnalyzer::declareFunctionParams()
         if (!table->insert(var))
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::PARAM_REDEFINITION, lexer->getLineCount(), i->getSymbol()) << std::endl;
+            delete var;
             break;
+        }
+        else
+        {
         }
     }
 }
@@ -161,17 +139,15 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
     {
         handleInvalidFunctionScoping();
     }
-    Function *new_func = new Function(id_name);
-    curr_func = new_func;
-    // std::cout << curr_func << std::endl;
 
-    new_func->setReturnType(Util::toUpper(ret_type));
+    // Creating a Function to insert into table
+    Function *new_func = new Function(id_name, Util::toUpper(ret_type));
     for (auto p : params)
     {
         new_func->addParam(new Variable(p->getSymbol(), Util::toUpper(p->getDataType())));
     }
 
-    if (!table->insert(new_func))
+    if (!table->insert(new_func)) // Couldn't insert
     {
         Identifier *id = (Identifier *)table->find(new_func->getSymbol());
         if (id->getIdentity() != "FUNCTION") // Already declared as non-function type
@@ -196,6 +172,7 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
                 }
             }
         }
+        delete new_func;
     }
     else
     {
@@ -208,6 +185,13 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
         }
         new_func->defineFunction();
     }
+
+    // Creating a track of current function
+    curr_func = new Function(id_name, Util::toUpper(ret_type));
+    for (auto p : params)
+    {
+        curr_func->addParam(new Variable(p->getSymbol(), Util::toUpper(p->getDataType())));
+    }
 }
 
 void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<Variable *> params)
@@ -216,9 +200,8 @@ void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<V
     {
         handleInvalidFunctionScoping();
     }
-    Function *new_func = new Function(id_name);
+    Function *new_func = new Function(id_name, Util::toUpper(ret_type));
 
-    new_func->setReturnType(Util::toUpper(ret_type));
     for (auto p : params)
     {
         new_func->addParam(new Variable(p->getSymbol(), Util::toUpper(p->getDataType())));
@@ -236,6 +219,7 @@ void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<V
             Function *func = (Function *)id;
             matchTwoFunction(func, new_func);
         }
+        delete new_func;
     }
     else
     {
@@ -275,7 +259,6 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
         {
             if (params[i]->getDataType() != args[i]->getDataType())
             {
-                // std::cout << params[i]->getDataType() << " " << args[i]->getDataType() << std::endl;
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::ARGUMENT_TYPE_MISMATCH, lexer->getLineCount(), std::to_string(i + 1) + " of '" + id_name + "'") << std::endl;
             }
         }
@@ -290,7 +273,6 @@ void SemanticAnalyzer::declareVariable(string data_type, string var_name)
     if (!table->insert(var)) // already present in current scope
     {
         Identifier *old_id = (Identifier *)table->find(var_name);
-
         if (old_id->getIdentity() == "FUNCTION")
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, lexer->getLineCount(), var_name) << std::endl;
@@ -311,6 +293,7 @@ void SemanticAnalyzer::declareVariable(string data_type, string var_name)
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MULTIPLE_DECLARATION, lexer->getLineCount(), var_name) << std::endl;
             }
         }
+        delete var;
     }
     else
     {
@@ -320,7 +303,6 @@ void SemanticAnalyzer::declareVariable(string data_type, string var_name)
 void SemanticAnalyzer::declareArray(string data_type, string arr_name, string arr_size)
 {
     Array *arr = new Array(arr_name, Util::toUpper(data_type), arr_size);
-
     if (!table->insert(arr)) // already present in current scope
     {
         Identifier *old_id = (Identifier *)table->find(arr_name);
@@ -352,6 +334,7 @@ void SemanticAnalyzer::declareArray(string data_type, string arr_name, string ar
                 }
             }
         }
+        delete arr;
     }
     else
     {
@@ -404,6 +387,7 @@ string SemanticAnalyzer::callVariable(string var_name)
             // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_MISMATCH, lexer->getLineCount(), var_name + " is an array") << std::endl;
             return "ARRAY_" + var->getDataType();
         }
+
         return var->getDataType();
     }
 }
@@ -456,7 +440,6 @@ string SemanticAnalyzer::assignOp(Expression *left, Expression *right)
     }
     else
     {
-        // std::cout << left->getDataType() << " " << right->getDataType() << std::endl;
         if (left->getDataType() == "INT" && right->getDataType() == "FLOAT")
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DATA_LOSS, lexer->getLineCount(), right->getDataType() + " to " + left->getDataType()) << std::endl;

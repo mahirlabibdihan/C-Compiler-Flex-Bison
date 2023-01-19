@@ -48,7 +48,6 @@ public:
     string mulOp(Expression *left, string op, Expression *right);
 
     string implicitTypecast(string left, string right);
-    bool isConvertible(string to, string from);
     bool checkAssignment(string left, string right);
 
     void handleInvalidFunctionScoping();

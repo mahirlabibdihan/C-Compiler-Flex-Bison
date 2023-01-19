@@ -68,14 +68,12 @@ char Util::getActualChar(std::string symbol)
 int Util::getStringLineCount(std::string str)
 {
     int n = str.length();
-    // std::cout << "->" << str << " " << n << std::endl;
     int count = 1;
     for (int i = 1; i < n - 1; i++)
     {
 
         if (str[i] == '\\')
         {
-            // std::cout << i << std::endl;
             i++;
             if (str[i] == '\r' or str[i] == '\n')
             {
@@ -87,7 +85,6 @@ int Util::getStringLineCount(std::string str)
             }
         }
     }
-    // std::cout << str << " " << count << std::endl;
     return count;
 }
 int Util::getSingleCommentLineCount(std::string str)

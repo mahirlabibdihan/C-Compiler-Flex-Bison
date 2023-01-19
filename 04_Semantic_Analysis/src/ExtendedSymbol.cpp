@@ -17,6 +17,11 @@ NonTerminal::NonTerminal(string name, string type) : SymbolInfo(name, "NON_TERMI
 
 NonTerminal::~NonTerminal()
 {
+    for (SymbolInfo *ch : children)
+    {
+        delete ch;
+    }
+    children.clear();
 }
 
 string NonTerminal::getNonTerminalType()
@@ -31,6 +36,14 @@ void NonTerminal::setNonTerminalType(string type)
 
 void NonTerminal::setChildren(std::vector<SymbolInfo *> children)
 {
+    if (!this->children.empty())
+    {
+        for (SymbolInfo *s : this->children)
+        {
+            delete s;
+        }
+        this->children.clear();
+    }
     this->children = children;
 }
 
@@ -360,8 +373,16 @@ void Array::setArraySize(string arr_size)
 Function::Function(const string &func_name) : Identifier(func_name, "FUNCTION")
 {
 }
+Function::Function(const string &func_name, const string &ret_type) : Identifier(func_name, "FUNCTION")
+{
+    this->ret_type = ret_type;
+}
 Function::~Function()
 {
+    for (Variable *v : params)
+    {
+        delete v;
+    }
 }
 const string &Function::getReturnType()
 {
@@ -409,7 +430,6 @@ bool Function::matchParamsType(Function *func)
     {
         if (func->params[i]->getDataType() != this->params[i]->getDataType())
         {
-            // std::cout << func->params[i]->getDataType() << " " << this->params[i]->getDataType() << std::endl;
             return false;
         }
     }

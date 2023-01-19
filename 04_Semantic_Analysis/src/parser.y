@@ -38,7 +38,43 @@ void syntax_error(string parent,string error_child){
 void syntax_error(string parent){
 	errorout << error_hndlr->handleSyntaxError(parent, sem_anlzr->getLineCount()) << std::endl;
 }
+void erm_s(SymbolInfo* s) // erase memory of SymbolInfo pointer
+{
+    if(s!=NULL) delete s;
+}
 
+void erm_nt(NonTerminal* nt) // erase memory of SymbolInfo pointer
+{
+    if(nt!=NULL) delete nt;
+}
+
+void erm_t(Terminal* t) // erase memory of SymbolInfo pointer
+{
+    if(t!=NULL) delete t;
+}
+void erm_e(Expression* s) // erase memory of SymbolInfo pointer
+{
+    if(s!=NULL) delete s;
+}
+
+void erm_v(Variable* s) // erase memory of SymbolInfo pointer
+{
+    if(s!=NULL) delete s;
+}
+
+void erm_dl(DeclarationList* dl) // erase memory of SymbolInfo pointer
+{
+    if(dl!=NULL) delete dl;
+}
+
+void erm_pl(ParameterList* pl) // erase memory of SymbolInfo pointer
+{
+    if(pl!=NULL) delete pl;
+}
+void erm_al(ArgumentList* al) // erase memory of SymbolInfo pointer
+{
+    if(al!=NULL) delete al;
+}
 %}
 %union{
 	Terminal *terminal;
@@ -58,6 +94,13 @@ void syntax_error(string parent){
 %type <vars> declaration_list
 %type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor variable
 
+%destructor { erm_t($$); } <terminal>
+%destructor { erm_nt($$); } <non_terminal>
+%destructor { erm_e($$);  } <expression>
+%destructor { erm_dl($$);  } <vars>
+%destructor { erm_pl($$);  } <params>
+%destructor { erm_al($$);  } <args>
+
 %nonassoc THEN
 %nonassoc ELSE
 %%
@@ -66,9 +109,18 @@ start 					: program
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"start");
-							cout<<"Code compiled successfully"<<endl;
+							if(error_hndlr->getErrorCount())
+							{
+								cout<<"Code compiled with errors"<<endl;
+							}
+							else
+							{
+								cout<<"Code compiled successfully"<<endl;
+							}
 							parseout<<ParseTreeGenerator::getTree($$);
-							ParseTreeGenerator::deleteTree($$);
+							// ParseTreeGenerator::deleteTree($$);
+							delete $$;
+							$$ = NULL;
 						}
 						;
 
@@ -116,9 +168,12 @@ func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 
-							if ($4->getChildren().size() == 1 && $4->getChildren().front()->getType() == "error") {
+							if ($4->getChildren().size() == 1 && $4->getChildren().front()->getType() == "error") 
+							{
 								syntax_error("function declaration","parameter list");
-							} else{
+							} 
+							else
+							{
 								sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
 							}
 						}
@@ -390,10 +445,10 @@ expression_statement 	: SEMICOLON
 						}
 						| error SEMICOLON {
 							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							Expression *e = new Expression(Util::formatCode({s}),"expression");
-							ParseTreeGenerator::createNode(e,{s});
-							vector<SymbolInfo*> child = {e,$2};
-							
+							Expression *exp = new Expression(Util::formatCode({s}),"expression");
+							ParseTreeGenerator::createNode(exp,{s});
+
+							vector<SymbolInfo*> child = {exp,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
 							syntax_error("expression statement","expression");
 						} 

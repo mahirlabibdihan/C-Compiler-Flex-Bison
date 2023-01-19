@@ -30,7 +30,6 @@ void ParseTreeGenerator::createNode(NonTerminal *node, vector<SymbolInfo *> chil
     }
     else
     {
-        // std::cout << node->getNonTerminalType() << std::endl;
         logout << Logger::getRule(node, child) << std::endl;
     }
 }
@@ -133,7 +132,6 @@ std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
 {
     if (node->getType() == "error")
     {
-        // std::cout << node->getSymbol() << " " << node->getType() << std::endl;
         return "";
     }
     std::string tree;
@@ -159,10 +157,6 @@ std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
 
 void ParseTreeGenerator::deleteTree(SymbolInfo *node)
 {
-    if (node->getType() == "error")
-    {
-        return;
-    }
     if (node->getType() == "NON_TERMINAL")
     {
         std::vector<SymbolInfo *> child = ((NonTerminal *)node)->getChildren();
@@ -170,9 +164,6 @@ void ParseTreeGenerator::deleteTree(SymbolInfo *node)
         {
             deleteTree(c);
         }
-    }
-    else
-    {
     }
     delete node;
 }

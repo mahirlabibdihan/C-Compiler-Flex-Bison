@@ -179,6 +179,7 @@ class Function : public Identifier
 
 public:
     Function(const string &func_name);
+    Function(const string &func_name, const string &ret_type);
     ~Function();
     const string &getReturnType();
     void setReturnType(const string &);

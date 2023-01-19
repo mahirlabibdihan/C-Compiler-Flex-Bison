@@ -3,6 +3,7 @@
  * Last modified: January 18, 2023
  */
 #include "../include/ScopeTable.hpp"
+#include <iostream>
 // #include <iostream>
 
 ScopeTable::ScopeTable(int n)

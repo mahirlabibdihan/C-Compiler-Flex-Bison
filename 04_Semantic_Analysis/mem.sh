@@ -11,7 +11,7 @@ echo 'Generated the scanner object file'
 g++ src/*.cpp -c
 mv *.o build/
 echo 'Generated the object files'
-g++ build/*.o -o bin/main.exe 
+g++ -w -g build/*.o -fsanitize=address -o bin/main.exe 
 echo 'All ready, running'
 ./bin/main.exe io/input.txt
 rm build/*

@@ -96,10 +96,10 @@ void erm_al(ArgumentList* al) // erase memory of SymbolInfo pointer
 
 %destructor { erm_t($$); } <terminal>
 %destructor { erm_nt($$); } <non_terminal>
-%destructor { erm_e($$);  } <expression>
-%destructor { erm_dl($$);  } <vars>
-%destructor { erm_pl($$);  } <params>
-%destructor { erm_al($$);  } <args>
+%destructor { erm_e($$); } <expression>
+%destructor { erm_dl($$); } <vars>
+%destructor { erm_pl($$); } <params>
+%destructor { erm_al($$); } <args>
 
 %nonassoc THEN
 %nonassoc ELSE

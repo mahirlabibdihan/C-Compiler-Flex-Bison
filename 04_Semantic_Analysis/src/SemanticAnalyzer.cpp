@@ -624,3 +624,13 @@ void SemanticAnalyzer::startScope()
         this->declareFunctionParams();
     }
 }
+
+void SemanticAnalyzer::setParseTreeRoot(NonTerminal *root)
+{
+    this->tree_root = root;
+}
+
+NonTerminal *SemanticAnalyzer::getParseTreeRoot()
+{
+    return this->tree_root;
+}

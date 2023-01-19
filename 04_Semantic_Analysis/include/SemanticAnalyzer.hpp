@@ -19,6 +19,7 @@ class SemanticAnalyzer
     LexicalAnalyzer *lexer;
     ofstream &logout;
     ofstream &errorout;
+    NonTerminal *tree_root;
 
 private:
     bool matchTwoFunction(Function *f1, Function *f2);
@@ -55,5 +56,8 @@ public:
     void endScope();
     void startScope();
     int getLineCount();
+
+    void setParseTreeRoot(NonTerminal *root);
+    NonTerminal *getParseTreeRoot();
 };
 #endif

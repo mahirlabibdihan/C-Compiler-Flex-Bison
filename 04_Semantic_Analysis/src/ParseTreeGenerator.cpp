@@ -123,11 +123,6 @@ std::string ParseTreeGenerator::getParseTree(SymbolInfo *curr)
     return rule;
 }
 
-// std::string ParseTreeGenerator::getParseTree()
-// {
-//     return getParseTree();
-// }
-
 std::string ParseTreeGenerator::getTree(SymbolInfo *node, int depth)
 {
     if (node->getType() == "error")

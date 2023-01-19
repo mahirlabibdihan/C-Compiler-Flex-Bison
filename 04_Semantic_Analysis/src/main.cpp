@@ -101,6 +101,10 @@ int main(int argc, char *argv[])
     logout << "Total Lines: " << lexer->getLineCount() << std::endl;
     logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
 
+    NonTerminal *root = sem_anlzr->getParseTreeRoot();
+    parseout << ParseTreeGenerator::getTree(root);
+    delete root;
+
     fclose(fin);
     logout.close();
     parseout.close();

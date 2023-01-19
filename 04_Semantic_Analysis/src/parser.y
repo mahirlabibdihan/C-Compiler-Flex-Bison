@@ -22,7 +22,6 @@ using namespace std;
 int yylex(void);
 extern FILE *yyin;
 extern SemanticAnalyzer* sem_anlzr;
-extern ofstream parseout;
 extern ErrorHandler *error_hndlr;
 extern ofstream logout;
 extern ofstream errorout;
@@ -117,9 +116,9 @@ start 					: program
 							{
 								cout<<"Code compiled successfully"<<endl;
 							}
-							parseout<<ParseTreeGenerator::getTree($$);
-							// ParseTreeGenerator::deleteTree($$);
-							delete $$;
+							// parseout<<ParseTreeGenerator::getTree($$);
+							
+							sem_anlzr->setParseTreeRoot($$);
 							$$ = NULL;
 						}
 						;
@@ -481,7 +480,6 @@ variable 				: ID
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							$$ = ParseTreeGenerator::createExpression(child,"expression");
 							$$->setDataType(sem_anlzr->assignOp($1,$3));
-							
 						}
 						;
 			
@@ -504,7 +502,6 @@ rel_expression			: simple_expression
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
 							$$->setDataType($1->getDataType());
-							
 						}
 						| simple_expression RELOP simple_expression	
 						{
@@ -552,8 +549,7 @@ unary_expression 		: ADDOP unary_expression
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression(child,"unary_expression");
-							$$->setDataType($2->getDataType());
-							
+							$$->setDataType("INT");	
 						}
 						| factor 
 						{
@@ -593,15 +589,13 @@ factor					: variable
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType("FLOAT");
-							
+							$$->setDataType("FLOAT");		
 						}
 						| variable INCOP 
 						{
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createExpression(child,"factor");
 							$$->setDataType($1->getDataType());	
-							
 						}
 						| variable DECOP
 						{
@@ -615,8 +609,7 @@ argument_list 			: arguments
 						{
 							vector<SymbolInfo*> child = {$1};
 							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
-							$$->addArgs($1);
-							
+							$$->addArgs($1);							
 						}
 						| 
 						{ 

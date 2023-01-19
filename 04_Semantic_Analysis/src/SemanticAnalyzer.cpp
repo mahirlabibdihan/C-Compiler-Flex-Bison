@@ -99,11 +99,6 @@ void SemanticAnalyzer::returnFunction(Expression *ret)
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
     }
-    // else
-    {
-        delete curr_func;
-        curr_func = NULL;
-    }
 }
 void SemanticAnalyzer::endFunction()
 {
@@ -111,6 +106,10 @@ void SemanticAnalyzer::endFunction()
     {
         delete curr_func;
         curr_func = NULL;
+    }
+    else
+    {
+        // No function to end
     }
 }
 

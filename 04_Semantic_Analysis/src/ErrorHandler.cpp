@@ -192,3 +192,7 @@ std::string ErrorHandler::handleSyntaxError(int line)
     syntax_error_line = line;
     return "Error at line no " + std::to_string(line) + " : syntax error";
 }
+int ErrorHandler::getSyntaxErrorLine()
+{
+    return syntax_error_line;
+}

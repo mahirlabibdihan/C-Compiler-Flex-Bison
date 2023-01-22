@@ -6,6 +6,7 @@
 #define __SEMANTIC_ANALYZER_H 1
 #include <string>
 #include <vector>
+#include <stack>
 #include "../include/SymbolInfo.hpp"
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/LexicalAnalyzer.hpp"
@@ -13,7 +14,7 @@ using namespace std;
 
 class SemanticAnalyzer
 {
-    Function *curr_func;
+    stack<Function *> functions;
     SymbolTable *table;
     ErrorHandler *error_hndlr;
     LexicalAnalyzer *lexer;
@@ -59,5 +60,7 @@ public:
 
     void setParseTreeRoot(NonTerminal *root);
     NonTerminal *getParseTreeRoot();
+    void pushFunction(string ret_type, string func_name, vector<Variable *> params);
+    void popFunction();
 };
 #endif

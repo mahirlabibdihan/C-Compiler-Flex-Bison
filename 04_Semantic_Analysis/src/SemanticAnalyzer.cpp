@@ -15,21 +15,19 @@ SemanticAnalyzer::SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, E
     this->lexer = lexer;
     this->table = table;
     this->error_hndlr = error_hndlr;
-    curr_func = NULL;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
 {
 }
 
+// If there is error in any expression, we will return "ERROR"
+// After printing error we will set "NULL" to that expression
+// And we will generate any further error due that expression
 string SemanticAnalyzer::implicitTypecast(string left, string right)
 {
     if (left == "NULL" || right == "NULL")
     {
         return "NULL"; // already reported , now supressing more errors
-    }
-    if (left == "VOID" || right == "VOID")
-    {
-        return "ERROR";
     }
     if (left == "FLOAT" && right == "INT")
     {
@@ -39,7 +37,7 @@ string SemanticAnalyzer::implicitTypecast(string left, string right)
     {
         return "FLOAT";
     }
-    if (Util::getDataSize(left) < 1 || Util::getDataSize(right) < 1)
+    if (Util::getDataSize(left) < 1 || Util::getDataSize(right) < 1) // Checking for void or array type
     {
         return "ERROR";
     }
@@ -95,17 +93,23 @@ bool SemanticAnalyzer::matchTwoFunction(Function *f1, Function *f2)
 
 void SemanticAnalyzer::returnFunction(Expression *ret)
 {
-    if (ret->getDataType() != curr_func->getReturnType())
+    if (!functions.empty())
     {
-        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
+        if (ret->getDataType() != "NULL" && ret->getDataType() != functions.top()->getReturnType())
+        {
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), functions.top()->getSymbol()) << std::endl;
+        }
+    }
+    else
+    {
+        // No function to return
     }
 }
 void SemanticAnalyzer::endFunction()
 {
-    if (curr_func != NULL)
+    if (!functions.empty())
     {
-        delete curr_func;
-        curr_func = NULL;
+        this->popFunction();
     }
     else
     {
@@ -115,7 +119,7 @@ void SemanticAnalyzer::endFunction()
 
 void SemanticAnalyzer::declareFunctionParams()
 {
-    for (auto i : curr_func->getParams())
+    for (auto i : functions.top()->getParams())
     {
         if (i->getSymbol() == "blank")
             continue;
@@ -132,9 +136,24 @@ void SemanticAnalyzer::declareFunctionParams()
     }
 }
 
+void SemanticAnalyzer::pushFunction(string ret_type, string func_name, vector<Variable *> params)
+{
+    Function *func = new Function(func_name, Util::toUpper(ret_type));
+    for (auto p : params)
+    {
+        func->addParam(new Variable(p->getSymbol(), Util::toUpper(p->getDataType())));
+    }
+    functions.push(func);
+}
+void SemanticAnalyzer::popFunction()
+{
+    delete functions.top();
+    functions.pop();
+}
+
 void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Variable *> params)
 {
-    if (curr_func != NULL)
+    if (!functions.empty())
     {
         handleInvalidFunctionScoping();
     }
@@ -186,16 +205,12 @@ void SemanticAnalyzer::defineFunction(string ret_type, string id_name, vector<Va
     }
 
     // Creating a track of current function
-    curr_func = new Function(id_name, Util::toUpper(ret_type));
-    for (auto p : params)
-    {
-        curr_func->addParam(new Variable(p->getSymbol(), Util::toUpper(p->getDataType())));
-    }
+    this->pushFunction(ret_type, id_name, params);
 }
 
 void SemanticAnalyzer::declareFunction(string ret_type, string id_name, vector<Variable *> params)
 {
-    if (curr_func != NULL)
+    if (!functions.empty())
     {
         handleInvalidFunctionScoping();
     }
@@ -256,7 +271,7 @@ string SemanticAnalyzer::callFunction(string id_name, vector<Expression *> args)
         vector<Variable *> params = func->getParams();
         for (int i = 0; i < params.size(); i++)
         {
-            if (params[i]->getDataType() != args[i]->getDataType())
+            if (args[i]->getDataType() != "NULL" && params[i]->getDataType() != args[i]->getDataType())
             {
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::ARGUMENT_TYPE_MISMATCH, lexer->getLineCount(), std::to_string(i + 1) + " of '" + id_name + "'") << std::endl;
             }
@@ -383,7 +398,6 @@ string SemanticAnalyzer::callVariable(string var_name)
         Variable *var = (Variable *)id;
         if (var->getVarType() == "ARRAY")
         {
-            // errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_MISMATCH, lexer->getLineCount(), var_name + " is an array") << std::endl;
             return "ARRAY_" + var->getDataType();
         }
 
@@ -590,7 +604,7 @@ int SemanticAnalyzer::getLineCount()
 
 void SemanticAnalyzer::handleInvalidFunctionScoping()
 {
-    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, lexer->getLineCount(), curr_func->getSymbol()) << std::endl;
+    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, lexer->getLineCount(), functions.top()->getSymbol()) << std::endl;
 }
 
 void SemanticAnalyzer::handlePrintlnCall(std::string id_name)
@@ -619,7 +633,7 @@ void SemanticAnalyzer::endScope()
 void SemanticAnalyzer::startScope()
 {
     table->enterScope();
-    if (curr_func != NULL)
+    if (!functions.empty())
     {
         this->declareFunctionParams();
     }

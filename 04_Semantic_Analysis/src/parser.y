@@ -179,7 +179,7 @@ func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON
 						| type_specifier ID LPAREN parameter_list error RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$7};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+							SymbolInfo *s = ParseTreeGenerator::createErrorNode();
 							$4->setChildren({s});
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
 							syntax_error("function declaration","parameter list");	
@@ -197,6 +197,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 						{
 							if ($4->getChildren().size() == 1 && $4->getChildren().front()->getType() == "error") {
 								syntax_error("function definition","parameter list");
+								sem_anlzr->pushFunction($1->getSymbol(),$2->getSymbol(), $4->getParams());
 							 }
 							else {
 								sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), $4->getParams());
@@ -211,11 +212,12 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 						| type_specifier ID LPAREN parameter_list error RPAREN 
 						{
 							syntax_error("function definition","parameter list");
+							sem_anlzr->pushFunction($1->getSymbol(),$2->getSymbol(), $4->getParams());
 						} 
 						compound_statement
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$8};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+							SymbolInfo *s = ParseTreeGenerator::createErrorNode();
 							$4->setChildren({s});
 							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
 							sem_anlzr->endFunction();	
@@ -297,7 +299,7 @@ var_declaration 		: type_specifier declaration_list SEMICOLON
 						| type_specifier declaration_list error SEMICOLON 
 						{ 		
 							vector<SymbolInfo*> child = {$1,$2,$4};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+							SymbolInfo *s = ParseTreeGenerator::createErrorNode();
 							$2->setChildren({s});
 							$$ = ParseTreeGenerator::createNonTerminal(child,"var_declaration");
 							sem_anlzr->declareVariables($1->getSymbol(),$2->getSymbol(),$2->getDeclarations());
@@ -443,7 +445,7 @@ expression_statement 	: SEMICOLON
 							}
 						}
 						| error SEMICOLON {
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
+							SymbolInfo *s = ParseTreeGenerator::createErrorNode();
 							Expression *exp = new Expression(Util::formatCode({s}),"expression");
 							ParseTreeGenerator::createNode(exp,{s});
 
@@ -464,8 +466,7 @@ variable 				: ID
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ =  ParseTreeGenerator::createArrayCall(child,"variable");
-							$$->setDataType(sem_anlzr->callArray($1->getSymbol(),$3));
-							
+							$$->setDataType(sem_anlzr->callArray($1->getSymbol(),$3));							
 						}
 						;
 	 

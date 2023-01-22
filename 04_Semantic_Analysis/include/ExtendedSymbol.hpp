@@ -99,7 +99,7 @@ protected:
 
 public:
     Expression();
-    Expression(const string &);
+    Expression(const string &exp_type);
     Expression(Expression *);
     Expression(const string &name, const string &type);
     Expression(const string &name, const string &type, const string &data_type);
@@ -112,7 +112,15 @@ public:
     void setExpType(const string &);
 };
 
-class ParameterList : public NonTerminal
+class List : public NonTerminal
+{
+public:
+    List();
+    List(const string &name, const string &type);
+    virtual ~List();
+};
+
+class ParameterList : public List
 {
     vector<Variable *> list; // Need to destruct
 
@@ -127,7 +135,7 @@ public:
     vector<Variable *> getParams();
 };
 
-class ArgumentList : public NonTerminal
+class ArgumentList : public List
 {
     vector<Expression *> list; // Need to destruct
 
@@ -140,7 +148,7 @@ public:
     vector<Expression *> getArgs();
 };
 
-class DeclarationList : public NonTerminal
+class DeclarationList : public List
 {
     vector<Variable *> list; // Need to destruct
 

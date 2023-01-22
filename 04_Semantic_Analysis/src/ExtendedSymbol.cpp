@@ -52,10 +52,21 @@ std::vector<SymbolInfo *> NonTerminal::getChildren()
     return children;
 }
 
+List::List()
+{
+}
+
+List::List(const string &name, const string &type) : NonTerminal(name, type)
+{
+}
+
+List::~List()
+{
+}
 ParameterList::ParameterList()
 {
 }
-ParameterList::ParameterList(const string &name, const string &type) : NonTerminal(name, type)
+ParameterList::ParameterList(const string &name, const string &type) : List(name, type)
 {
 }
 ParameterList::~ParameterList()
@@ -97,7 +108,7 @@ vector<Variable *> ParameterList::getParams()
 ArgumentList::ArgumentList()
 {
 }
-ArgumentList::ArgumentList(const string &name, const string &type) : NonTerminal(name, type)
+ArgumentList::ArgumentList(const string &name, const string &type) : List(name, type)
 {
 }
 ArgumentList::~ArgumentList()
@@ -131,9 +142,10 @@ DeclarationList::DeclarationList()
 {
 }
 
-DeclarationList::DeclarationList(const string &name, const string &type) : NonTerminal(name, type)
+DeclarationList::DeclarationList(const string &name, const string &type) : List(name, type)
 {
 }
+
 DeclarationList::~DeclarationList()
 {
     while (!list.empty())
@@ -185,6 +197,7 @@ vector<Variable *> DeclarationList::getDeclarations()
 Expression::Expression() : NonTerminal()
 {
     this->data_type = "void";
+    // this->exp_type = "";
 }
 Expression::Expression(const string &exp_type) : NonTerminal()
 {
@@ -194,15 +207,18 @@ Expression::Expression(const string &exp_type) : NonTerminal()
 Expression::Expression(Expression *e) : NonTerminal(e->name, e->type)
 {
     this->data_type = e->data_type;
+    // this->exp_type = "";
 }
 Expression::Expression(const string &name, const string &type) : NonTerminal(name, type)
 {
     this->data_type = "";
+    // this->exp_type = "";
 }
 
 Expression::Expression(const string &name, const string &type, const string &data_type) : NonTerminal(name, type)
 {
     this->data_type = data_type;
+    // this->exp_type = "";
 }
 Expression::~Expression()
 {
@@ -240,6 +256,7 @@ ArrayCall::ArrayCall() : Expression("ARRAY_CALL")
 }
 ArrayCall::ArrayCall(Expression *index) : Expression("ARRAY_CALL")
 {
+    idx = "";
     // this->index = new Expression(index);
 }
 ArrayCall::ArrayCall(const string &name, const string &type) : Expression(name, type)
@@ -266,6 +283,10 @@ void ArrayCall::setIndex(string idx)
     this->idx = idx;
 }
 
+Terminal::Terminal()
+{
+    this->t_type = "";
+}
 Terminal::Terminal(const string &t_type) : SymbolInfo("blank", "TERMINAL")
 {
     this->t_type = t_type;
@@ -312,10 +333,12 @@ void Identifier::setIdentity(const string &id_type)
 Variable::Variable() : Identifier("VARIABLE")
 {
     this->var_type = "";
+    this->data_type = "";
 }
 Variable::Variable(const string &var_type) : Identifier("VARIABLE")
 {
     this->var_type = var_type;
+    this->data_type = "";
 }
 Variable::Variable(const string &var_name, const string &data_type) : Identifier(var_name, "VARIABLE")
 {
@@ -349,6 +372,7 @@ void Variable::setDataType(const string &data_type)
 
 Array::Array(const string &arr_name) : Variable(arr_name, "", "ARRAY")
 {
+    this->arr_size = "0";
 }
 Array::Array(const string &arr_name, string arr_size) : Variable(arr_name, "", "ARRAY")
 {
@@ -372,9 +396,14 @@ void Array::setArraySize(string arr_size)
 
 Function::Function(const string &func_name) : Identifier(func_name, "FUNCTION")
 {
+    is_definition = false;
+    is_declaration = false;
+    this->ret_type = "";
 }
 Function::Function(const string &func_name, const string &ret_type) : Identifier(func_name, "FUNCTION")
 {
+    is_definition = false;
+    is_declaration = false;
     this->ret_type = ret_type;
 }
 Function::~Function()

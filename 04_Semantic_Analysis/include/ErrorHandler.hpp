@@ -80,6 +80,7 @@ public:
     std::string handleSyntaxError(string parent, string error_child, int line);
     std::string handleSyntaxError(string parent, int line);
     std::string handleSyntaxError(int line);
+    int getSyntaxErrorLine();
     int getErrorCount();
 };
 

@@ -43,4 +43,4 @@ $(OBJDIR)main.o: $(SRCDIR)main.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm $(OBJDIR)* $(BINDIR)*
+	rm $(OBJDIR)* $(BINDIR)* $(SRCDIR)*.c $(INCDIR)*.h

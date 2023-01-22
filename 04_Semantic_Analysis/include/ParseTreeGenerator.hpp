@@ -7,7 +7,7 @@
 namespace ParseTreeGenerator
 {
     void createNode(NonTerminal *node, vector<SymbolInfo *> child);
-    SymbolInfo *createErrorNode(int line_no);
+    SymbolInfo *createErrorNode();
     NonTerminal *createNonTerminal(std::vector<SymbolInfo *> child, std::string name);
     Expression *createExpression(std::vector<SymbolInfo *> child, std::string name);
     ParameterList *createParameterList(std::vector<SymbolInfo *> child, std::string name);
@@ -16,6 +16,6 @@ namespace ParseTreeGenerator
     ArrayCall *createArrayCall(std::vector<SymbolInfo *> child, std::string name);
     std::string getParseTree(SymbolInfo *curr);
     std::string getTree(SymbolInfo *node, int depth = 0);
-    void deleteTree(SymbolInfo *node);
+    // void deleteTree(SymbolInfo *node);
 };
 #endif

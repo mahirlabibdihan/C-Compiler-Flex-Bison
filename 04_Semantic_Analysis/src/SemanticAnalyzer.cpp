@@ -576,6 +576,11 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
     {
         if (type != "ERROR")
         {
+            if (op == "/" && right->getExpression() == "0")
+            {
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, lexer->getLineCount(), right->getExpression() + "%" + right->getExpression()) << std::endl;
+                return "NULL";
+            }
             return type;
         }
         else

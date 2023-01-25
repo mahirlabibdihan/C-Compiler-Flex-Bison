@@ -67,7 +67,7 @@ void setChildren(SymbolInfo* node,const vector<SymbolInfo *> &child, const strin
 	// 	cout<<type<<"ERROR"<<endl;
 	// }
 		
-	// logout << Logger::getRule(node, child) << std::endl;
+	logout << Logger::getRule(node, child) << std::endl;
 	// logout << node->getSymbol() << std::endl;
 }
 %}
@@ -129,7 +129,22 @@ start 					: program
 program 				: program  unit
 						{
 							$$ = $1;
-							if($2 != NULL) $$->addUnit($2);	
+							if($2 != NULL) 
+							{
+								string type = $2->getUnitType();
+								if(type == "FUNCTION_DEFINITION")
+								{
+									$$->addFunctionDefinition((FunctionDefinition*)$2);
+								}
+								if(type == "FUNCTION_DECLARATION")
+								{
+									$$->addFunctionDeclaration((FunctionDeclaration*)$2);
+								}
+								if(type == "VARIABLE_DECLARATION")
+								{
+									$$->addVariableDeclaration((VariableDeclaration*)$2);
+								}
+							}	
 
 							vector<SymbolInfo*> child = {$1,$2};
 							setChildren($$, child, "program");	
@@ -137,7 +152,22 @@ program 				: program  unit
 						|  unit
 						{
 							$$ = new Program(); 
-							if($1 != NULL) $$->addUnit($1);
+							if($1 != NULL)
+							{
+								string type = $1->getUnitType();
+								if(type == "FUNCTION_DEFINITION")
+								{
+									$$->addFunctionDefinition((FunctionDefinition*)$1);
+								}
+								if(type == "FUNCTION_DECLARATION")
+								{
+									$$->addFunctionDeclaration((FunctionDeclaration*)$1);
+								}
+								if(type == "VARIABLE_DECLARATION")
+								{
+									$$->addVariableDeclaration((VariableDeclaration*)$1);
+								}
+							}
 
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "program");
@@ -146,28 +176,31 @@ program 				: program  unit
 	
 unit 					: var_declaration
 						{
-							$$ = (Unit*) $1;
+							$$ = $1;
+							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {(Unit*)$1};
 							setChildren($$, child, "unit");
 						}
 						| func_declaration
 						{
-							$$ = (Unit*) $1;
+							$$ = $1;
+							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {(Unit*)$1};
 							setChildren($$, child, "unit");
 						}
 						| func_definition
 						{
-							$$ = (Unit*) $1;
+							$$ = $1;
+							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {(Unit*)$1};
 							setChildren($$, child, "unit");	
 						}
 						;
     
-func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON // 
+func_declaration 		: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON // 
 						{
 							$$ = new FunctionDeclaration($2->getSymbol(), $1->getType(), $4->getParams());
 
@@ -201,6 +234,8 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_stat
 						{
 							syntax_error("function definition","parameter list");
 							$$ = NULL;	
+							
+							delete $1, $2, $3, $4, $6, $7;
 						}
 						| type_specifier ID LPAREN RPAREN compound_statement
 						{
@@ -211,11 +246,13 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_stat
 						}
 						;				
 
-// No temporary variables
 parameter_list  		: parameter_list COMMA type_specifier ID
 						{
 							$$ = $1; 
-							$$->addParam($3->getType(),$4->getSymbol());
+							Variable* param = new Variable($4->getSymbol(),$3->getType());
+							param->setStartLine($3->getStartLine());
+							$$->addParam(param);
+							// $$->addParam($3->getType(),$4->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							setChildren($$, child, "parameter_list");
@@ -223,7 +260,10 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 						| parameter_list COMMA type_specifier 
 						{
 							$$ = $1; 
-							$$->addParam($3->getType());
+							Variable* param = new Variable("blank",$3->getType());
+							param->setStartLine($3->getStartLine());
+							$$->addParam(param);
+							// $$->addParam($3->getType());
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							setChildren($$, child, "parameter_list");	
@@ -231,7 +271,10 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 						| type_specifier ID 
 						{
 							$$ = new ParameterList(); 
-							$$->addParam($1->getType(),$2->getSymbol());
+							Variable* param = new Variable($2->getSymbol(),$1->getType());
+							param->setStartLine($1->getStartLine());
+							$$->addParam(param);
+							// $$->addParam($1->getType(),$2->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2};
 							setChildren($$, child, "parameter_list");
@@ -239,13 +282,16 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 						| type_specifier
 						{
 							$$ = new ParameterList(); 
-							$$->addParam($1->getType());
+							Variable* param = new Variable("blank",$1->getType());
+							param->setStartLine($1->getStartLine());
+							$$->addParam(param);
+							// $$->addParam($1->getType());
 
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "parameter_list");
 						}
 						;
- 		
+
 compound_statement 		: LCURL statements RCURL
 						{
 							$$ = $2;
@@ -256,6 +302,7 @@ compound_statement 		: LCURL statements RCURL
 						| LCURL RCURL
 						{
 							$$ = NULL;
+							delete $1, $2;
 						}
 						;
 
@@ -352,35 +399,37 @@ statements 				: statement
 
 statement 				: var_declaration
 						{
-							$$ = (Statement*) $1;
-
+							$$ = $1;
+							$$->setNonTerminalType("STATEMENT");
 							vector<SymbolInfo*> child = {(Statement*)$1};
 							setChildren($$, child, "statement");
 						}
 						| func_definition
 						{
-							$$ = (Statement*) $1;
+							$$ = $1;
+							$$->setNonTerminalType("STATEMENT");
 
 							vector<SymbolInfo*> child = {(Statement*)$1};
 							setChildren($$, child, "statement");
 						}
 						| func_declaration
 						{
-							$$ = (Statement*) $1;
+							$$ = $1;
+							$$->setNonTerminalType("STATEMENT");
 
 							vector<SymbolInfo*> child = {(Statement*)$1};
 							setChildren($$, child, "statement");	
 						}
 						| expression_statement
 						{
-							$$ = (Statement*) $1;
+							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "statement");
 						}
 						| compound_statement
 						{
-							$$ = (Statement*) $1;
+							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "statement");
@@ -438,6 +487,7 @@ statement 				: var_declaration
 expression_statement 	: SEMICOLON
 						{
 							$$ = NULL;
+							delete $1;
 						}	
 						| expression SEMICOLON // $$ = $1;
 						{
@@ -449,6 +499,8 @@ expression_statement 	: SEMICOLON
 						| error SEMICOLON {
 							syntax_error("expression statement","expression");
 							$$ = NULL;
+
+							delete $2;
 						} 
 						;
 	  
@@ -464,7 +516,7 @@ variable 				: ID
 							$$ = new ArrayCall($1->getSymbol(),$3);		
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							setChildren($$, child, "variable");					
+							setChildren($$, child, "variable");		
 						}
 						;
 	 
@@ -532,14 +584,14 @@ simple_expression 		: term
 						}
 						;
 					
-term 					:	unary_expression
+term 					: unary_expression
 						{
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "term");
 						}
-						|  term MULOP unary_expression
+						| term MULOP unary_expression
 						{
 							$$ = new MulOp($1,$3,$2->getSymbol());	
 							
@@ -571,10 +623,10 @@ unary_expression 		: ADDOP unary_expression
 						}
 						;
 
-factor					: variable 
+factor					: variable
 						{
-							$$ = new VariableCall($1->getIdName());
-
+							$$ = $1;
+							
 							vector<SymbolInfo*> child = {$1};
 							setChildren($$, child, "factor");
 						}
@@ -592,7 +644,7 @@ factor					: variable
 							vector<SymbolInfo*> child = {$1,$2,$3};
 							setChildren($$, child, "factor");
 						}
-						| CONST_INT // $$ = new IntegerCall($1->getSymbol());
+						| CONST_INT
 						{
 							$$ = new IntegerCall($1->getSymbol());
 							$$->setSymbol($1->getSymbol());

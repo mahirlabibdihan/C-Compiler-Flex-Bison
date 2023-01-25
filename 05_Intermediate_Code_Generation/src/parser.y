@@ -1,4 +1,8 @@
 %{
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -8,34 +12,66 @@
 #include "../include/SymbolTable.hpp"
 #include "../include/Logger.hpp"
 #include "../include/ErrorHandler.hpp"
-#include "../include/SemanticAnalyzer.hpp"
 #include "../include/Util.hpp"
 #include "../include/ExtendedSymbol.hpp"
-#include "../include/Tokenizer.hpp"
-#include "../include/ParseTreeGenerator.hpp"
+#include "../include/LexicalAnalyzer.hpp"
 using namespace std;
 
+int yyparse(Program*);
 int yylex(void);
 extern FILE *yyin;
-extern SemanticAnalyzer* sem_anlzr;
-extern ofstream parseout;
 extern ErrorHandler *error_hndlr;
 extern ofstream logout;
 extern ofstream errorout;
-
+extern LexicalAnalyzer *lexer;
+Program *prog;
 void yyerror(string error){
-	// errorout << error_hndlr->handleSyntaxError(error, sem_anlzr->getLineCount()) << std::endl;
+	logout << error_hndlr->handleSyntaxError(lexer->getLineCount()) << std::endl;
 }
 
 void syntax_error(string parent,string error_child){
-	errorout << error_hndlr->handleSyntaxError(parent, error_child, sem_anlzr->getLineCount()) << std::endl;
+	errorout << error_hndlr->handleSyntaxError(parent, error_child, lexer->getLineCount()) << std::endl;
 }
 
 void syntax_error(string parent){
-	errorout << error_hndlr->handleSyntaxError(parent, sem_anlzr->getLineCount()) << std::endl;
+	errorout << error_hndlr->handleSyntaxError(parent, lexer->getLineCount()) << std::endl;
 }
 
+template <typename T>
+void erm(T s)
+{
+	if(s!=NULL) delete s;
+}
+
+void setChildren(SymbolInfo* node,const vector<SymbolInfo *> &child, const string &type)
+{
+	if(node == NULL) return;
+	node->setSymbol(Util::formatCode(child));
+	// node->setType(type);
+	if (child.empty())
+    {
+        node->setStartLine(lexer->getLineCount());
+        node->setEndLine(lexer->getLineCount());
+    }
+    else
+    {
+		if(child.front()!=NULL)
+        node->setStartLine(child.front()->getStartLine());
+		if(child.back()!=NULL)
+        node->setEndLine(child.back()->getEndLine());
+    }
+	// if(((ASTNode*)node)->getASTType()=="NON_TERMINAL") 
+	// {
+	// 	cout<<type<<"ERROR"<<endl;
+	// 	((NonTerminal*)node)->setChildren(child);
+	// 	cout<<type<<"ERROR"<<endl;
+	// }
+		
+	// logout << Logger::getRule(node, child) << std::endl;
+	// logout << node->getSymbol() << std::endl;
+}
 %}
+
 %union{
 	Terminal *terminal;
 	NonTerminal *non_terminal;
@@ -43,16 +79,36 @@ void syntax_error(string parent){
 	ArgumentList *args;
 	ParameterList *params;
 	DeclarationList *vars;
+	Program *program;
+	Unit *unit;
+	FunctionDeclaration *func_decl;
+	FunctionDefinition *func_def;
+	VariableDeclaration *var_decl;
+	CompoundStatement *stmt_list;
+	Statement *stmt;
+	VariableCall *var_call;
+	ExpressionStatement* expr_stmt;
 }
 
 %token <terminal> IF ELSE THEN SWITCH CASE DEFAULT FOR DO WHILE INT FLOAT DOUBLE CHAR STRING VOID BREAK RETURN CONTINUE INCOP DECOP ASSIGNOP NOT PRINTLN LPAREN RPAREN LCURL RCURL LSQUARE RSQUARE COMMA SEMICOLON ID CONST_INT CONST_FLOAT CONST_CHAR ADDOP MULOP LOGICOP RELOP BITOP
 
-%type <non_terminal> start program unit func_declaration func_definition compound_statement var_declaration type_specifier statements statement expression_statement
+%type <program> start program 
+%type <unit> unit 
+%type <func_decl> func_declaration 
+%type <func_def> func_definition 
+%type <var_decl> var_declaration
+%type <stmt_list> compound_statement statements
+%type <terminal> type_specifier 
+%type <stmt> statement
+%type <expr_stmt> expression_statement
 
 %type <args> argument_list arguments
 %type <params> parameter_list
 %type <vars> declaration_list
-%type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor variable
+%type <expression> expression logic_expression rel_expression simple_expression term unary_expression factor 
+%type <var_call> variable
+
+%destructor { erm($$); } <*>
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -60,728 +116,552 @@ void syntax_error(string parent){
 
 start 					: program
 						{
+							$$ = $1;
+							
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"start");
-							cout<<"Code compiled successfully"<<endl;
-							parseout<<ParseTreeGenerator::getTree($$);
-							ParseTreeGenerator::deleteTree($$);
+							setChildren($$, child, "start");
+
+							prog = $$;
+							$$ = NULL;
 						}
 						;
 
-program 				:  program  unit 
+program 				: program  unit
 						{
+							$$ = $1;
+							if($2 != NULL) $$->addUnit($2);	
+
 							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"program");			 
+							setChildren($$, child, "program");	
 						}
-						|  unit 
+						|  unit
 						{
+							$$ = new Program(); 
+							if($1 != NULL) $$->addUnit($1);
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"program");
+							setChildren($$, child, "program");
 						}
 						;
 	
-unit 					: var_declaration 
+unit 					: var_declaration
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							
+							$$ = (Unit*) $1;
+
+							vector<SymbolInfo*> child = {(Unit*)$1};
+							setChildren($$, child, "unit");
 						}
-						| func_declaration 
+						| func_declaration
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							
+							$$ = (Unit*) $1;
+
+							vector<SymbolInfo*> child = {(Unit*)$1};
+							setChildren($$, child, "unit");
 						}
-						| func_definition 
+						| func_definition
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							
-						}
-						| error {
-							vector<SymbolInfo*> child = {};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-							syntax_error("unit");
+							$$ = (Unit*) $1;
+
+							vector<SymbolInfo*> child = {(Unit*)$1};
+							setChildren($$, child, "unit");	
 						}
 						;
-
-// No temporary variables     
-func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON 
+    
+func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON // 
 						{
+							$$ = new FunctionDeclaration($2->getSymbol(), $1->getType(), $4->getParams());
+
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-							
+							setChildren((Unit*)$$, child, "func_declaration");
 						}
-						// | type_specifier ID LPAREN parameter_list RPAREN error
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-						// 	// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());	
-						// 	syntax_error("function declaration");
-						// 	
-						// }
 						| type_specifier ID LPAREN parameter_list error RPAREN SEMICOLON
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$7};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-							// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-							syntax_error("function declaration","parameter list");
-							
+							syntax_error("function declaration","parameter list");	
+							$$ = NULL;
 						}
-						// | type_specifier ID LPAREN parameter_list error RPAREN error
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$2,$3,$4,$6};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-						// 	// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),$4->getParams());
-						// 	syntax_error("function declaration","parameter list");
-						// 	
-						// }
 						| type_specifier ID LPAREN RPAREN SEMICOLON
 						{
+							$$ = new FunctionDeclaration($2->getSymbol(), $1->getType(), {});
+
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-							sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							
+							setChildren((Unit*)$$, child, "func_declaration"); 
 						}
-						// | type_specifier ID LPAREN RPAREN error
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$2,$3,$4};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-						// 	// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-						// 	syntax_error("function declaration");
-						// 	
-						// }
-						| type_specifier ID LPAREN error RPAREN SEMICOLON
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$5,$6};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-							// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-							syntax_error("function declaration","parameter list");
-							
-						}
-						// | type_specifier ID LPAREN error RPAREN error
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$2,$3,$5};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"func_declaration");
-						// 	// sem_anlzr->declareFunction($1->getSymbol(),$2->getSymbol(),{});
-						// 	syntax_error("function declaration","parameter list");
-						// 	
-						// }
 						;
 		 
 
-func_definition 		: type_specifier ID LPAREN parameter_list RPAREN 
+func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 						{
-							sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), $4->getParams());
-						} 
-						compound_statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$7};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
-							sem_anlzr->endFunction();
-							
+							$$ = new FunctionDefinition($2->getSymbol(),$1->getType(), $4->getParams(), $6->getStatements());
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};	
+							setChildren((Unit*)$$, child, "func_definition");
 						}
-						| type_specifier ID LPAREN parameter_list error RPAREN 
+						| type_specifier ID LPAREN parameter_list error RPAREN compound_statement
 						{
-							// sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), $4->getParams());
 							syntax_error("function definition","parameter list");
-						} 
-						compound_statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6,$8};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
-							sem_anlzr->endFunction();
-							
+							$$ = NULL;	
 						}
-						| type_specifier ID LPAREN RPAREN 
+						| type_specifier ID LPAREN RPAREN compound_statement
 						{
-							sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), {});
-						} 
-						compound_statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$6};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
-							sem_anlzr->endFunction();
-							
-						}
-						| type_specifier ID LPAREN error RPAREN 
-						{
-							// sem_anlzr->defineFunction($1->getSymbol(),$2->getSymbol(), vector<Variable*>());
-							syntax_error("function definition","parameter list");
-						}
-						compound_statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$5,$7};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"func_definition");
-							sem_anlzr->endFunction();
-							// freeMemory(child);
+							$$ = new FunctionDefinition($2->getSymbol(), $1->getType(), {}, $5->getStatements());
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
+							setChildren((Unit*)$$, child, "func_definition");
 						}
 						;				
 
 // No temporary variables
 parameter_list  		: parameter_list COMMA type_specifier ID
 						{
+							$$ = $1; 
+							$$->addParam($3->getType(),$4->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-							$$->addParams($1);
-							$$->addParam($3->getSymbol(),$4->getSymbol());
-							// freeMemory(child);
+							setChildren($$, child, "parameter_list");
 						}
-						// | parameter_list error COMMA type_specifier ID
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3,$4,$5};
-						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-						// 	syntax_error("function definition","parameter list");
-						// 	$$->addParams($1);
-						// 	$$->addParam($4->getSymbol(),$5->getSymbol());
-						// 	
-						// }
-						| parameter_list COMMA type_specifier
+						| parameter_list COMMA type_specifier 
 						{
+							$$ = $1; 
+							$$->addParam($3->getType());
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-							$$->addParams($1);
-							$$->addParam($3->getSymbol());
-							
+							setChildren($$, child, "parameter_list");	
 						}
-						// | parameter_list error COMMA type_specifier
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3,$4};
-						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-						// 	syntax_error("function definition","parameter list");
-						// 	$$->addParams($1);
-						// 	$$->addParam($4->getSymbol());
-						// 	
-						// }
-						| type_specifier ID
+						| type_specifier ID 
 						{
+							$$ = new ParameterList(); 
+							$$->addParam($1->getType(),$2->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-							$$->addParam($1->getSymbol(),$2->getSymbol());
-							
+							setChildren($$, child, "parameter_list");
 						}
 						| type_specifier
 						{
+							$$ = new ParameterList(); 
+							$$->addParam($1->getType());
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-							$$->addParam($1->getSymbol());
-							
+							setChildren($$, child, "parameter_list");
 						}
-						// | type_specifier error
-						// {
-						// 	vector<SymbolInfo*> child = {$1};
-						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-						// 	$$->addParam($1->getSymbol());
-						// 	
-						// }
-						// | error
-						// {
-						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	vector<SymbolInfo*> child = {s};
-						// 	$$ = ParseTreeGenerator::createParameterList(child,"parameter_list");
-						// 	
-						// }
 						;
  		
-compound_statement 		: LCURL create_scope statements RCURL
+compound_statement 		: LCURL statements RCURL
 						{
-							vector<SymbolInfo*> child = {$1,$3,$4};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
-							sem_anlzr->endScope();
-							
+							$$ = $2;
+
+							vector<SymbolInfo*> child = {$1,$2,$3};
+							setChildren($$, child, "compound_statement");
 						}
-						// | LCURL create_scope statements error RCURL
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3,$5};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
-						// 	sem_anlzr->endScope();
-						// 	
-						// }
-						// | LCURL create_scope error statements RCURL
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$4,$5};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
-						// 	sem_anlzr->endScope();
-						// 	
-						// }
-						| LCURL create_scope RCURL
+						| LCURL RCURL
 						{
-							vector<SymbolInfo*> child = {$1,$3};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
-							sem_anlzr->endScope();
-							
+							$$ = NULL;
 						}
-						// | LCURL create_scope error RCURL
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$4};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"compound_statement");
-						// 	sem_anlzr->endScope();
-						// 	
-						// }
 						;
 
-// No temporary variables
-create_scope			: 
-						{ 
-							sem_anlzr->startScope();
-						}
-
-// No temporary variables
-var_declaration 		: type_specifier declaration_list SEMICOLON 
+var_declaration 		: type_specifier declaration_list SEMICOLON
 						{ 				
+							$$ = new VariableDeclaration($1->getType(), $2->getDeclarations());
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"var_declaration");
-							sem_anlzr->declareVariables($1->getSymbol(),$2->getSymbol(),$2->getDeclarations());
-							
+							setChildren((Unit*)$$, child, "var_declaration");							
 						}
 						| type_specifier declaration_list error SEMICOLON 
-						{ 			
+						{ 	
+							$$ = new VariableDeclaration($1->getType(), $2->getDeclarations());
+
 							vector<SymbolInfo*> child = {$1,$2,$4};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"var_declaration");
-							sem_anlzr->declareVariables($1->getSymbol(),$2->getSymbol(),$2->getDeclarations());
 							syntax_error("variable declaration","declaration list");
-							
 						}
 						;
 
-// No temporary variables		 
-type_specifier			: INT 	
+type_specifier			: INT
 						{ 
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
+							$$ = $1;
 							
+							vector<SymbolInfo*> child = {$1};
+							setChildren($$, child, "type_specifier");	
 						}
 						| FLOAT
 						{
+							$$ = $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
-							
+							setChildren($$, child, "type_specifier");
 						}
 						| VOID
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"type_specifier");
-							
+							$$ = $1;
+
+							vector<SymbolInfo*> child = {$1};	
+							setChildren($$, child, "type_specifier");				
 						}
 						;
-
-// No temporary variables 		
+	
 declaration_list 		: declaration_list COMMA ID
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							$$->addVariables($1);
+							$$ = $1; 
 							$$->addVariable($3->getSymbol());
 							
+							vector<SymbolInfo*> child = {$1,$2,$3};
+							setChildren($$, child, "declaration_list");							
 						}
-						// | declaration_list error COMMA ID
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3,$4};
-						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-						// 	$$->addVariables($1);
-						// 	$$->addVariable($4->getSymbol());
-						// 	
-						// }
 						| declaration_list COMMA ID LSQUARE CONST_INT RSQUARE
 						{
+							$$ = $1; 
+							$$->addArray($3->getSymbol(),$5->getSymbol());	
+							
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
-							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							// sem_anlzr->checkArraySize($5);
-							$$->addVariables($1);
-							$$->addArray($3->getSymbol(),$5->getSymbol());
-							
+							setChildren($$, child, "declaration_list");								
 						}
-						// | declaration_list error COMMA ID LSQUARE CONST_INT RSQUARE
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3,$4,$5,$6,$7};
-						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-						// 	// sem_anlzr->checkArraySize($6);
-						// 	$$->addVariables($1);
-						// 	$$->addArray($4->getSymbol(),$6->getSymbol());
-						// 	
-						// }
-						| ID 
+						| ID
 						{ 
+							$$ = new DeclarationList();
+							$$->addVariable($1->getSymbol());	
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");	
-							$$->addVariable($1->getSymbol());
-							
+							setChildren($$, child, "declaration_list");
 						}
-						| ID LSQUARE CONST_INT RSQUARE // handleArrayDeclaration({$1,$2,$3,$4})
+						| ID LSQUARE CONST_INT RSQUARE
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-							// sem_anlzr->checkArraySize($3);
+							$$ = new DeclarationList();
 							$$->addArray($1->getSymbol(),$3->getSymbol());
-							
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4};
+							setChildren($$, child, "declaration_list");
 						}
-						// | error
-						// {
-						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	vector<SymbolInfo*> child = {s};
-						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-						// 	
-						// }
 						;
  		  
 statements 				: statement
 						{
+							$$ = new CompoundStatement(); 
+							if($1 != NULL) $$->addStatement($1);
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-							
+							setChildren($$, child, "statements");
 						}
 						| statements statement
 						{
+							$$ = $1; 
+							if($2 != NULL) $$->addStatement($2);
+
 							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-							
-						}
-						// | statements error statement
-						// {
-						// 	vector<SymbolInfo*> child = {$1,$3};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"statements");
-						// 	
-						// }
-						// | error
-						// {
-						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	vector<SymbolInfo*> child = {s};
-						// 	$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
-						// 	
-						// }
-						;
-	   
-statement 				: var_declaration
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| func_definition 
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							// sem_anlzr->handleInvalidFunctionScoping();
-							
-						}
-						| func_declaration 
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							// sem_anlzr->handleInvalidFunctionScoping();
-							
-						}
-						| expression_statement
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| compound_statement
-						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| FOR LPAREN expression_statement expression_statement expression RPAREN statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| IF LPAREN expression RPAREN statement %prec THEN
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}		
-						| IF LPAREN expression RPAREN statement ELSE statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| WHILE LPAREN expression RPAREN statement
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
-						}
-						| RETURN expression SEMICOLON
-						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							sem_anlzr->returnFunction($2);
-							
-						}
-						| RETURN SEMICOLON {
-							// New rule
-							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
-							
+							setChildren($$, child, "statements");
 						}
 						;
 
-expression_statement 	: SEMICOLON		
+statement 				: var_declaration
 						{
+							$$ = (Statement*) $1;
+
+							vector<SymbolInfo*> child = {(Statement*)$1};
+							setChildren($$, child, "statement");
+						}
+						| func_definition
+						{
+							$$ = (Statement*) $1;
+
+							vector<SymbolInfo*> child = {(Statement*)$1};
+							setChildren($$, child, "statement");
+						}
+						| func_declaration
+						{
+							$$ = (Statement*) $1;
+
+							vector<SymbolInfo*> child = {(Statement*)$1};
+							setChildren($$, child, "statement");	
+						}
+						| expression_statement
+						{
+							$$ = (Statement*) $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
-							
-						}	
-						| expression SEMICOLON 
+							setChildren($$, child, "statement");
+						}
+						| compound_statement
 						{
-						
-							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
-						
+							$$ = (Statement*) $1;
+
+							vector<SymbolInfo*> child = {$1};
+							setChildren($$, child, "statement");
+						}
+						| FOR LPAREN expression_statement expression_statement expression RPAREN statement
+						{
+							$$ = new ForLoop($3->getExpression(), $4->getExpression(), $5, $7);
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
+							setChildren($$, child, "statement");
+						}
+						| IF LPAREN expression RPAREN statement %prec THEN
+						{
+							$$ = new IfStatement($3, $5);
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
+							setChildren($$, child, "statement");
+						}		
+						| IF LPAREN expression RPAREN statement ELSE statement
+						{
+							$$ = new IfElseStatement($3, $5, $7);
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
+							setChildren($$, child, "statement");
+						}
+						| WHILE LPAREN expression RPAREN statement
+						{
+							$$ = new WhileLoop($3, $5);
 							
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
+							setChildren($$, child, "statement");
+						}
+						| PRINTLN LPAREN ID RPAREN SEMICOLON 
+						{
+							$$ = new PrintStatement(new VariableCall($3->getSymbol()));
+
+							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
+							setChildren($$, child, "statement");
+						}
+						| RETURN expression SEMICOLON
+						{
+							$$ = new ReturnStatement($2);
+
+							vector<SymbolInfo*> child = {$1,$2,$3};
+							setChildren($$, child, "statement");
+						}
+						| RETURN SEMICOLON {
+							$$ = new ReturnStatement(NULL);
+
+							vector<SymbolInfo*> child = {$1,$2};
+							setChildren($$, child, "statement");
+						}
+						;
+
+expression_statement 	: SEMICOLON
+						{
+							$$ = NULL;
+						}	
+						| expression SEMICOLON // $$ = $1;
+						{
+							$$ = new ExpressionStatement($1);
+
+							vector<SymbolInfo*> child = {$1,$2};
+							setChildren($$, child, "expression_statement");
 						}
 						| error SEMICOLON {
-							vector<SymbolInfo*> child = {$2};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createNonTerminal(child,"expression_statement");
 							syntax_error("expression statement","expression");
+							$$ = NULL;
 						} 
 						;
 	  
-variable 				: ID 		
+variable 				: ID 
 						{
+							$$ = new VariableCall($1->getSymbol());
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"variable");
-							$$->setDataType(sem_anlzr->callVariable($1->getSymbol()));
-							
+							setChildren($$, child, "variable");
 						}
-						| ID LSQUARE expression RSQUARE 
+						| ID LSQUARE expression RSQUARE
 						{
+							$$ = new ArrayCall($1->getSymbol(),$3);		
+
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ =  ParseTreeGenerator::createArrayCall(child,"variable");
-							$$->setDataType(sem_anlzr->callArray($1->getSymbol(),$3));
-							
+							setChildren($$, child, "variable");					
 						}
 						;
 	 
- expression 			: logic_expression	
+ expression 			: logic_expression 
 						{
+							$$ = $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"expression");
-							$$->setDataType($1->getDataType());				
-							
+							setChildren($$, child, "expression");
 						}
-						| variable ASSIGNOP logic_expression 
+						| variable ASSIGNOP logic_expression
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"expression");
-							// std::cout<<$3->getDataType()<<std::endl;
-							$$->setDataType(sem_anlzr->assignOp($1,$3));
+							$$ = new AssignOp($1,$3);
 							
+							vector<SymbolInfo*> child = {$1,$2,$3};
+							setChildren($$, child, "expression");
 						}
-						// | error
-						// {
-						// 	std::cout<<"Here"<<std::endl;
-						// 	SymbolInfo* s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	vector<SymbolInfo*> child = {s};
-						// 	$$ = ParseTreeGenerator::createExpression(child,"expression");
-						// 	
-						// }	
 						;
 			
 logic_expression 		: rel_expression 	
 						{
+							$$ = $1;
+							
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"logic_expression");
-							$$->setDataType($1->getDataType());
-							
+							setChildren($$, child, "logic_expression");
 						}
-						| rel_expression LOGICOP rel_expression 	
+						| rel_expression LOGICOP rel_expression
 						{
+							$$ = new LogicOp($1,$3,$2->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"logic_expression");
-							$$->setDataType(sem_anlzr->logicOp($1,$2->getSymbol(),$3));
-							
+							setChildren($$, child, "logic_expression");
 						}
 						;
 			
 rel_expression			: simple_expression 
 						{
+							$$ = $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
-							$$->setDataType($1->getDataType());
-							
+							setChildren($$, child, "rel_expression");
 						}
-						| simple_expression RELOP simple_expression	
+						| simple_expression RELOP simple_expression
 						{
+							$$ = new RelOp($1,$3,$2->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"rel_expression");
-							$$->setDataType(sem_anlzr->relOp($1,$2->getSymbol(),$3));
-							
+							setChildren($$, child, "rel_expression");
 						}
 						;
 				
-simple_expression 		: term 
+simple_expression 		: term
 						{
+							$$ = $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"simple_expression");
-							$$->setDataType($1->getDataType());
+							setChildren($$, child, "simple_expression");
 						}
-						| simple_expression ADDOP term 
+						| simple_expression ADDOP term
 						{
+							$$ = new AddOp($1,$3,$2->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"simple_expression");
-							$$->setDataType(sem_anlzr->addOp($1,$2->getSymbol(),$3));
-							
+							setChildren($$, child, "simple_expression");
 						}
 						;
 					
 term 					:	unary_expression
 						{
+							$$ = $1;
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"term");
-							$$->setDataType($1->getDataType());
+							setChildren($$, child, "term");
 						}
 						|  term MULOP unary_expression
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"term");
-							$$->setDataType(sem_anlzr->mulOp($1,$2->getSymbol(),$3));						
+							$$ = new MulOp($1,$3,$2->getSymbol());	
 							
+							vector<SymbolInfo*> child = {$1,$2,$3};	
+							setChildren($$, child, "term");					
 						}
 						;
 
 unary_expression 		: ADDOP unary_expression
 						{ 
+							$$ = new UAddOp($2,$1->getSymbol());
+
 							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createExpression({$1,$2},"unary_expression");
-							$$->setDataType($2->getDataType());	
+							setChildren($$, child, "unary_expression");
 						}  
 						| NOT unary_expression 
 						{
+							$$ = new NotOp($2);
+
 							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createExpression(child,"unary_expression");
-							$$->setDataType($2->getDataType());
-							
+							setChildren($$, child, "unary_expression");
 						}
 						| factor 
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"unary_expression");
-							$$->setDataType($1->getDataType());	
+							$$ = $1;
+
+							vector<SymbolInfo*> child = {$1};	
+							setChildren($$, child, "unary_expression");
 						}
 						;
-	
+
 factor					: variable 
 						{
+							$$ = new VariableCall($1->getIdName());
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType($1->getDataType());
-							
+							setChildren($$, child, "factor");
 						}
 						| ID LPAREN argument_list RPAREN
 						{
+							$$ = new FunctionCall($1->getSymbol(), $3->getArgs());
+
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							
-							$$->setDataType(sem_anlzr->callFunction($1->getSymbol(), $3->getArgs()));						
-							// std::cout<<$$->getDataType()<<std::endl;
+							setChildren($$, child, "factor");				
 						}
-						| LPAREN expression RPAREN
+						| LPAREN expression RPAREN 
 						{
+							$$ = $2;
+
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType($2->getDataType());
-							
+							setChildren($$, child, "factor");
 						}
-						| CONST_INT 
+						| CONST_INT // $$ = new IntegerCall($1->getSymbol());
 						{
+							$$ = new IntegerCall($1->getSymbol());
+							$$->setSymbol($1->getSymbol());
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType("INT");
-							
+							setChildren($$, child, "factor");
 						}
 						| CONST_FLOAT
 						{
+							$$ = new FloatCall($1->getSymbol());
+							$$->setSymbol($1->getSymbol());
+
 							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType("FLOAT");
-							
+							setChildren($$, child, "factor");	
 						}
-						| variable INCOP 
+						| variable INCOP
 						{
-							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType($1->getDataType());	
-							
+							$$ = new IncOp($1);
+
+							vector<SymbolInfo*> child = {$1,$2};	
+							setChildren($$, child, "factor");
 						}
 						| variable DECOP
 						{
-							vector<SymbolInfo*> child = {$1,$2};
-							$$ = ParseTreeGenerator::createExpression(child,"factor");
-							$$->setDataType($1->getDataType());
-							
+							$$ = new DecOp($1);
+
+							vector<SymbolInfo*> child = {$1,$2};	
+							setChildren($$, child, "factor");
 						}
 						;
 	
-argument_list 			: arguments
+argument_list 			: arguments 
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
-							$$->addArgs($1);
-							
-						}
-						|
-						arguments error
-						{
-							vector<SymbolInfo*> child = {$1};
-							SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");
-							$$->addArgs($1);
-							syntax_error("argument list","arguments");
-							
+							$$ = $1;	
+
+							vector<SymbolInfo*> child = {$1};					
+							setChildren($$, child, "argument_list");
 						}
 						| 
 						{ 
-							vector<SymbolInfo*> child = {};
-							$$ = ParseTreeGenerator::createArgumentList(child,"argument_list");			
+							$$ = new ArgumentList();
+
+							vector<SymbolInfo*> child = {};		
+							setChildren($$, child, "argument_list");
 						}
 						;
 	
-arguments 				: arguments COMMA logic_expression // handleArguments({$1,$2,$3})
+arguments 				: arguments COMMA logic_expression
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-							$$ = ParseTreeGenerator::createArgumentList(child,"arguments");
-							$$->addArgs($1);
+							$$ = $1; 
 							$$->addArg($3);
-							
+
+							vector<SymbolInfo*> child = {$1,$2,$3};
+							setChildren($$, child, "arguments");
 						}
-						| logic_expression // handleArgument($1)
+						| logic_expression
 						{
-							vector<SymbolInfo*> child = {$1};
-							$$ = ParseTreeGenerator::createArgumentList(child,"arguments");
+							$$ = new ArgumentList(); 
 							$$->addArg($1);
+
+							vector<SymbolInfo*> child = {$1};
+							setChildren($$, child, "arguments");
 						}
 						;
-
-// No temporary variables
-// constant 				: CONST_INT // handleConstant({$1},"int")
-// 						| CONST_FLOAT // handleConstant({$1},"float")
 %%
 
-void runParser(FILE *fin)
+Program *runParser(FILE *fin)
 {
 	yyin = fin;
-    yyparse();
+    if(yyparse() == 0) return prog;
+	return NULL;
 }
-
-// Arguments of argument list
-// Parameter list of function definition/declaration
-// Declaration list of var declaration
-// Unit

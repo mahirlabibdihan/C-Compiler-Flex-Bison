@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <iostream>
 #include <sstream>
 #include "../include/Util.hpp"
@@ -64,14 +68,12 @@ char Util::getActualChar(std::string symbol)
 int Util::getStringLineCount(std::string str)
 {
     int n = str.length();
-    // std::cout << "->" << str << " " << n << std::endl;
     int count = 1;
     for (int i = 1; i < n - 1; i++)
     {
 
         if (str[i] == '\\')
         {
-            // std::cout << i << std::endl;
             i++;
             if (str[i] == '\r' or str[i] == '\n')
             {
@@ -83,7 +85,6 @@ int Util::getStringLineCount(std::string str)
             }
         }
     }
-    // std::cout << str << " " << count << std::endl;
     return count;
 }
 int Util::getSingleCommentLineCount(std::string str)
@@ -161,12 +162,14 @@ std::string Util::formatCode(std::vector<SymbolInfo *> tokens)
     std::string code = "";
     for (auto &i : tokens)
     {
+        if (i == NULL)
+            continue;
         code += i->getSymbol();
-        if (i->getType() == "type_specifier" || i->getType() == "ELSE" || i->getType() == "RETURN")
+        if (i->getSymbol() == "int" || i->getSymbol() == "float" || i->getSymbol() == "void" || i->getSymbol() == "else" || i->getSymbol() == "return")
         {
             code += " ";
         }
-        else if (i->getType() == "LCURL" || i->getType() == "unit" || i->getType() == "statement")
+        else if (i->getSymbol() == "{" || i->getSymbol() == "}" || i->getType() == "unit" || i->getSymbol() == ";")
         {
             code += "\n";
         }

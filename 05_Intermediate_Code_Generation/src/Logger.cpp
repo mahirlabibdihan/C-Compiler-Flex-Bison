@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include "../include/Tokenizer.hpp"
 #include "../include/Logger.hpp"
 #include "../include/Util.hpp"
@@ -80,21 +84,19 @@ std::string Logger::getRuleAndLine(SymbolInfo *parent, std::vector<SymbolInfo *>
 
 std::string Logger::getRule(SymbolInfo *parent, std::vector<SymbolInfo *> children)
 {
-    std::string left = ((NonTerminal *)parent)->getNonTerminalType();
+    std::string left = parent->getType();
     std::string right = "";
     for (auto &i : children)
     {
+        if (i == NULL)
+            continue;
         if (i->getType() == "error")
         {
-            right += "error ";
-        }
-        else if (i->getType() == "TERMINAL")
-        {
-            right += ((Terminal *)i)->getTerminalType() + " ";
+            right += "error";
         }
         else
         {
-            right += ((NonTerminal *)i)->getNonTerminalType() + " ";
+            right += i->getType() + " ";
         }
     }
     return getRule(left, right);

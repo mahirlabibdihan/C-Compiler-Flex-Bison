@@ -107,11 +107,14 @@ public:
 class Identifier : public Terminal
 {
     string id_type; // Variable, Function
+    string id_name;
+
 public:
     Identifier(const string &id_name, const string &id_type);
     virtual ~Identifier();
     const string &getIdentity();
     void setIdentity(const string &);
+    const string &getIdName();
 };
 
 class Variable : public Identifier
@@ -170,7 +173,7 @@ class NonTerminal : public ASTNode
     std::vector<SymbolInfo *> children;
 
 public:
-    NonTerminal(string symbol, string type, string nt_type);
+    NonTerminal(string symbol = "", string type = "", string nt_type = "");
     virtual ~NonTerminal();
     string getNonTerminalType();
     void setNonTerminalType(string nt_type);
@@ -206,7 +209,7 @@ public:
     const string &getListType();
 };
 
-class Statement : public NonTerminal
+class Statement : virtual public NonTerminal
 {
     string stmt_type; // ConditionalStatement, LoopStatement, CompoundStatement
 public:
@@ -369,7 +372,7 @@ class IdentifierCall : public CallExpression
 public:
     IdentifierCall(const string &name, const string &type, const string &id_name, const string &id_type);
     const string &getIdName();
-    const string &getIdType();
+    const string &getIdentity();
 };
 
 class FunctionCall : public IdentifierCall
@@ -517,15 +520,21 @@ public:
 
 class Program : public NonTerminal
 {
-    vector<Unit *> units;
+    vector<FunctionDefinition *> func_defs;
+    vector<FunctionDeclaration *> func_decs;
+    vector<VariableDeclaration *> var_decs;
 
 public:
     Program(); // **
-    void addUnit(Unit *unit);
-    const vector<Unit *> &getUnits();
+    void addFunctionDefinition(FunctionDefinition *func_def);
+    void addFunctionDeclaration(FunctionDeclaration *func_dec);
+    void addVariableDeclaration(VariableDeclaration *var_dec);
+    const vector<FunctionDefinition *> &getFunctionDefinitions();
+    const vector<FunctionDeclaration *> &getFunctionDeclarations();
+    const vector<VariableDeclaration *> &getVariableDeclarations();
 };
 
-class Unit : public NonTerminal
+class Unit : virtual public NonTerminal
 {
     string u_type;
 

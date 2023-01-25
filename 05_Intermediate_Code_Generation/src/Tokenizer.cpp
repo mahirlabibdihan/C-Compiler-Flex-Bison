@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <fstream>
 #include <string>
 #include <map>
@@ -87,11 +91,12 @@ std::map<std::string, int> Tokenizer::keywordToken = {
     {"default", DEFAULT},
     {"break", BREAK},
     {"return", RETURN},
-    {"continue", CONTINUE}};
+    {"continue", CONTINUE},
+    {"println", PRINTLN}};
 
 std::string Tokenizer::getToken(std::string type, std::string symbol)
 {
-    yylval.terminal = new Terminal(symbol, type);
+    yylval.terminal = new Terminal(symbol, type, "");
     yylval.terminal->setStartLine(lexer->getLineCount());
     yylval.terminal->setEndLine(lexer->getLineCount());
     return std::string() + "<" + type + ", " + symbol + ">";

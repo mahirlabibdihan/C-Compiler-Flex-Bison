@@ -720,14 +720,14 @@ void SemanticAnalyzer::declareVariables(VariableDeclaration *var_decl)
     {
         for (Variable *var : vars)
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_VARIABLE, ((Unit *)var_decl)->getStartLine(), var->getIdName()) << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_VARIABLE, var_decl->getStartLine(), var->getIdName()) << std::endl;
         }
     }
     else
     {
         for (auto &var : vars)
         {
-            var->setStartLine(((Unit *)var_decl)->getStartLine()); // Not a good way
+            var->setStartLine(var_decl->getStartLine());
             var->setDataType(data_type);
 
             if (var->getVarType() == "ARRAY")
@@ -786,7 +786,7 @@ void SemanticAnalyzer::checkFunctionDeclaration(FunctionDeclaration *func_dec)
             }
             else
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, ((Unit *)func_dec)->getStartLine(), func_name) << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, func_dec->getStartLine(), func_name) << std::endl;
             }
         }
         delete new_func;
@@ -818,7 +818,7 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
         Identifier *id = (Identifier *)table->find(func_name);
         if (id->getIdentity() != "FUNCTION") // Already declared as non-function type
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, ((Unit *)func_def)->getStartLine(), func_name) << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, func_def->getStartLine(), func_name) << std::endl;
         }
         else // or Defined as function
         {
@@ -827,11 +827,11 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
             {
                 if (matchTwoFunction(func, new_func))
                 {
-                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MULTIPLE_DEFINITION, ((Unit *)func_def)->getStartLine(), func_name) << std::endl;
+                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MULTIPLE_DEFINITION, func_def->getStartLine(), func_name) << std::endl;
                 }
                 else
                 {
-                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, ((Unit *)func_def)->getStartLine(), func_name) << std::endl;
+                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, func_def->getStartLine(), func_name) << std::endl;
                 }
             }
             else // declared but not defined
@@ -842,7 +842,7 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
                 }
                 else
                 {
-                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, ((Unit *)func_def)->getStartLine(), func_name) << std::endl;
+                    errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, func_def->getStartLine(), func_name) << std::endl;
                 }
             }
         }
@@ -854,7 +854,7 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
         {
             if (i->getIdName() == "blank")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MISSING_PARAM_NAME, ((Unit *)func_def)->getStartLine(), func_name) << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MISSING_PARAM_NAME, func_def->getStartLine(), func_name) << std::endl;
             }
         }
         new_func->defineFunction();

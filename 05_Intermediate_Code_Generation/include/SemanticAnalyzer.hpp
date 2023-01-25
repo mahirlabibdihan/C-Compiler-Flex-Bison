@@ -23,30 +23,30 @@ class SemanticAnalyzer
 
 private:
     bool matchTwoFunction(Function *f1, Function *f2);
+    bool isZero(Expression *expr);
 
 public:
     SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
     ~SemanticAnalyzer();
 
-    string callFunction(string id, vector<Expression *> args);
-    string callVariable(string id);
-    string callArray(string id, Expression *index);
+    string evaluateFunctionCall(FunctionCall *func_call);
+    string checkVariableCall(VariableCall *var_call);
+    string checkArrayCall(ArrayCall *arr_call);
 
     void declareFunctionParams(vector<Variable *> params);
-    void defineFunction(string ret_type, string func_name, vector<Variable *> params);
+    void checkFunctionDefinition(FunctionDefinition *func_def);
     // void returnFunction(Expression *);
     // void endFunction();
 
-    void declareFunction(string ret_type, string func_name, vector<Variable *> params);
-    void declareVariables(string data_type, vector<Variable *> ids);
-    void declareVariable(string data_type, string var_name);
-    void declareArray(string data_type, string arr_name, string arr_size);
+    void checkFunctionDeclaration(FunctionDeclaration *func_dec);
+    void declareVariable(Variable *var);
+    void declareArray(Array *arr);
 
-    string assignOp(const string &left, const string &right);
-    string logicOp(const string &left, const string &op, const string &right);
-    string relOp(const string &left, const string &op, const string &right);
-    string addOp(const string &left, const string &op, const string &right);
-    string mulOp(const string &left, const string &op, const string &right);
+    string assignOp(AssignOp *expr);
+    string logicOp(LogicOp *expr);
+    string relOp(RelOp *expr);
+    string addOp(AddOp *expr);
+    string mulOp(MulOp *expr);
 
     string implicitTypecast(string left, string right);
     bool checkAssignment(string left, string right);
@@ -64,14 +64,14 @@ public:
 
     void startProgram(Program *prog);
     void analyzeUnit(Unit *unit);
-    string analyzeExpression(Expression *expr); // Unary, Binary, Call
-    string analyzeBinaryExpression(BinaryExpression *bin_expr);
-    string analyzeUnaryExpression(UnaryExpression *unr_expr);
-    string analyzeCallExpression(CallExpression *call_expr);
-    string analyzeIdentifierCall(IdentifierCall *id_call);
-    string analyzeVariableCall(VariableCall *var_call);
-    string analyzeArrayCall(ArrayCall *arr_call);
-    string analyzeFunctionCall(FunctionCall *func_call);
+    string evaluateExpression(Expression *expr); // Unary, Binary, Call
+    string evaluateBinaryExpression(BinaryExpression *bin_expr);
+    string evaluateUnaryExpression(UnaryExpression *unr_expr);
+    string evaluateCallExpression(CallExpression *call_expr);
+    string callIdentifier(IdentifierCall *id_call);
+    string callVariable(VariableCall *var_call);
+    string callArray(ArrayCall *arr_call);
+    string callFunction(FunctionCall *func_call);
     // string analyzeConstantCall(ConstantCall *const_call);
 
     void analyzeStatement(Statement *stmt); // Conditional, Loop, Return, Print, Expression
@@ -86,9 +86,9 @@ public:
     void analyzeCompoundStatement(CompoundStatement *stmt_list);
     void analyzeExpressionStatement(ExpressionStatement *expr_stmt);
 
-    void analyzeVariableDeclaration(VariableDeclaration *var_decl);
-    void analyzeFunctionDeclaration(FunctionDeclaration *func_decl);
-    void analyzeFunctionDefinition(FunctionDefinition *func_def);
+    void declareVariables(VariableDeclaration *var_decl);
+    void declareFunction(FunctionDeclaration *func_decl);
+    void defineFunction(FunctionDefinition *func_def);
     // void analyzeDeclarationList(DeclarationList *decl_list);
     // void analyzeParameterList(ParameterList *params);
     // void analyzeArgumentList(ArgumentList *args);

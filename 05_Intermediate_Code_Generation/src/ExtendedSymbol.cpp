@@ -96,7 +96,7 @@ void ParameterList::addParam(const string &data_type, const string &name)
 
 void ParameterList::addParam(Variable *param)
 {
-    list.push_back(new Variable(param->getSymbol(), param->getDataType(), "PRIMITIVE"));
+    list.push_back(param);
 }
 
 void ParameterList::addParams(ParameterList *params)
@@ -300,6 +300,7 @@ void Terminal::setTerminalType(string type)
 Identifier::Identifier(const string &id_name, const string &id_type) : Terminal(id_name, "ID", "IDENTIFIER")
 {
     this->id_type = id_type;
+    this->id_name = id_name;
 }
 
 Identifier::~Identifier()
@@ -315,11 +316,10 @@ void Identifier::setIdentity(const string &id_type)
     this->id_type = id_type;
 }
 
-// Variable::Variable(const string &var_name, const string &data_type) : Identifier(var_name, "VARIABLE")
-// {
-//     this->data_type = data_type;
-//     this->var_type = "PRIMITIVE";
-// }
+const string &Identifier::getIdName()
+{
+    return id_name;
+}
 Variable::Variable(const string &var_name, const string &data_type, const string &var_type) : Identifier(var_name, "VARIABLE")
 {
     this->var_type = var_type;
@@ -445,15 +445,31 @@ Program::Program() : NonTerminal("", "", "PROGRAM")
 {
 }
 
-void Program::addUnit(Unit *unit)
+void Program::addFunctionDefinition(FunctionDefinition *func_def)
 {
-    this->units.push_back(unit);
+    this->func_defs.push_back(func_def);
+}
+void Program::addFunctionDeclaration(FunctionDeclaration *func_dec)
+{
+    this->func_decs.push_back(func_dec);
+}
+void Program::addVariableDeclaration(VariableDeclaration *var_dec)
+{
+    this->var_decs.push_back(var_dec);
+}
+const vector<FunctionDefinition *> &Program::getFunctionDefinitions()
+{
+    return func_defs;
+}
+const vector<FunctionDeclaration *> &Program::getFunctionDeclarations()
+{
+    return func_decs;
+}
+const vector<VariableDeclaration *> &Program::getVariableDeclarations()
+{
+    return var_decs;
 }
 
-const vector<Unit *> &Program::getUnits()
-{
-    return this->units;
-}
 Unit::Unit(const string &name, const string &type, const string &u_type) : NonTerminal(name, type, "UNIT")
 {
     this->u_type = u_type;
@@ -531,7 +547,7 @@ IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left)
 {
 }
 
-UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("ADDOP", oprt, right)
+UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right)
 {
     this->uadd_oprt = oprt;
 }
@@ -617,7 +633,7 @@ const string &IdentifierCall::getIdName()
 {
     return id_name;
 }
-const string &IdentifierCall::getIdType()
+const string &IdentifierCall::getIdentity()
 {
     return id_type;
 }

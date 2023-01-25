@@ -1,6 +1,6 @@
 /**
  * Author: Mahir Labib Dihan
- * Last modified: December 05, 2022
+ * Last modified: January 18, 2023
  */
 #ifndef __ERROR_HANDLER_H
 #define __ERROR_HANDLER_H 1
@@ -15,6 +15,7 @@ class ErrorHandler
     int lexical_error_count;
     int semantic_error_count;
     int syntax_error_count;
+    int syntax_error_line;
 
 public:
     // Lexical error types
@@ -78,6 +79,8 @@ public:
     std::string handleSemanticError(SemanticError type, int line, string lexeme = "");
     std::string handleSyntaxError(string parent, string error_child, int line);
     std::string handleSyntaxError(string parent, int line);
+    std::string handleSyntaxError(int line);
+    int getSyntaxErrorLine();
     int getErrorCount();
 };
 

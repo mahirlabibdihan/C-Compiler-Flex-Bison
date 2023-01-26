@@ -87,7 +87,7 @@ public:
         EXPRESSION,
         STATEMENT
     };
-    ASTNode(const string &symbol, const string &type, const string &ast_type);
+    ASTNode(const string &ast_type, const string &name = "", const string &type = "");
     virtual ~ASTNode();
     const string &getASTType();
     void setASTType(const string &ast_type);
@@ -98,7 +98,7 @@ class Terminal : public ASTNode
     string t_type;
 
 public:
-    Terminal(const string &symbol, const string &type, const string &t_type);
+    Terminal(const string &name, const string &type, const string &t_type);
     virtual ~Terminal();
     string getTerminalType();
     void setTerminalType(string);
@@ -173,7 +173,7 @@ class NonTerminal : public ASTNode
     std::vector<SymbolInfo *> children;
 
 public:
-    NonTerminal(string symbol = "", string type = "", string nt_type = "");
+    NonTerminal(string nt_type = "");
     virtual ~NonTerminal();
     string getNonTerminalType();
     void setNonTerminalType(string nt_type);
@@ -188,13 +188,10 @@ protected:
     string exp_type;  // CallExpression, BinaryExpression, UnaryExpression
 
 public:
-    Expression(Expression *expr);
-    Expression(const string &name, const string &type, const string &data_type, const string &exp_type);
+    Expression(const string &data_type, const string &exp_type);
     virtual ~Expression();
     const string &getDataType();
     void setDataType(const string &);
-    const string &getExpression();
-    void setExpression(const string &);
     const string &getExpType();
     void setExpType(const string &);
 };
@@ -204,7 +201,7 @@ class List : public NonTerminal
     string l_type; // CompoundStatement, ParameterList, ArgumentList, DeclarationList
 
 public:
-    List(const string &name, const string &type, const string &l_type);
+    List(const string &l_type);
     virtual ~List();
     const string &getListType();
 };
@@ -213,7 +210,7 @@ class Statement : virtual public NonTerminal
 {
     string stmt_type; // ConditionalStatement, LoopStatement, CompoundStatement
 public:
-    Statement(const string &name, const string &type, const string &stmt_type);
+    Statement(const string &stmt_type);
     const string &getStatementType();
 };
 
@@ -360,7 +357,7 @@ class CallExpression : public Expression
     string call_type;
 
 public:
-    CallExpression(const string &name, const string &type, const string &data_type, const string &call_type);
+    CallExpression(const string &data_type, const string &call_type);
     const string &getCallType();
 };
 
@@ -370,7 +367,7 @@ class IdentifierCall : public CallExpression
     string id_type;
 
 public:
-    IdentifierCall(const string &name, const string &type, const string &id_name, const string &id_type);
+    IdentifierCall(const string &id_name, const string &id_type);
     const string &getIdName();
     const string &getIdentity();
 };
@@ -529,6 +526,7 @@ public:
     void addFunctionDefinition(FunctionDefinition *func_def);
     void addFunctionDeclaration(FunctionDeclaration *func_dec);
     void addVariableDeclaration(VariableDeclaration *var_dec);
+    void addUnit(Unit *unit);
     const vector<FunctionDefinition *> &getFunctionDefinitions();
     const vector<FunctionDeclaration *> &getFunctionDeclarations();
     const vector<VariableDeclaration *> &getVariableDeclarations();
@@ -539,7 +537,7 @@ class Unit : virtual public NonTerminal
     string u_type;
 
 public:
-    Unit(const string &name, const string &type, const string &u_type);
+    Unit(const string &u_type);
     const string &getUnitType();
 };
 

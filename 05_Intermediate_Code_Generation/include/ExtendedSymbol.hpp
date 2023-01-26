@@ -572,14 +572,11 @@ public:
 class VariableDeclaration : public Unit, public Statement
 {
     vector<Variable *> decl_list;
-    string data_type;
 
 public:
     VariableDeclaration(const string &data_type, const vector<Variable *> &list); // **
     void setDeclarationList(const vector<Variable *> &list);
     const vector<Variable *> &getDeclarationList();
-    void setDataType(const string &data_type);
-    const string &getDataType();
 };
 
 #endif

@@ -153,17 +153,16 @@ std::string ASTGenerator::getVariableDeclaration(VariableDeclaration *var_decl, 
 {
     std::string tree = "";
     tree += getIndent(depth);
-    tree += var_decl->getDataType() + "\n";
     for (Variable *var : var_decl->getDeclarationList())
     {
         tree += getIndent(depth);
         if (var->getVarType() == "ARRAY")
         {
-            tree += var->getIdName() + "[" + ((Array *)var)->getArraySize() + "]" + "\n";
+            tree += var->getDataType() + " " + var->getIdName() + "[" + ((Array *)var)->getArraySize() + "]" + "\n";
         }
         else
         {
-            tree += var->getIdName() + "\n";
+            tree += var->getDataType() + " " + var->getIdName() + "\n";
         }
     }
     return tree;

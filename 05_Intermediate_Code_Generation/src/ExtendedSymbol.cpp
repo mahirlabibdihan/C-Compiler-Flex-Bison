@@ -441,17 +441,16 @@ const string &Unit::getUnitType()
 }
 VariableDeclaration::VariableDeclaration(const string &data_type, const vector<Variable *> &list) : Unit("VARIABLE_DECLARATION"), Statement("VARIABLE_DECLARATION")
 {
-    this->data_type = data_type;
+    for (Variable *var : list)
+    {
+        var->setDataType(data_type);
+    }
     this->decl_list = list;
 }
 
 const vector<Variable *> &VariableDeclaration::getDeclarationList()
 {
     return decl_list;
-}
-const string &VariableDeclaration::getDataType()
-{
-    return data_type;
 }
 
 FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION")

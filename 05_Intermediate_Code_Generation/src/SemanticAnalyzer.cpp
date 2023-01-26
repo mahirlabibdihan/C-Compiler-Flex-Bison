@@ -708,23 +708,17 @@ void SemanticAnalyzer::declareVariable(Variable *var)
 }
 void SemanticAnalyzer::declareVariables(VariableDeclaration *var_decl)
 {
-    string data_type = var_decl->getDataType();
     vector<Variable *> vars = var_decl->getDeclarationList();
 
-    if (data_type == "VOID")
+    for (Variable *var : vars)
     {
-        for (Variable *var : vars)
+        if (var->getDataType() == "VOID")
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_VARIABLE, var_decl->getStartLine(), var->getIdName()) << std::endl;
         }
-    }
-    else
-    {
-        for (auto &var : vars)
+        else
         {
             var->setStartLine(var_decl->getStartLine());
-            var->setDataType(data_type);
-
             if (var->getVarType() == "ARRAY")
             {
                 declareArray((Array *)var);
@@ -738,19 +732,7 @@ void SemanticAnalyzer::declareVariables(VariableDeclaration *var_decl)
 }
 bool SemanticAnalyzer::matchTwoFunction(Function *f1, Function *f2)
 {
-    if (!f1->matchReturnType(f2))
-    {
-        return false;
-    }
-    if (!f1->matchParamsNum(f2))
-    {
-        return false;
-    }
-    if (!f1->matchParamsType(f2))
-    {
-        return false;
-    }
-    return true;
+    return f1->matchReturnType(f2) && f1->matchParamsNum(f2) && f1->matchParamsType(f2);
 }
 void SemanticAnalyzer::checkFunctionDeclaration(FunctionDeclaration *func_dec)
 {

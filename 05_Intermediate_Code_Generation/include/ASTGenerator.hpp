@@ -6,7 +6,7 @@
 
 namespace ASTGenerator
 {
-    std::string getAST(ASTNode *node, int depth = 0);
+    std::string getAST(Program *node, int depth = 0);
     std::string getProgram(Program *prog, int depth);
     std::string getUnit(Unit *unit, int depth);
     std::string getExpression(Expression *unit, int depth);
@@ -34,7 +34,7 @@ namespace ASTGenerator
     std::string getWhileLoop(WhileLoop *while_loop, int depth);
     std::string getPrintStatement(PrintStatement *print_stmt, int depth);
     std::string getReturnStatement(ReturnStatement *ret_stmt, int depth);
-    std::string getStatementList(StatementList *ret_stmt, int depth);
+    std::string getCompoundStatement(CompoundStatement *stmt_list, int depth);
     std::string getExpressionStatement(ExpressionStatement *expr_stmt, int depth);
 };
 

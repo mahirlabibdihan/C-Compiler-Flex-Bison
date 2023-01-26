@@ -9,47 +9,37 @@ std::string getIndent(int depth)
     }
     return indent;
 }
-std::string ASTGenerator::getAST(ASTNode *node, int depth)
+std::string ASTGenerator::getAST(Program *node, int depth)
 {
     std::string tree = "";
-    // tree += getIndent(depth);
-    if (node->getASTType() == "NON_TERMINAL")
-    {
-        NonTerminal *non_term = (NonTerminal *)node;
-        string type = non_term->getNonTerminalType();
-
-        if (type == "EXPRESSION")
-        {
-            tree += getExpression((Expression *)non_term, depth);
-        }
-        if (type == "STATEMENT")
-        {
-            tree += getStatement((Statement *)non_term, depth);
-        }
-        if (type == "UNIT")
-        {
-            tree += getUnit((Unit *)non_term, depth);
-        }
-        if (type == "PROGRAM")
-        {
-            tree += getProgram((Program *)non_term, depth);
-        }
-        if (type == "LIST")
-        {
-            tree += getList((List *)non_term, depth);
-        }
-    }
+    tree += getProgram((Program *)node, depth);
     return tree;
 }
 std::string ASTGenerator::getProgram(Program *prog, int depth)
 {
     std::string tree = "";
     // tree += getIndent(depth);
-    vector<Unit *> units = prog->getUnits();
-    tree += prog->getNonTerminalType() + "\n";
-    for (Unit *u : units)
+    vector<FunctionDefinition *> func_defs = prog->getFunctionDefinitions();
+    vector<FunctionDeclaration *> func_decs = prog->getFunctionDeclarations();
+    vector<VariableDeclaration *> var_decs = prog->getVariableDeclarations();
+
+    for (VariableDeclaration *var_dec : var_decs)
     {
-        tree += getUnit(u, depth + 1);
+        tree += getIndent(depth);
+        tree += "VARIABLE_DECLARATION\n";
+        tree += getVariableDeclaration(var_dec, depth + 1);
+    }
+    for (FunctionDeclaration *func_dec : func_decs)
+    {
+        tree += getIndent(depth);
+        tree += "FUNCTION_DECLARATION\n";
+        tree += getFunctionDeclaration(func_dec, depth + 1);
+    }
+    for (FunctionDefinition *func_def : func_defs)
+    {
+        tree += getIndent(depth);
+        tree += "FUNCTION_DEFINITION\n";
+        tree += getFunctionDefinition(func_def, depth + 1);
     }
     return tree;
 }
@@ -98,6 +88,8 @@ std::string ASTGenerator::getExpression(Expression *expr, int depth)
 std::string ASTGenerator::getStatement(Statement *stmt, int depth)
 {
     std::string tree = "";
+    if (stmt == NULL)
+        return tree;
     // tree += getIndent(depth);
     string type = stmt->getStatementType();
     if (type == "CONDITIONAL_STATEMENT")
@@ -126,15 +118,27 @@ std::string ASTGenerator::getStatement(Statement *stmt, int depth)
         tree += type + "\n";
         tree += getExpressionStatement((ExpressionStatement *)stmt, depth);
     }
-    if (type == "STATEMENT_LIST")
+    if (type == "COMPOUND_STATEMENT")
     {
-        tree += getStatementList((StatementList *)stmt, depth);
+        tree += getCompoundStatement((CompoundStatement *)stmt, depth);
     }
     if (type == "VARIABLE_DECLARATION")
     {
         tree += getIndent(depth);
         tree += type + "\n";
         tree += getVariableDeclaration((VariableDeclaration *)stmt, depth + 1);
+    }
+    if (type == "FUNCTION_DEFINITION")
+    {
+        tree += getIndent(depth);
+        tree += type + "\n";
+        tree += getFunctionDefinition((FunctionDefinition *)stmt, depth + 1);
+    }
+    if (type == "FUNCTION_DECLARATION")
+    {
+        tree += getIndent(depth);
+        tree += type + "\n";
+        tree += getFunctionDeclaration((FunctionDeclaration *)stmt, depth + 1);
     }
     return tree;
 }
@@ -150,13 +154,34 @@ std::string ASTGenerator::getVariableDeclaration(VariableDeclaration *var_decl, 
     std::string tree = "";
     tree += getIndent(depth);
     tree += var_decl->getDataType() + "\n";
-    tree += getDeclarationList(var_decl->getDeclarationList(), depth + 1);
+    for (Variable *var : var_decl->getDeclarationList())
+    {
+        tree += getIndent(depth);
+        if (var->getVarType() == "ARRAY")
+        {
+            tree += var->getIdName() + "[" + ((Array *)var)->getArraySize() + "]" + "\n";
+        }
+        else
+        {
+            tree += var->getIdName() + "\n";
+        }
+    }
     return tree;
 }
 std::string ASTGenerator::getFunctionDeclaration(FunctionDeclaration *func_decl, int depth)
 {
     std::string tree = "";
     tree += getIndent(depth);
+    tree += func_decl->getReturnType() + "\n";
+    tree += getIndent(depth);
+    tree += func_decl->getFunctionName() + "\n";
+    tree += getIndent(depth);
+    tree += "PARAMETER_LIST\n";
+    for (Variable *p : func_decl->getParams())
+    {
+        tree += getIndent(depth + 1);
+        tree += p->getDataType() + " " + p->getIdName() + "\n";
+    }
     return tree;
 }
 std::string ASTGenerator::getFunctionDefinition(FunctionDefinition *func_def, int depth)
@@ -168,10 +193,17 @@ std::string ASTGenerator::getFunctionDefinition(FunctionDefinition *func_def, in
     tree += func_def->getFunctionName() + "\n";
     tree += getIndent(depth);
     tree += "PARAMETER_LIST\n";
-    tree += getParameterList(func_def->getParams(), depth + 1);
+    for (Variable *p : func_def->getParams())
+    {
+        tree += getIndent(depth + 1);
+        tree += p->getDataType() + " " + p->getIdName() + "\n";
+    }
     tree += getIndent(depth);
     tree += "FUNCTION_BODY\n";
-    tree += getStatementList(func_def->getBody(), depth + 1);
+    for (Statement *stmt : func_def->getBody())
+    {
+        tree += getStatement(stmt, depth + 1);
+    }
     return tree;
 }
 std::string ASTGenerator::getDeclarationList(DeclarationList *decl_list, int depth)
@@ -181,7 +213,7 @@ std::string ASTGenerator::getDeclarationList(DeclarationList *decl_list, int dep
     for (Variable *var : var_list)
     {
         tree += getIndent(depth);
-        tree += var->getSymbol() + "\n";
+        tree += var->getIdName() + "\n";
     }
     // if (var_list.empty())
     //     tree += "\n";
@@ -194,7 +226,7 @@ std::string ASTGenerator::getParameterList(ParameterList *params, int depth)
     for (Variable *p : list)
     {
         tree += getIndent(depth);
-        tree += p->getDataType() + " " + p->getSymbol() + "\n";
+        tree += p->getDataType() + " " + p->getIdName() + "\n";
     }
     // if (list.empty())
     //     tree += "\n";
@@ -233,7 +265,7 @@ std::string ASTGenerator::getIdentifierCall(IdentifierCall *id_call, int depth)
 {
     std::string tree = "";
     // tree += getIndent(depth);
-    string type = id_call->getIdType();
+    string type = id_call->getIdentity();
     if (type == "VARIABLE_CALL")
     {
         tree += getVariableCall((VariableCall *)id_call, depth);
@@ -275,11 +307,8 @@ std::string ASTGenerator::getConstantCall(ConstantCall *const_call, int depth)
     std::string tree = "";
     tree += getIndent(depth);
     string type = const_call->getDataType();
-    if (type == "INTEGER")
-    {
-        IntegerCall *int_call = (IntegerCall *)const_call;
-        tree += " " + int_call->getLiteral() + "\n";
-    }
+    tree += " " + const_call->getLiteral() + "\n";
+
     return tree;
 }
 std::string ASTGenerator::getFunctionCall(FunctionCall *func_call, int depth)
@@ -287,7 +316,10 @@ std::string ASTGenerator::getFunctionCall(FunctionCall *func_call, int depth)
     std::string tree = "";
     tree += getIndent(depth);
     tree += func_call->getIdName() + "\n";
-    tree += getArgumentList(func_call->getArgs(), depth);
+    for (Expression *e : func_call->getArgs())
+    {
+        tree += getExpression(e, depth + 1);
+    }
     return tree;
 }
 std::string ASTGenerator::getBinaryExpression(BinaryExpression *bin_expr, int depth)
@@ -382,7 +414,7 @@ std::string ASTGenerator::getPrintStatement(PrintStatement *print_stmt, int dept
 {
     std::string tree = "";
     // tree += getIndent(depth);
-    tree += getIdentifierCall(print_stmt->getIdentifierCall(), depth + 1);
+    tree += getVariableCall(print_stmt->getVariableCall(), depth + 1);
     return tree;
 }
 std::string ASTGenerator::getReturnStatement(ReturnStatement *ret_stmt, int depth)
@@ -392,12 +424,12 @@ std::string ASTGenerator::getReturnStatement(ReturnStatement *ret_stmt, int dept
     tree += getExpression(ret_stmt->getExpression(), depth + 1);
     return tree;
 }
-std::string ASTGenerator::getStatementList(StatementList *stmt_list, int depth)
+std::string ASTGenerator::getCompoundStatement(CompoundStatement *stmt_list, int depth)
 {
     std::string tree = "";
     // tree += getIndent(depth);
     vector<Statement *> list = stmt_list->getStatements();
-    std::cout << list.size() << std::endl;
+
     for (Statement *stmt : list)
     {
         tree += getStatement(stmt, depth);

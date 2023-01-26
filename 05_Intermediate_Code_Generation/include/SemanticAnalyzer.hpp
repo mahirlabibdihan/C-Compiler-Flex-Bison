@@ -20,6 +20,7 @@ class SemanticAnalyzer
     ofstream &logout;
     ofstream &errorout;
     Program *tree_root;
+    stack<FunctionDefinition *> functions;
 
 private:
     bool matchTwoFunction(Function *f1, Function *f2);
@@ -35,8 +36,6 @@ public:
 
     void declareFunctionParams(vector<Variable *> params);
     void checkFunctionDefinition(FunctionDefinition *func_def);
-    // void returnFunction(Expression *);
-    // void endFunction();
 
     void checkFunctionDeclaration(FunctionDeclaration *func_dec);
     void declareVariable(Variable *var);
@@ -55,8 +54,7 @@ public:
     void startScope();
 
     void startProgram(Program *prog);
-    void analyzeUnit(Unit *unit);
-    string evaluateExpression(Expression *expr); // Unary, Binary, Call
+    string evaluateExpression(Expression *expr);
     string evaluateBinaryExpression(BinaryExpression *bin_expr);
     string evaluateUnaryExpression(UnaryExpression *unr_expr);
     string evaluateCallExpression(CallExpression *call_expr);
@@ -64,9 +62,8 @@ public:
     string callVariable(VariableCall *var_call);
     string callArray(ArrayCall *arr_call);
     string callFunction(FunctionCall *func_call);
-    // string analyzeConstantCall(ConstantCall *const_call);
 
-    void analyzeStatement(Statement *stmt); // Conditional, Loop, Return, Print, Expression
+    void analyzeStatement(Statement *stmt);
     void analyzeConditionalStatement(ConditionalStatement *stmt);
     void analyzeLoopStatement(LoopStatement *stmt);
     void analyzeIfStatement(IfStatement *if_stmt);
@@ -81,8 +78,5 @@ public:
     void declareVariables(VariableDeclaration *var_decl);
     void declareFunction(FunctionDeclaration *func_decl);
     void defineFunction(FunctionDefinition *func_def);
-    // void analyzeDeclarationList(DeclarationList *decl_list);
-    // void analyzeParameterList(ParameterList *params);
-    // void analyzeArgumentList(ArgumentList *args);
 };
 #endif

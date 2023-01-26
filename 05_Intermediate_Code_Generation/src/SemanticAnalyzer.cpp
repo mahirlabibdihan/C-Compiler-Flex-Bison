@@ -255,22 +255,7 @@ void SemanticAnalyzer::startProgram(Program *prog)
         defineFunction(func_def);
     }
 }
-void SemanticAnalyzer::analyzeUnit(Unit *unit)
-{
-    string type = unit->getUnitType();
-    if (type == "VARIABLE_DECLARATION")
-    {
-        declareVariables((VariableDeclaration *)unit);
-    }
-    if (type == "FUNCTION_DECLARATION")
-    {
-        declareFunction((FunctionDeclaration *)unit);
-    }
-    if (type == "FUNCTION_DEFINITION")
-    {
-        defineFunction((FunctionDefinition *)unit);
-    }
-}
+
 string SemanticAnalyzer::evaluateExpression(Expression *expr)
 {
     if (expr != NULL)
@@ -554,8 +539,21 @@ void SemanticAnalyzer::analyzeWhileLoop(WhileLoop *while_loop)
 }
 void SemanticAnalyzer::analyzeReturnStatement(ReturnStatement *ret_stmt)
 {
-    Expression *expr = ret_stmt->getExpression();
-    expr->setDataType(evaluateExpression(expr));
+    Expression *ret_expr = ret_stmt->getExpression();
+    string data_type = evaluateExpression(ret_expr);
+    string ret_type = functions.top()->getReturnType();
+    string func_name = functions.top()->getFunctionName();
+    if (data_type == "NULL")
+    {
+        if (ret_type != "VOID")
+        {
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, ret_stmt->getStartLine(), func_name) << std::endl;
+        }
+    }
+    else if (ret_type != data_type)
+    {
+        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, ret_stmt->getStartLine(), func_name) << std::endl;
+    }
 }
 void SemanticAnalyzer::analyzePrintStatement(PrintStatement *print_stmt)
 {
@@ -879,6 +877,11 @@ void SemanticAnalyzer::declareFunctionParams(vector<Variable *> params)
 }
 void SemanticAnalyzer::defineFunction(FunctionDefinition *func_def)
 {
+    if (!functions.empty())
+    {
+        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, lexer->getLineCount(), functions.top()->getFunctionName()) << std::endl;
+    }
+
     string ret_type = func_def->getReturnType();
     string func_name = func_def->getFunctionName();
     vector<Variable *> params = func_def->getParams();
@@ -886,22 +889,14 @@ void SemanticAnalyzer::defineFunction(FunctionDefinition *func_def)
     checkFunctionDefinition(func_def);
 
     this->startScope();
+    functions.push(func_def);
+
     declareFunctionParams(params);
     for (Statement *stmt : stmt_list)
     {
-        if (stmt != NULL && stmt->getStatementType() == "RETURN_STATEMENT")
-        {
-            Expression *ret_expr = ((ReturnStatement *)stmt)->getExpression();
-            string data_type = evaluateExpression(ret_expr);
-            if (data_type != "NULL" && ret_type != data_type)
-            {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, stmt->getStartLine(), func_name) << std::endl;
-            }
-        }
-        else
-        {
-            analyzeStatement(stmt);
-        }
+        analyzeStatement(stmt);
     }
+
+    functions.pop();
     this->endScope();
 }

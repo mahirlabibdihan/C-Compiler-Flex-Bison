@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include "../include/SymbolTable.hpp"
 
 SymbolTable::SymbolTable(int n)

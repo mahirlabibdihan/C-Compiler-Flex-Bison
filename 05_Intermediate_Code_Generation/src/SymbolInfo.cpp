@@ -1,7 +1,11 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include "../include/SymbolInfo.hpp"
-
 SymbolInfo::SymbolInfo(const std::string &name, const std::string &type, SymbolInfo *next)
 {
+
     this->name = name;
     this->type = type;
     this->next = next;

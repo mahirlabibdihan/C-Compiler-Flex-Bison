@@ -51,16 +51,8 @@ public:
     string implicitTypecast(string left, string right);
     bool checkAssignment(string left, string right);
 
-    // void handleInvalidFunctionScoping();
-    void handlePrintlnCall(std::string id_name);
     void endScope();
     void startScope();
-    int getLineCount();
-
-    void setASTRoot(Program *root);
-    Program *getASTRoot();
-    // void pushFunction(string ret_type, string func_name, vector<Variable *> params);
-    // void popFunction();
 
     void startProgram(Program *prog);
     void analyzeUnit(Unit *unit);

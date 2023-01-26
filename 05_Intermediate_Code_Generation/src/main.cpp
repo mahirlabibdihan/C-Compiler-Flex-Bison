@@ -17,16 +17,19 @@
 #include "../include/SemanticAnalyzer.hpp"
 #include "../include/ParseTreeGenerator.hpp"
 #include "../include/ASTGenerator.hpp"
+#include "../include/AssemblyGenerator.hpp"
 // For file input output
 std::ofstream logout;
 std::ofstream tokenout;
 std::ofstream errorout;
 std::ofstream parseout;
 std::ofstream codeout;
+std::ofstream asmout;
 LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
 SyntaxAnalyzer *syn_anlzr;
 ErrorHandler *error_hndlr;
+AssemblyGenerator *asm_gen;
 SymbolTable *table;
 Program *runParser(FILE *fin);
 void ScopeTable::print() const
@@ -92,13 +95,14 @@ int main(int argc, char *argv[])
     tokenout.open("io/token.txt");
     errorout.open("io/error.txt");
     parseout.open("io/parsetree.txt");
-    codeout.open("io/codeout.txt");
-
+    codeout.open("io/code.c");
+    asmout.open("io/code.asm");
     table = new SymbolTable(11);
     error_hndlr = new ErrorHandler();
     lexer = new LexicalAnalyzer(error_hndlr, logout, tokenout);
     sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
     syn_anlzr = new SyntaxAnalyzer(lexer, table, error_hndlr, logout, errorout);
+    asm_gen = new AssemblyGenerator(asmout);
 
     if (runParser(fin)) // Main Parser
     {
@@ -118,11 +122,13 @@ int main(int argc, char *argv[])
         codeout << prog->getSymbol() << std::endl;
         parseout << ASTGenerator::getAST(prog);
         sem_anlzr->startProgram(prog);
+        asm_gen->startProgram(prog);
     }
 
     // delete root;
 
     fclose(fin);
+    asmout.close();
     codeout.close();
     logout.close();
     parseout.close();

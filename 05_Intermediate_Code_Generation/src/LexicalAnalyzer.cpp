@@ -19,17 +19,6 @@ LexicalAnalyzer::~LexicalAnalyzer()
 {
     delete line_trkr;
 }
-// void LexicalAnalyzer::installID(std::string yytext)
-// {
-//     if (table->insert(yytext, "ID"))
-//     {
-//         table->printAllScope();
-//     }
-//     else
-//     {
-//         logout << "\t" << yytext << " already exisits in the current ScopeTable" << std::endl;
-//     }
-// }
 
 void LexicalAnalyzer::handleWhiteSpace(std::string yytext)
 {

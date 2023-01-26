@@ -226,10 +226,7 @@ string SemanticAnalyzer::mulOp(MulOp *expr)
     }
     return type;
 }
-int SemanticAnalyzer::getLineCount()
-{
-    return lexer->getLineCount();
-}
+
 void SemanticAnalyzer::endScope()
 {
     table->printAllScope();

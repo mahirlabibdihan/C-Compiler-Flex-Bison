@@ -453,7 +453,7 @@ string SemanticAnalyzer::checkArrayCall(ArrayCall *arr_call)
         }
         if (index->getDataType() != "INT")
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::INVALID_ARRAY_INDEX, arr_call->getStartLine(), index->getExpression()) << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::INVALID_ARRAY_INDEX, arr_call->getStartLine()) << std::endl;
         }
         return var->getDataType();
     }

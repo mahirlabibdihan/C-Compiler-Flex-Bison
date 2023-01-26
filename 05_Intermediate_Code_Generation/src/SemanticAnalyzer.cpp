@@ -543,14 +543,14 @@ void SemanticAnalyzer::analyzeReturnStatement(ReturnStatement *ret_stmt)
     string data_type = evaluateExpression(ret_expr);
     string ret_type = functions.top()->getReturnType();
     string func_name = functions.top()->getFunctionName();
-    if (data_type == "NULL")
+    if (ret_expr == NULL)
     {
         if (ret_type != "VOID")
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, ret_stmt->getStartLine(), func_name) << std::endl;
         }
     }
-    else if (ret_type != data_type)
+    else if (data_type != "NULL" && ret_type != data_type)
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, ret_stmt->getStartLine(), func_name) << std::endl;
     }

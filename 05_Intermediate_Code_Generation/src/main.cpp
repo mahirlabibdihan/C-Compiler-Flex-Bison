@@ -1,3 +1,7 @@
+/**
+ * Author: Mahir Labib Dihan
+ * Last modified: January 18, 2023
+ */
 #include <iostream>
 #include <cstdio>
 #include <fstream>
@@ -6,22 +10,25 @@
 #include "../include/Util.hpp"
 #include "../include/LineTracker.hpp"
 #include "../include/LexicalAnalyzer.hpp"
+#include "../include/SyntaxAnalyzer.hpp"
 #include "../include/ErrorHandler.hpp"
 #include "../include/Logger.hpp"
 #include "../include/Tokenizer.hpp"
 #include "../include/SemanticAnalyzer.hpp"
 #include "../include/ParseTreeGenerator.hpp"
+#include "../include/ASTGenerator.hpp"
 // For file input output
 std::ofstream logout;
 std::ofstream tokenout;
 std::ofstream errorout;
 std::ofstream parseout;
+std::ofstream codeout;
 LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
+SyntaxAnalyzer *syn_anlzr;
 ErrorHandler *error_hndlr;
 SymbolTable *table;
-
-void runParser(FILE *fin);
+Program *runParser(FILE *fin);
 void ScopeTable::print() const
 {
     logout << '\t' << "ScopeTable# " << id << std::endl;
@@ -35,27 +42,27 @@ void ScopeTable::print() const
         logout << "\t" << i + 1 << "--> ";
         while (cur != nullptr)
         {
-            if (cur->getType() == "TERMINAL")
+            if (((ASTNode *)cur)->getASTType() == "TERMINAL")
             {
                 Terminal *cur_2 = (Terminal *)cur;
-                if (cur_2->getTerminalType() == "ID")
+                if (cur_2->getTerminalType() == "IDENTIFIER")
                 {
                     Identifier *cur_3 = (Identifier *)cur_2;
                     if (cur_3->getIdentity() == "FUNCTION")
                     {
                         Function *cur_4 = (Function *)cur_3;
-                        logout << "<" << cur_4->getSymbol() << ", " << cur_4->getIdentity() << ", " << cur_4->getReturnType() << "> ";
+                        logout << "<" << cur_4->getIdName() << ", " << cur_4->getIdentity() << ", " << cur_4->getReturnType() << "> ";
                     }
                     else if (cur_3->getIdentity() == "VARIABLE")
                     {
                         Variable *cur_4 = (Variable *)cur_3;
                         if (cur_4->getVarType() == "ARRAY")
                         {
-                            logout << "<" << cur_4->getSymbol() << ", " << cur_4->getVarType() << ", " << cur_4->getDataType() << "> ";
+                            logout << "<" << cur_4->getIdName() << ", " << cur_4->getVarType() << ", " << cur_4->getDataType() << "> ";
                         }
                         else if (cur_4->getVarType() == "PRIMITIVE")
                         {
-                            logout << "<" << cur_4->getSymbol() << ", " << cur_4->getDataType() << "> ";
+                            logout << "<" << cur_4->getIdName() << ", " << cur_4->getDataType() << "> ";
                         }
                     }
                 }
@@ -85,19 +92,38 @@ int main(int argc, char *argv[])
     tokenout.open("io/token.txt");
     errorout.open("io/error.txt");
     parseout.open("io/parsetree.txt");
+    codeout.open("io/codeout.txt");
 
     table = new SymbolTable(11);
     error_hndlr = new ErrorHandler();
     lexer = new LexicalAnalyzer(error_hndlr, logout, tokenout);
     sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
+    syn_anlzr = new SyntaxAnalyzer(lexer, table, error_hndlr, logout, errorout);
 
-    runParser(fin); // Main Parser
+    if (runParser(fin)) // Main Parser
+    {
+        Program *prog = syn_anlzr->getASTRoot();
+        if (error_hndlr->getErrorCount())
+        {
+            cout << "Code compiled with errors" << endl;
+        }
+        else
+        {
+            cout << "Code compiled successfully" << endl;
+        }
 
-    // table->printAllScope();
-    logout << "Total Lines: " << lexer->getLineCount() << std::endl;
-    logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
+        logout << "Total Lines: " << lexer->getLineCount() << std::endl;
+        logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
+
+        codeout << prog->getSymbol() << std::endl;
+        parseout << ASTGenerator::getAST(prog);
+        sem_anlzr->startProgram(prog);
+    }
+
+    // delete root;
 
     fclose(fin);
+    codeout.close();
     logout.close();
     parseout.close();
     errorout.close();

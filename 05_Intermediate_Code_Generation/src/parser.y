@@ -223,8 +223,10 @@ compound_statement 		: LCURL statements RCURL
 						}
 						| LCURL RCURL
 						{
-							$$ = NULL;
-							delete $1, $2;
+							$$ = new CompoundStatement();
+
+							vector<SymbolInfo*> child = {$1,$2};
+							syn_anlzr->setChildren($$, child, "compound_statement");
 						}
 						;
 

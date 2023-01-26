@@ -7,7 +7,7 @@
 #include "../include/Logger.hpp"
 #include <iostream>
 
-ASTNode::ASTNode(const string &name, const string &type, const string &ast_type) : SymbolInfo(name, type)
+ASTNode::ASTNode(const string &ast_type, const string &name, const string &type) : SymbolInfo(name, type)
 {
     this->ast_type = ast_type;
 }
@@ -22,7 +22,7 @@ void ASTNode::setASTType(const string &ast_type)
 {
     this->ast_type = ast_type;
 }
-NonTerminal::NonTerminal(string name, string type, string nt_type) : ASTNode(name, type, "NON_TERMINAL")
+NonTerminal::NonTerminal(string nt_type) : ASTNode("NON_TERMINAL")
 {
     this->nt_type = nt_type;
 }
@@ -61,7 +61,7 @@ std::vector<SymbolInfo *> NonTerminal::getChildren()
     return children;
 }
 
-List::List(const string &name, const string &type, const string &l_type) : NonTerminal(name, type, "LIST")
+List::List(const string &l_type) : NonTerminal("LIST")
 {
     this->l_type = l_type;
 }
@@ -73,7 +73,7 @@ const string &List::getListType()
 {
     return l_type;
 }
-ParameterList::ParameterList() : List("", "", "PARAMETER_LIST")
+ParameterList::ParameterList() : List("PARAMETER_LIST")
 {
 }
 ParameterList::~ParameterList()
@@ -112,7 +112,7 @@ vector<Variable *> ParameterList::getParams()
     return list;
 }
 
-ArgumentList::ArgumentList() : List("", "", "ARGUMENT_LIST")
+ArgumentList::ArgumentList() : List("ARGUMENT_LIST")
 {
 }
 
@@ -143,7 +143,7 @@ vector<Expression *> ArgumentList::getArgs()
     return list;
 }
 
-DeclarationList::DeclarationList() : List("", "", "DECLARATION_LIST")
+DeclarationList::DeclarationList() : List("DECLARATION_LIST")
 {
 }
 
@@ -163,7 +163,7 @@ void DeclarationList::addVariable(const string &name)
 
 void DeclarationList::addVariable(Variable *var)
 {
-    list.push_back(new Variable(var->getSymbol(), var->getDataType(), "PRIMITIVE"));
+    list.push_back(new Variable(var->getIdName(), var->getDataType(), "PRIMITIVE"));
 }
 
 void DeclarationList::addArray(const string &name, const string &size)
@@ -173,7 +173,7 @@ void DeclarationList::addArray(const string &name, const string &size)
 
 void DeclarationList::addArray(Array *arr)
 {
-    list.push_back(new Array(arr->getSymbol(), arr->getDataType(), arr->getArraySize()));
+    list.push_back(new Array(arr->getIdName(), arr->getDataType(), arr->getArraySize()));
 }
 
 void DeclarationList::addVariables(DeclarationList *vars)
@@ -195,13 +195,7 @@ vector<Variable *> DeclarationList::getDeclarations()
     return list;
 }
 
-Expression::Expression(Expression *e) : NonTerminal(e->name, e->type, "EXPRESSION")
-{
-    this->data_type = e->data_type;
-    this->exp_type = "";
-}
-
-Expression::Expression(const string &name, const string &type, const string &data_type, const string &exp_type) : NonTerminal(name, type, "EXPRESSION")
+Expression::Expression(const string &data_type, const string &exp_type) : NonTerminal("EXPRESSION")
 {
     this->data_type = data_type;
     this->exp_type = exp_type;
@@ -218,16 +212,6 @@ void Expression::setDataType(const string &data_type)
 {
     this->data_type = data_type;
 }
-
-const string &Expression::getExpression()
-{
-    return this->getSymbol();
-}
-void Expression::setExpression(const string &exp)
-{
-    this->setSymbol(exp);
-}
-
 const string &Expression::getExpType()
 {
     return exp_type;
@@ -237,50 +221,11 @@ void Expression::setExpType(const string &type)
     this->exp_type = type;
 }
 
-// CallExpression::CallExpression(const string &name, const string &type, const string &call_type) : Expression(name, type, "", "CALL_EXPRESSION")
-// {
-//     this->call_type = call_type;
-// }
-
-// IdentifierCall::IdentifierCall(const string &name, const string &type, const string &id_name, const string &id_type) : CallExpression(name, type, "IDENTIFIER_CALL")
-// {
-//     this->id_name = id_name;
-//     this->id_type = id_type;
-// }
-
-// ArrayCall::ArrayCall(Expression *idx) : IdentifierCall(idx->symbol, idx->type, "ARRAY_CALL")
-// {
-//     // idx = "";
-//     this->idx = new Expression(idx);
-// }
-// ArrayCall::ArrayCall(const string &name, const string &type) : VariableCall(name, type)
-// {
-//     // this->index = NULL;
-//     this->exp_type = "ARRAY_CALL";
-//     idx = "";
-// }
-// ArrayCall::ArrayCall(const string &var_name, Expression *idx) : VariableCall(var_name, "ARRAY_CALL")
-// {
-//     this->idx = idx;
-// }
 ArrayCall::~ArrayCall()
 {
 }
 
-// string ArrayCall::getIndex()
-// {
-//     return idx;
-// }
-// void ArrayCall::setIndex(string idx)
-// {
-//     this->idx = idx;
-// }
-
-// Terminal::Terminal(const string &t_type) : ASTNode("blank", "", "TERMINAL")
-// {
-//     this->t_type = t_type;
-// }
-Terminal::Terminal(const string &name, const string &type, const string &t_type) : ASTNode(name, type, "TERMINAL")
+Terminal::Terminal(const string &name, const string &type, const string &t_type) : ASTNode("TERMINAL", name, type)
 {
     this->t_type = t_type;
 }
@@ -345,10 +290,6 @@ void Variable::setDataType(const string &data_type)
     this->data_type = data_type;
 }
 
-// Array::Array(const string &arr_name, string arr_size) : Variable(arr_name, "", "ARRAY")
-// {
-//     this->arr_size = arr_size;
-// }
 Array::Array(const string &arr_name, const string &data_type, string arr_size) : Variable(arr_name, data_type, "ARRAY")
 {
     this->arr_size = arr_size;
@@ -441,7 +382,7 @@ void Function::defineFunction()
     is_definition = true;
 }
 
-Program::Program() : NonTerminal("", "", "PROGRAM")
+Program::Program() : NonTerminal("PROGRAM")
 {
 }
 
@@ -457,6 +398,25 @@ void Program::addVariableDeclaration(VariableDeclaration *var_dec)
 {
     this->var_decs.push_back(var_dec);
 }
+void Program::addUnit(Unit *unit)
+{
+    if (unit != NULL)
+    {
+        string type = unit->getUnitType();
+        if (type == "FUNCTION_DEFINITION")
+        {
+            this->addFunctionDefinition((FunctionDefinition *)unit);
+        }
+        if (type == "FUNCTION_DECLARATION")
+        {
+            this->addFunctionDeclaration((FunctionDeclaration *)unit);
+        }
+        if (type == "VARIABLE_DECLARATION")
+        {
+            this->addVariableDeclaration((VariableDeclaration *)unit);
+        }
+    }
+}
 const vector<FunctionDefinition *> &Program::getFunctionDefinitions()
 {
     return func_defs;
@@ -470,7 +430,7 @@ const vector<VariableDeclaration *> &Program::getVariableDeclarations()
     return var_decs;
 }
 
-Unit::Unit(const string &name, const string &type, const string &u_type) : NonTerminal(name, type, "UNIT")
+Unit::Unit(const string &u_type) : NonTerminal("UNIT")
 {
     this->u_type = u_type;
 }
@@ -479,7 +439,7 @@ const string &Unit::getUnitType()
 {
     return u_type;
 }
-VariableDeclaration::VariableDeclaration(const string &data_type, const vector<Variable *> &list) : Unit("", "", "VARIABLE_DECLARATION"), Statement("", "", "VARIABLE_DECLARATION")
+VariableDeclaration::VariableDeclaration(const string &data_type, const vector<Variable *> &list) : Unit("VARIABLE_DECLARATION"), Statement("VARIABLE_DECLARATION")
 {
     this->data_type = data_type;
     this->decl_list = list;
@@ -494,7 +454,7 @@ const string &VariableDeclaration::getDataType()
     return data_type;
 }
 
-FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("", "", "FUNCTION_DECLARATION"), Statement("", "", "FUNCTION_DECLARATION")
+FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION")
 {
     this->ret_type = ret_type;
     this->func_name = func_name;
@@ -512,7 +472,7 @@ const vector<Variable *> &FunctionDeclaration::getParams()
 {
     return params;
 }
-FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body) : Unit("", "", "FUNCTION_DEFINITION"), Statement("", "", "FUNCTION_DEFINITION")
+FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION")
 {
     this->ret_type = ret_type;
     this->func_name = func_name;
@@ -551,7 +511,7 @@ UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP"
 {
     this->uadd_oprt = oprt;
 }
-UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("", "", "", "UNARY_EXPRESSION")
+UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("", "UNARY_EXPRESSION")
 {
     this->op_type = op_type;
     this->operand = operand;
@@ -593,7 +553,7 @@ AssignOp::AssignOp(VariableCall *left, Expression *right) : BinaryExpression("AS
 {
 }
 
-BinaryExpression::BinaryExpression(const string &op_type, const string &op_symbol, Expression *left, Expression *right) : Expression("", "", "", "BINARY_EXPRESSION")
+BinaryExpression::BinaryExpression(const string &op_type, const string &op_symbol, Expression *left, Expression *right) : Expression("", "BINARY_EXPRESSION")
 {
     this->op_type = op_type;
     this->left_opr = left;
@@ -616,7 +576,7 @@ const string &BinaryExpression::getOperator()
 {
     return op_symbol;
 }
-CallExpression::CallExpression(const string &name, const string &type, const string &data_type, const string &call_type) : Expression(name, type, data_type, "CALL_EXPRESSION")
+CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression(data_type, "CALL_EXPRESSION")
 {
     this->call_type = call_type;
 }
@@ -624,7 +584,7 @@ const string &CallExpression::getCallType()
 {
     return call_type;
 }
-IdentifierCall::IdentifierCall(const string &name, const string &type, const string &id_name, const string &id_type) : CallExpression("", "", "", "IDENTIFIER_CALL")
+IdentifierCall::IdentifierCall(const string &id_name, const string &id_type) : CallExpression("", "IDENTIFIER_CALL")
 {
     this->id_name = id_name;
     this->id_type = id_type;
@@ -637,7 +597,7 @@ const string &IdentifierCall::getIdentity()
 {
     return id_type;
 }
-FunctionCall::FunctionCall(const string &func_name, const vector<Expression *> &args) : IdentifierCall("", "", func_name, "FUNCTION_CALL")
+FunctionCall::FunctionCall(const string &func_name, const vector<Expression *> &args) : IdentifierCall(func_name, "FUNCTION_CALL")
 {
     this->args = args;
 }
@@ -645,7 +605,7 @@ const vector<Expression *> &FunctionCall::getArgs()
 {
     return args;
 }
-VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall("", "", var_name, "VARIABLE_CALL")
+VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall(var_name, "VARIABLE_CALL")
 {
     this->var_type = var_type;
 }
@@ -661,7 +621,7 @@ Expression *ArrayCall::getIndex()
 {
     return idx;
 }
-ConstantCall::ConstantCall(const string &literal, const string &data_type) : CallExpression("", "", data_type, "CONSTANT_CALL")
+ConstantCall::ConstantCall(const string &literal, const string &data_type) : CallExpression(data_type, "CONSTANT_CALL")
 {
     this->literal = literal;
     this->data_type = data_type;
@@ -679,7 +639,7 @@ FloatCall::FloatCall(const string &literal) : ConstantCall(literal, "FLOAT")
 {
 }
 
-ConditionalStatement::ConditionalStatement(string c_type, Expression *condition) : Statement("", "", "CONDITIONAL_STATEMENT")
+ConditionalStatement::ConditionalStatement(string c_type, Expression *condition) : Statement("CONDITIONAL_STATEMENT")
 {
     this->condition = condition;
     this->c_type = c_type;
@@ -714,7 +674,7 @@ Statement *IfElseStatement::getElseBody()
 {
     return else_body;
 }
-LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("", "", "LOOP_STATEMENT")
+LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT")
 {
     this->condition = condition;
     this->body = body;
@@ -749,7 +709,7 @@ WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(con
 {
 }
 
-PrintStatement::PrintStatement(VariableCall *var_call) : Statement("", "", "PRINT_STATEMENT")
+PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT")
 {
     this->var_call = var_call;
 }
@@ -757,7 +717,7 @@ VariableCall *PrintStatement::getVariableCall()
 {
     return var_call;
 }
-ReturnStatement::ReturnStatement(Expression *expr) : Statement("", "", "RETURN_STATEMENT")
+ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT")
 {
     this->expr = expr;
 }
@@ -765,7 +725,7 @@ Expression *ReturnStatement::getExpression()
 {
     return expr;
 }
-ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("", "", "EXPRESSION_STATEMENT")
+ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT")
 {
     this->expr = expr;
 }
@@ -775,12 +735,12 @@ Expression *ExpressionStatement::getExpression()
     return expr;
 }
 
-Statement::Statement(const string &name, const string &type, const string &stmt_type) : NonTerminal(name, type, "STATEMENT")
+Statement::Statement(const string &stmt_type) : NonTerminal("STATEMENT")
 {
     this->stmt_type = stmt_type;
 }
 
-CompoundStatement::CompoundStatement() : Statement("", "", "COMPOUND_STATEMENT")
+CompoundStatement::CompoundStatement() : Statement("COMPOUND_STATEMENT")
 {
 }
 

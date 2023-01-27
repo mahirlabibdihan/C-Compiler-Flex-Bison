@@ -19,6 +19,8 @@ namespace Util
     std::string getActualString(std::string str);
     std::string formatCode(std::vector<SymbolInfo *> tokens);
     int getDataSize(std::string);
+    int countTokens(const std::string &line, char delim = ' ');
+    std::string *split(const std::string &line, char delim = ' ');
 };
 
 #endif

@@ -5,6 +5,7 @@
 class AssemblyGenerator
 {
     std::ofstream &asmout;
+    int indent;
 
 public:
     AssemblyGenerator(std::ofstream &asmout);
@@ -16,5 +17,7 @@ public:
     void declareVariables(VariableDeclaration *var_decl);
     void declareFunction(FunctionDeclaration *func_decl);
     void defineFunction(FunctionDefinition *func_def);
+
+    void print(const string &code);
 };
 #endif

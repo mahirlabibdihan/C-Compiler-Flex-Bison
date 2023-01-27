@@ -107,14 +107,6 @@ int main(int argc, char *argv[])
     if (runParser(fin)) // Main Parser
     {
         Program *prog = syn_anlzr->getASTRoot();
-        if (error_hndlr->getErrorCount())
-        {
-            cout << "Code compiled with errors" << endl;
-        }
-        else
-        {
-            cout << "Code compiled successfully" << endl;
-        }
 
         logout << "Total Lines: " << lexer->getLineCount() << std::endl;
         logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
@@ -122,7 +114,16 @@ int main(int argc, char *argv[])
         codeout << prog->getSymbol() << std::endl;
         parseout << ASTGenerator::getAST(prog);
         sem_anlzr->startProgram(prog);
-        asm_gen->startProgram(prog);
+
+        if (error_hndlr->getErrorCount())
+        {
+            cout << "Code compiled with errors" << endl;
+        }
+        else
+        {
+            asm_gen->startProgram(prog);
+            cout << "Code compiled successfully" << endl;
+        }
     }
 
     // delete root;

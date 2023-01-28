@@ -121,6 +121,8 @@ class Variable : public Identifier
 {
     string var_type;  // Primitive, Array
     string data_type; // int, float, char
+    int offset;
+
 public:
     Variable(const string &var_name, const string &data_type, const string &var_type = "PRIMITIVE");
     virtual ~Variable();
@@ -128,6 +130,8 @@ public:
     void setVarType(const string &);
     const string &getDataType();
     void setDataType(const string &);
+    void setOffset(int offset);
+    int getOffset();
 };
 
 class Array : public Variable

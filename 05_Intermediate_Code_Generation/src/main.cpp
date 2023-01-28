@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     lexer = new LexicalAnalyzer(error_hndlr, logout, tokenout);
     sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
     syn_anlzr = new SyntaxAnalyzer(lexer, table, error_hndlr, logout, errorout);
-    asm_gen = new AssemblyGenerator(asmout);
+    asm_gen = new AssemblyGenerator(table, asmout);
 
     if (runParser(fin)) // Main Parser
     {

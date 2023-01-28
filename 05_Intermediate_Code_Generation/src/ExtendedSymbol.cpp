@@ -269,6 +269,7 @@ Variable::Variable(const string &var_name, const string &data_type, const string
 {
     this->var_type = var_type;
     this->data_type = data_type;
+    this->offset = 0;
 }
 Variable::~Variable()
 {
@@ -289,7 +290,14 @@ void Variable::setDataType(const string &data_type)
 {
     this->data_type = data_type;
 }
-
+void Variable::setOffset(int offset)
+{
+    this->offset = offset;
+}
+int Variable::getOffset()
+{
+    return offset;
+}
 Array::Array(const string &arr_name, const string &data_type, string arr_size) : Variable(arr_name, data_type, "ARRAY")
 {
     this->arr_size = arr_size;

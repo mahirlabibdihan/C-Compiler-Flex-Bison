@@ -559,6 +559,7 @@ void SemanticAnalyzer::analyzePrintStatement(PrintStatement *print_stmt)
 {
     callVariable(print_stmt->getVariableCall());
 }
+
 void SemanticAnalyzer::analyzeCompoundStatement(CompoundStatement *stmt_list)
 {
     vector<Statement *> list = stmt_list->getStatements();
@@ -567,6 +568,7 @@ void SemanticAnalyzer::analyzeCompoundStatement(CompoundStatement *stmt_list)
         analyzeStatement(stmt);
     }
 }
+
 void SemanticAnalyzer::analyzeExpressionStatement(ExpressionStatement *expr_stmt)
 {
     evaluateExpression(expr_stmt->getExpression());

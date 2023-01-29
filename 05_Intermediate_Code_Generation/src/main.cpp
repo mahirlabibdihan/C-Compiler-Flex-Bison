@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
 
         codeout << prog->getSymbol() << std::endl;
-        parseout << ASTGenerator::getAST(prog);
+        parseout << ASTGenerator::getAST(prog) << std::endl;
         sem_anlzr->startProgram(prog);
 
         if (error_hndlr->getErrorCount())

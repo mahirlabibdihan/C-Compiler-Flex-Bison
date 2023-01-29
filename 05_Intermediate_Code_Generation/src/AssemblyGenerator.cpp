@@ -15,8 +15,8 @@ AssemblyGenerator::AssemblyGenerator(SymbolTable *table, std::ofstream &out) : a
 {
     this->table = table;
     indent = 0;
+    label_count = 0;
 }
-
 void AssemblyGenerator::startProgram(Program *prog)
 {
     vector<FunctionDefinition *> func_defs = prog->getFunctionDefinitions();
@@ -49,7 +49,6 @@ void AssemblyGenerator::startProgram(Program *prog)
 
     print("END MAIN");
 }
-
 void AssemblyGenerator::declareVariables(VariableDeclaration *var_decl)
 {
     vector<Variable *> vars = var_decl->getDeclarationList();
@@ -66,7 +65,6 @@ void AssemblyGenerator::declareVariables(VariableDeclaration *var_decl)
         }
     }
 }
-
 void AssemblyGenerator::declareVariable(Variable *var)
 {
     string data_type = var->getDataType();
@@ -122,24 +120,26 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
         offset += 2;
     }
 }
-
 void AssemblyGenerator::returnFunction()
 {
-    print("POP DX");
-    print("POP CX");
-    print("POP BX");
-    print("POP AX");
+    if (curr_func->getReturnType() != "VOID")
+    {
+        print("POP AX");
+    }
     print("MOV SP, BP");
     print("POP BP");
-}
 
+    if (curr_func->getFunctionName() != "main")
+    {
+        print("RET " + std::to_string(2 * curr_func->getParams().size()));
+    }
+}
 void AssemblyGenerator::analyzePrintStatement(PrintStatement *print_stmt)
 {
     callVariable(print_stmt->getVariableCall());
 
     print("CALL OUTPUT");
 }
-
 void AssemblyGenerator::definePrintFunction()
 {
     ifstream in("print.asm");
@@ -158,6 +158,9 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     vector<Statement *> stmt_list = func_def->getBody();
 
     Function *new_func = new Function(func_name, ret_type);
+
+    curr_func = func_def;
+
     for (auto p : params)
     {
         new_func->addParam(new Variable(p->getIdName(), p->getDataType()));
@@ -170,18 +173,20 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     indent++;
     table->enterScope();
 
-    print("PUSH BP");
-    print("MOV BP, SP");
-    print("PUSH AX");
-    print("PUSH BX");
-    print("PUSH CX");
-    print("PUSH DX");
+    if (func_def->getFunctionName() == "main")
+    {
+        print("MOV AX, @DATA");
+        print("MOV DS, AX");
+        print("MOV BP, SP");
 
-    offset_history.push_back(-10);
-    print("XOR AX, AX");
-    print("XOR BX, BX");
-    print("XOR CX, CX");
-    print("XOR DX, DX");
+        offset_history.push_back(-2);
+    }
+    else
+    {
+        print("PUSH BP");
+        print("MOV BP, SP");
+        offset_history.push_back(-2);
+    }
 
     declareFunctionParams(params);
     for (Statement *stmt : stmt_list)
@@ -189,12 +194,18 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
         analyzeStatement(stmt);
     }
 
+    if (func_def->getFunctionName() == "main")
+    {
+        print("MOV AH, 4CH");
+        print("INT 21H");
+    }
+
     offset_history.pop_back();
     table->exitScope();
     indent--;
+
     print(func_name + " ENDP");
 }
-
 void AssemblyGenerator::declareFunction(FunctionDeclaration *func_decl)
 {
     string ret_type = func_decl->getReturnType();
@@ -224,10 +235,7 @@ void AssemblyGenerator::print(const string &code)
         }
         asmout << lines[i] << std::endl;
     }
-    // asmout.flush();
-    // Sleep(500);
 }
-
 void AssemblyGenerator::analyzeStatement(Statement *stmt)
 {
     if (stmt == NULL)
@@ -235,11 +243,11 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
     string type = stmt->getStatementType();
     if (type == "CONDITIONAL_STATEMENT")
     {
-        // analyzeConditionalStatement((ConditionalStatement *)stmt);
+        analyzeConditionalStatement((ConditionalStatement *)stmt);
     }
     if (type == "LOOP_STATEMENT")
     {
-        // analyzeLoopStatement((LoopStatement *)stmt);
+        analyzeLoopStatement((LoopStatement *)stmt);
     }
     if (type == "PRINT_STATEMENT")
     {
@@ -247,7 +255,7 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
     }
     if (type == "RETURN_STATEMENT")
     {
-        // analyzeReturnStatement((ReturnStatement *)stmt);
+        analyzeReturnStatement((ReturnStatement *)stmt);
     }
     if (type == "EXPRESSION_STATEMENT")
     {
@@ -256,7 +264,7 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
     if (type == "COMPOUND_STATEMENT")
     {
         table->enterScope();
-        // analyzeCompoundStatement((CompoundStatement *)stmt);
+        analyzeCompoundStatement((CompoundStatement *)stmt);
         table->exitScope();
     }
     if (type == "VARIABLE_DECLARATION")
@@ -264,12 +272,18 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
         declareVariables((VariableDeclaration *)stmt);
     }
 }
-
 void AssemblyGenerator::analyzeExpressionStatement(ExpressionStatement *expr_stmt)
 {
     evaluateExpression(expr_stmt->getExpression());
 }
-
+void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *stmt_list)
+{
+    vector<Statement *> list = stmt_list->getStatements();
+    for (Statement *stmt : list)
+    {
+        analyzeStatement(stmt);
+    }
+}
 void AssemblyGenerator::evaluateExpression(Expression *expr)
 {
     if (expr != NULL)
@@ -285,11 +299,10 @@ void AssemblyGenerator::evaluateExpression(Expression *expr)
         }
         if (type == "UNARY_EXPRESSION")
         {
-            // return evaluateUnaryExpression((UnaryExpression *)expr);
+            return evaluateUnaryExpression((UnaryExpression *)expr);
         }
     }
 }
-
 void AssemblyGenerator::evaluateBinaryExpression(BinaryExpression *bin_expr)
 {
     string type = bin_expr->getOpType();
@@ -314,7 +327,115 @@ void AssemblyGenerator::evaluateBinaryExpression(BinaryExpression *bin_expr)
         logicOp((LogicOp *)bin_expr);
     }
 }
+void AssemblyGenerator::evaluateUnaryExpression(UnaryExpression *unr_expr)
+{
+    string type = unr_expr->getOpType();
 
+    if (type == "UADDOP")
+    {
+        uaddOp((UAddOp *)unr_expr);
+    }
+    if (type == "NOTOP")
+    {
+        notOp((NotOp *)unr_expr);
+    }
+    if (type == "INCOP")
+    {
+        incOp((IncOp *)unr_expr);
+    }
+    if (type == "DECOP")
+    {
+        decOp((DecOp *)unr_expr);
+    }
+}
+void AssemblyGenerator::analyzeConditionalStatement(ConditionalStatement *cnd_stmt)
+{
+    std::string type = cnd_stmt->getConditionType();
+    if (type == "IF_STATEMENT")
+    {
+        analyzeIfStatement((IfStatement *)cnd_stmt);
+    }
+    if (type == "IFELSE_STATEMENT")
+    {
+        analyzeIfElseStatement((IfElseStatement *)cnd_stmt);
+    }
+}
+void AssemblyGenerator::analyzeLoopStatement(LoopStatement *loop_stmt)
+{
+    string type = loop_stmt->getLoopType();
+    if (type == "FOR_LOOP")
+    {
+        analyzeForLoop((ForLoop *)loop_stmt);
+    }
+    if (type == "WHILE_LOOP")
+    {
+        analyzeWhileLoop((WhileLoop *)loop_stmt);
+    }
+}
+void AssemblyGenerator::analyzeIfStatement(IfStatement *if_stmt)
+{
+    evaluateExpression(if_stmt->getCondition());
+
+    string true_label = newLabel();
+    string end_label = newLabel();
+
+    print("POP AX");
+    print("CMP AX, 0");
+    print("JE " + end_label);
+    analyzeStatement(if_stmt->getIfBody());
+    print(end_label + ":");
+}
+void AssemblyGenerator::analyzeIfElseStatement(IfElseStatement *ifelse_stmt)
+{
+    evaluateExpression(ifelse_stmt->getCondition());
+    string else_label = newLabel();
+    string end_label = newLabel();
+
+    print("POP AX");
+    print("CMP AX, 0");
+    print("JE " + else_label);
+    analyzeStatement(ifelse_stmt->getIfBody());
+    print("JMP " + end_label);
+    print(else_label + ":");
+    analyzeStatement(ifelse_stmt->getElseBody());
+    print(end_label + ":");
+}
+void AssemblyGenerator::analyzeForLoop(ForLoop *for_loop)
+{
+    std::string start_label = newLabel();
+    std::string end_label = newLabel();
+
+    evaluateExpression(for_loop->getInitialize());
+    print(start_label + ":");
+    evaluateExpression(for_loop->getCondition());
+    print("CMP AX, 0");
+    print("JE " + end_label);
+    analyzeStatement(for_loop->getBody());
+    evaluateExpression(for_loop->getIncDec());
+    print("POP AX"); // Pop increment
+    print("JMP " + start_label);
+    print(end_label + ":");
+}
+void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
+{
+    std::string start_label = newLabel();
+    std::string end_label = newLabel();
+
+    print(start_label + ":");
+    evaluateExpression(while_loop->getCondition());
+    print("POP AX");
+    print("CMP AX, 0");
+    print("JE " + end_label);
+    analyzeStatement(while_loop->getBody());
+    print("JMP " + start_label);
+    print(end_label + ":");
+}
+void AssemblyGenerator::analyzeReturnStatement(ReturnStatement *ret_stmt)
+{
+    Expression *ret_expr = ret_stmt->getExpression();
+    evaluateExpression(ret_expr);
+    returnFunction();
+}
 void AssemblyGenerator::evaluateCallExpression(CallExpression *call_expr)
 {
     string type = call_expr->getCallType();
@@ -327,12 +448,10 @@ void AssemblyGenerator::evaluateCallExpression(CallExpression *call_expr)
         callConstant((ConstantCall *)call_expr);
     }
 }
-
 void AssemblyGenerator::callConstant(ConstantCall *const_call)
 {
     print("PUSH " + const_call->getLiteral());
 }
-
 void AssemblyGenerator::callIdentifier(IdentifierCall *id_call)
 {
     string type = id_call->getIdentity();
@@ -342,10 +461,88 @@ void AssemblyGenerator::callIdentifier(IdentifierCall *id_call)
     }
     if (type == "FUNCTION_CALL")
     {
-        // callFunction((FunctionCall *)id_call);
+        callFunction((FunctionCall *)id_call);
     }
 }
+void AssemblyGenerator::callFunction(FunctionCall *func_call)
+{
+    string func_name = func_call->getIdName();
+    vector<Expression *> args = func_call->getArgs();
+    for (Expression *e : args)
+    {
+        evaluateExpression(e);
+    }
+    Function *func = (Function *)table->find(func_name);
+    print("CALL " + func_name);
+    if (func->getReturnType() != "VOID")
+    {
+        print("PUSH AX");
+    }
+}
+void AssemblyGenerator::uaddOp(UAddOp *expr)
+{
+    evaluateExpression(expr->getOperand());
+    if (expr->getOperator() == "-")
+    {
+        print("POP BX");
+        print("NEG BX");
+        print("PUSH BX");
+    }
+}
+void AssemblyGenerator::notOp(NotOp *expr)
+{
+    evaluateExpression(expr->getOperand());
+    print("POP AX");
+    print("NOT AX");
+    print("PUSH AX");
+}
+void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
+{
+    assignVariable(var_call);
 
+    Variable *var = (Variable *)table->find(var_call->getIdName());
+
+    if (var->getVarType() == "ARRAY")
+    {
+        print("POP BX");
+        if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
+        {
+            print("PUSH " + var->getIdName() + "[BX]");  // Pushing previous value to stack
+            print(op + " " + var->getIdName() + "[BX]"); // Increment the value
+        }
+        else
+        {
+            string offset = std::to_string(var->getOffset());
+            print("MOV SI, BX");
+            print("SUB SI, " + offset);
+            print("NEG SI");
+            print("PUSH [BP+SI]");
+            print(op + " [BP+SI]");
+        }
+    }
+    else
+    {
+        if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
+        {
+            print("PUSH " + var->getIdName());
+            print(op + " " + var->getIdName());
+        }
+        else
+        {
+            string offset = std::to_string(var->getOffset());
+            print("PUSH [BP + " + offset + "]");
+            print(op + " [BP + " + offset + "]");
+        }
+    }
+}
+void AssemblyGenerator::incOp(IncOp *expr)
+{
+    incdecOp((VariableCall *)expr->getOperand(), "INC");
+}
+void AssemblyGenerator::decOp(DecOp *expr)
+{
+    incdecOp((VariableCall *)expr->getOperand(), "DEC");
+}
 void AssemblyGenerator::assignOp(AssignOp *expr)
 {
     VariableCall *left_var = (VariableCall *)expr->getLeftOpr();
@@ -366,7 +563,7 @@ void AssemblyGenerator::assignOp(AssignOp *expr)
         {
             string offset = std::to_string(left->getOffset());
             print("MOV SI, BX");
-            print("SUB SI, " + std::to_string(((Array *)left)->getOffset()));
+            print("SUB SI, " + offset);
             print("NEG SI");
             print("MOV [BP+SI], AX");
         }
@@ -388,11 +585,72 @@ void AssemblyGenerator::logicOp(LogicOp *expr)
 {
     evaluateExpression(expr->getLeftOpr());
     evaluateExpression(expr->getRightOpr());
+
+    std::string op = expr->getOperator();
+
+    string true_label = newLabel();
+    string false_label = newLabel();
+    string end_label = newLabel();
+
+    print("POP BX");
+    print("POP AX");
+
+    if (op == "&&")
+    {
+        print("AND AX, BX");
+    }
+    else if (op == "||")
+    {
+        print("OR AX, BX");
+    }
+    print("PUSH AX");
+}
+std::string AssemblyGenerator::getRelOpASM(string op)
+{
+    if (op == ">")
+    {
+        return "JG";
+    }
+    else if (op == ">=")
+    {
+        return "JGE";
+    }
+    else if (op == "<")
+    {
+        return "JL";
+    }
+    else if (op == "<=")
+    {
+        return "JLE";
+    }
+    else if (op == "!=")
+    {
+        return "JNE";
+    }
+    else if (op == "==")
+    {
+        return "JE";
+    }
+    return "";
 }
 void AssemblyGenerator::relOp(RelOp *expr)
 {
     evaluateExpression(expr->getLeftOpr());
     evaluateExpression(expr->getRightOpr());
+
+    string true_label = newLabel();
+    string end_label = newLabel();
+
+    string op = getRelOpASM(expr->getOperator());
+    print("POP BX");
+    print("POP AX");
+    print("CMP AX, BX");
+    print("PUSH 0");
+    print(op + " " + true_label);
+    print("JMP " + end_label);
+    print(true_label + ":");
+    print("PUSH 1");
+    print(end_label + ":");
 }
 void AssemblyGenerator::addOp(AddOp *expr)
 {
@@ -437,7 +695,6 @@ void AssemblyGenerator::mulOp(MulOp *expr)
         }
     }
 }
-
 void AssemblyGenerator::callVariable(VariableCall *var_call)
 {
     string var_name = var_call->getIdName();
@@ -486,7 +743,6 @@ void AssemblyGenerator::callArray(ArrayCall *arr_call)
 
     print("PUSH AX");
 }
-
 void AssemblyGenerator::assignVariable(VariableCall *var_call)
 {
     if (var_call->getVarType() == "ARRAY_CALL")
@@ -497,4 +753,10 @@ void AssemblyGenerator::assignVariable(VariableCall *var_call)
         print("SHL BX, 1");
         print("PUSH BX");
     }
+}
+std::string AssemblyGenerator::newLabel()
+{
+    string lb = "L" + std::to_string(label_count);
+    label_count++;
+    return lb;
 }

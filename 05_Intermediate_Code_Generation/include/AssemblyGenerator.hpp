@@ -10,6 +10,8 @@ class AssemblyGenerator
     std::ofstream &asmout;
     int indent;
     std::vector<int> offset_history;
+    FunctionDefinition *curr_func;
+    int label_count;
 
 public:
     AssemblyGenerator(SymbolTable *table, std::ofstream &asmout);
@@ -48,10 +50,15 @@ public:
 
     void assignOp(AssignOp *expr);
     void logicOp(LogicOp *expr);
+    std::string getRelOpASM(string op);
     void relOp(RelOp *expr);
     void addOp(AddOp *expr);
     void mulOp(MulOp *expr);
-
+    void uaddOp(UAddOp *expr);
+    void notOp(NotOp *expr);
+    void incOp(IncOp *expr);
+    void decOp(DecOp *expr);
+    void incdecOp(VariableCall *expr, std::string op);
     void callConstant(ConstantCall *const_call);
     void callIdentifier(IdentifierCall *id_call);
     void callVariable(VariableCall *var_call);
@@ -59,5 +66,7 @@ public:
     void callFunction(FunctionCall *func_call);
 
     void assignVariable(VariableCall *var_call);
+
+    std::string newLabel();
 };
 #endif

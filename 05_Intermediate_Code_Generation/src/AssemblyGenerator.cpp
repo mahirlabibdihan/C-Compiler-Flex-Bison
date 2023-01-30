@@ -409,6 +409,7 @@ void AssemblyGenerator::analyzeForLoop(ForLoop *for_loop)
     evaluateExpression(for_loop->getInitialize());
     print(start_label + ":");
     evaluateExpression(for_loop->getCondition());
+    print("POP AX");
     print("CMP AX, 0");
     print("JE " + end_label);
     analyzeStatement(for_loop->getBody());
@@ -508,8 +509,8 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         print("POP BX");
         if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
         {
-            print("PUSH " + var->getIdName() + "[BX]");  // Pushing previous value to stack
-            print(op + " " + var->getIdName() + "[BX]"); // Increment the value
+            print("PUSH " + var->getIdName() + "[BX]");           // Pushing previous value to stack
+            print(op + " WORD PTR " + var->getIdName() + "[BX]"); // Increment the value
         }
         else
         {
@@ -518,7 +519,7 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
             print("SUB SI, " + offset);
             print("NEG SI");
             print("PUSH [BP+SI]");
-            print(op + " [BP+SI]");
+            print(op + " WORD PTR [BP+SI]");
         }
     }
     else
@@ -526,13 +527,13 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
         {
             print("PUSH " + var->getIdName());
-            print(op + " " + var->getIdName());
+            print(op + " WORD PTR  " + var->getIdName());
         }
         else
         {
             string offset = std::to_string(var->getOffset());
             print("PUSH [BP + " + offset + "]");
-            print(op + " [BP + " + offset + "]");
+            print(op + " WORD PTR [BP + " + offset + "]");
         }
     }
 }
@@ -646,8 +647,8 @@ void AssemblyGenerator::relOp(RelOp *expr)
     print("POP BX");
     print("POP AX");
     print("CMP AX, BX");
-    print("PUSH 0");
     print(op + " " + true_label);
+    print("PUSH 0");
     print("JMP " + end_label);
     print(true_label + ":");
     print("PUSH 1");

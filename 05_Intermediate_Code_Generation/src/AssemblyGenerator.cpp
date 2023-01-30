@@ -78,7 +78,7 @@ void AssemblyGenerator::declareVariable(Variable *var)
     }
     else
     {
-        print("PUSH BX");
+        print("SUB SP, 2");
         new_var->setOffset(offset_history.back());
         offset_history.back() -= 2;
     }
@@ -99,7 +99,7 @@ void AssemblyGenerator::declareArray(Array *arr)
     {
         for (int i = 0; i < stoi(arr_size); i++)
         {
-            print("PUSH BX");
+            print("SUB SP, 2");
         }
         new_arr->setOffset(offset_history.back());
         offset_history.back() -= stoi(arr_size) * 2; // Stack decrease downward
@@ -589,10 +589,6 @@ void AssemblyGenerator::logicOp(LogicOp *expr)
     evaluateExpression(expr->getRightOpr());
 
     std::string op = expr->getOperator();
-
-    string true_label = newLabel();
-    string false_label = newLabel();
-    string end_label = newLabel();
 
     print("POP BX");
     print("POP AX");

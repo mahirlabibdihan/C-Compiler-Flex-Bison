@@ -526,9 +526,17 @@ void AssemblyGenerator::uaddOp(UAddOp *expr)
 void AssemblyGenerator::notOp(NotOp *expr)
 {
     evaluateExpression(expr->getOperand());
+
+    string true_label = newLabel();
+    string end_label = newLabel();
     print("POP AX");
-    print("NOT AX");
-    print("PUSH AX");
+    print("CMP AX, 0");
+    print("JE " + true_label);
+    print("PUSH 0");
+    print("JMP " + end_label);
+    print(true_label + ":");
+    print("PUSH 1");
+    print(end_label + ":");
 }
 void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
 {
@@ -621,19 +629,37 @@ void AssemblyGenerator::logicOp(LogicOp *expr)
     evaluateExpression(expr->getRightOpr());
 
     std::string op = expr->getOperator();
+    string false_label = newLabel();
+    string true_label = newLabel();
+    string end_label = newLabel();
 
     print("POP BX");
     print("POP AX");
 
     if (op == "&&")
     {
-        print("AND AX, BX");
+        print("CMP AX, 0");
+        print("JE " + false_label);
+        print("CMP BX, 0");
+        print("JE " + false_label);
+        print("PUSH 1");
+        print("JMP " + end_label);
+        print(false_label + ":");
+        print("PUSH 0");
+        print(end_label + ":");
     }
     else if (op == "||")
     {
-        print("OR AX, BX");
+        print("CMP AX, 0");
+        print("JNE " + true_label);
+        print("CMP BX, 0");
+        print("JNE " + true_label);
+        print("PUSH 0");
+        print("JMP " + end_label);
+        print(true_label + ":");
+        print("PUSH 1");
+        print(end_label + ":");
     }
-    print("PUSH AX");
 }
 std::string AssemblyGenerator::getRelOpASM(string op)
 {

@@ -200,6 +200,7 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
         print("INT 21H");
     }
 
+    returnFunction();
     offset_history.pop_back();
     table->exitScope();
     indent--;

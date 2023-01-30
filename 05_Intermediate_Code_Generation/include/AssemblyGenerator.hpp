@@ -28,7 +28,8 @@ public:
 
     void declareFunctionParams(std::vector<Variable *> params);
     void print(const string &code);
-
+    void comment(const string &msg);
+    void comment(const string &msg, int line);
     // Statements
     void analyzeStatement(Statement *stmt);
     void analyzeConditionalStatement(ConditionalStatement *stmt);

@@ -18,6 +18,7 @@
 #include "../include/ParseTreeGenerator.hpp"
 #include "../include/ASTGenerator.hpp"
 #include "../include/AssemblyGenerator.hpp"
+#include "../include/Optimizer.hpp"
 // For file input output
 std::ofstream logout;
 std::ofstream tokenout;
@@ -25,12 +26,15 @@ std::ofstream errorout;
 std::ofstream parseout;
 std::ofstream codeout;
 std::ofstream asmout;
+std::ifstream asmin;
+std::ofstream optout;
 LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
 SyntaxAnalyzer *syn_anlzr;
 ErrorHandler *error_hndlr;
 AssemblyGenerator *asm_gen;
 SymbolTable *table;
+Optimizer *optmzr;
 Program *runParser(FILE *fin);
 void ScopeTable::print() const
 {
@@ -103,7 +107,7 @@ int main(int argc, char *argv[])
     sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
     syn_anlzr = new SyntaxAnalyzer(lexer, table, error_hndlr, logout, errorout);
     asm_gen = new AssemblyGenerator(table, asmout);
-
+    optmzr = new Optimizer();
     if (runParser(fin)) // Main Parser
     {
         Program *prog = syn_anlzr->getASTRoot();
@@ -123,6 +127,8 @@ int main(int argc, char *argv[])
         {
             asm_gen->startProgram(prog);
             cout << "Code compiled successfully" << endl;
+            asmin.open("io/code.asm");
+            optmzr->optimize();
         }
     }
 

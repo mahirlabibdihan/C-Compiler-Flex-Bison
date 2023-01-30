@@ -52,7 +52,7 @@ void AssemblyGenerator::startProgram(Program *prog)
 void AssemblyGenerator::declareVariables(VariableDeclaration *var_decl)
 {
     vector<Variable *> vars = var_decl->getDeclarationList();
-
+    comment(var_decl->getSymbol());
     for (Variable *var : vars)
     {
         if (var->getVarType() == "ARRAY")
@@ -122,22 +122,23 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 }
 void AssemblyGenerator::returnFunction()
 {
-    if (curr_func->getReturnType() != "VOID")
+    if (curr_func->getReturnType() != "VOID" && curr_func->getFunctionName() != "main")
     {
         print("POP AX");
+        print("MOV [BP+" + std::to_string(2 * curr_func->getParams().size() + 4) + "], AX");
     }
-    print("MOV SP, BP");
-    print("POP BP");
 
     if (curr_func->getFunctionName() != "main")
     {
+        print("MOV SP, BP");
+        print("POP BP");
         print("RET " + std::to_string(2 * curr_func->getParams().size()));
     }
 }
 void AssemblyGenerator::analyzePrintStatement(PrintStatement *print_stmt)
 {
+    comment(print_stmt->getSymbol());
     callVariable(print_stmt->getVariableCall());
-
     print("CALL OUTPUT");
 }
 void AssemblyGenerator::definePrintFunction()
@@ -237,6 +238,24 @@ void AssemblyGenerator::print(const string &code)
         asmout << lines[i] << std::endl;
     }
 }
+void AssemblyGenerator::comment(const string &msg)
+{
+    string *lines = Util::split(msg, '\n');
+    int count = Util::countTokens(msg, '\n');
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 1; j <= indent; j++)
+        {
+            asmout << "\t";
+        }
+        asmout << "; " << lines[i] << std::endl;
+    }
+}
+
+void AssemblyGenerator::comment(const string &msg, int line)
+{
+    comment("Line no: " + to_string(line) + " => " + msg);
+}
 void AssemblyGenerator::analyzeStatement(Statement *stmt)
 {
     if (stmt == NULL)
@@ -275,6 +294,7 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
 }
 void AssemblyGenerator::analyzeExpressionStatement(ExpressionStatement *expr_stmt)
 {
+    comment(expr_stmt->getSymbol());
     evaluateExpression(expr_stmt->getExpression());
 }
 void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *stmt_list)
@@ -375,6 +395,7 @@ void AssemblyGenerator::analyzeLoopStatement(LoopStatement *loop_stmt)
 }
 void AssemblyGenerator::analyzeIfStatement(IfStatement *if_stmt)
 {
+    comment(if_stmt->getCondition()->getSymbol());
     evaluateExpression(if_stmt->getCondition());
 
     string true_label = newLabel();
@@ -388,6 +409,7 @@ void AssemblyGenerator::analyzeIfStatement(IfStatement *if_stmt)
 }
 void AssemblyGenerator::analyzeIfElseStatement(IfElseStatement *ifelse_stmt)
 {
+    comment(ifelse_stmt->getCondition()->getSymbol());
     evaluateExpression(ifelse_stmt->getCondition());
     string else_label = newLabel();
     string end_label = newLabel();
@@ -406,13 +428,16 @@ void AssemblyGenerator::analyzeForLoop(ForLoop *for_loop)
     std::string start_label = newLabel();
     std::string end_label = newLabel();
 
+    comment(for_loop->getInitialize()->getSymbol());
     evaluateExpression(for_loop->getInitialize());
     print(start_label + ":");
+    comment(for_loop->getCondition()->getSymbol());
     evaluateExpression(for_loop->getCondition());
     print("POP AX");
     print("CMP AX, 0");
     print("JE " + end_label);
     analyzeStatement(for_loop->getBody());
+    comment(for_loop->getIncDec()->getSymbol());
     evaluateExpression(for_loop->getIncDec());
     print("POP AX"); // Pop increment
     print("JMP " + start_label);
@@ -424,6 +449,7 @@ void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
     std::string end_label = newLabel();
 
     print(start_label + ":");
+    comment(while_loop->getCondition()->getSymbol());
     evaluateExpression(while_loop->getCondition());
     print("POP AX");
     print("CMP AX, 0");
@@ -435,6 +461,7 @@ void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
 void AssemblyGenerator::analyzeReturnStatement(ReturnStatement *ret_stmt)
 {
     Expression *ret_expr = ret_stmt->getExpression();
+    comment(ret_stmt->getSymbol());
     evaluateExpression(ret_expr);
     returnFunction();
 }
@@ -470,16 +497,21 @@ void AssemblyGenerator::callFunction(FunctionCall *func_call)
 {
     string func_name = func_call->getIdName();
     vector<Expression *> args = func_call->getArgs();
+
+    Function *func = (Function *)table->find(func_name);
+    // Push reference for return type
+    // Return type will be stored here
+    if (func->getReturnType() != "VOID")
+    {
+        print("SUB SP, 2");
+    }
+
+    comment(func_call->getSymbol());
     for (Expression *e : args)
     {
         evaluateExpression(e);
     }
-    Function *func = (Function *)table->find(func_name);
     print("CALL " + func_name);
-    if (func->getReturnType() != "VOID")
-    {
-        print("PUSH AX");
-    }
 }
 void AssemblyGenerator::uaddOp(UAddOp *expr)
 {

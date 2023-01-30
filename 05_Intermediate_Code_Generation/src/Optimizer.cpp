@@ -221,7 +221,7 @@ void Optimizer::optimize()
         }
         else
         {
-            std::cout << lines[i] << std::endl;
+            // std::cout << lines[i] << std::endl;
         }
         // Add condition for dead codes
     }

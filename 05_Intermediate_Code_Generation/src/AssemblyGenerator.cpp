@@ -97,12 +97,10 @@ void AssemblyGenerator::declareArray(Array *arr)
     }
     else
     {
-        for (int i = 0; i < stoi(arr_size); i++)
-        {
-            print("SUB SP, 2");
-        }
+        int sz = stoi(arr_size) * 2;
+        print("SUB SP, " + to_string(sz));
         new_arr->setOffset(offset_history.back());
-        offset_history.back() -= stoi(arr_size) * 2; // Stack decrease downward
+        offset_history.back() -= SC_ZOOM; // Stack decrease downward
     }
 }
 void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)

@@ -265,13 +265,13 @@ string SemanticAnalyzer::evaluateExpression(Expression *expr)
         {
             return evaluateCallExpression((CallExpression *)expr);
         }
-        if (type == "BINARY_EXPRESSION")
+        if (type == "BINARY_EXPRESSION" || type == "BINARY_BOOLEAN")
         {
-            return evaluateBinaryExpression((BinaryExpression *)expr);
+            return evaluateBinaryExpression(dynamic_cast<BinaryExpression *>(expr));
         }
-        if (type == "UNARY_EXPRESSION")
+        if (type == "UNARY_EXPRESSION" || type == "UNARY_BOOLEAN")
         {
-            return evaluateUnaryExpression((UnaryExpression *)expr);
+            return evaluateUnaryExpression(dynamic_cast<UnaryExpression *>(expr));
         }
     }
 

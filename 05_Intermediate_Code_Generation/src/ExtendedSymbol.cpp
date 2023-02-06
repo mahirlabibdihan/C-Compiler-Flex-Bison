@@ -195,9 +195,8 @@ vector<Variable *> DeclarationList::getDeclarations()
     return list;
 }
 
-Expression::Expression(const string &data_type, const string &exp_type) : NonTerminal("EXPRESSION")
+Expression::Expression(const string &exp_type) : NonTerminal("EXPRESSION")
 {
-    this->data_type = data_type;
     this->exp_type = exp_type;
 }
 Expression::~Expression()
@@ -447,7 +446,7 @@ const string &Unit::getUnitType()
 {
     return u_type;
 }
-VariableDeclaration::VariableDeclaration(const string &data_type, const vector<Variable *> &list) : Unit("VARIABLE_DECLARATION"), Statement("VARIABLE_DECLARATION")
+VariableDeclaration::VariableDeclaration(const string &data_type, const vector<Variable *> &list) : Unit("VARIABLE_DECLARATION"), Statement("VARIABLE_DECLARATION"), NonTerminal("UNIT")
 {
     for (Variable *var : list)
     {
@@ -461,7 +460,7 @@ const vector<Variable *> &VariableDeclaration::getDeclarationList()
     return decl_list;
 }
 
-FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION")
+FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION"), NonTerminal("UNIT")
 {
     this->ret_type = ret_type;
     this->func_name = func_name;
@@ -479,7 +478,7 @@ const vector<Variable *> &FunctionDeclaration::getParams()
 {
     return params;
 }
-FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION")
+FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION"), NonTerminal("UNIT")
 {
     this->ret_type = ret_type;
     this->func_name = func_name;
@@ -502,23 +501,32 @@ const vector<Statement *> &FunctionDefinition::getBody()
 {
     return body;
 }
-NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right)
+
+void FunctionDefinition::setReturnLabel(const string &label)
+{
+    this->return_label = label;
+}
+const string &FunctionDefinition::getReturnLabel()
+{
+    return return_label;
+}
+NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanExpression("NOTOP"), Expression("UNARY_BOOLEAN")
 {
 }
 
-DecOp::DecOp(Expression *left) : UnaryExpression("DECOP", "--", left)
+DecOp::DecOp(Expression *left) : UnaryExpression("DECOP", "--", left), Expression("UNARY_EXPRESSION")
 {
 }
 
-IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left)
+IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left), Expression("UNARY_EXPRESSION")
 {
 }
 
-UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right)
+UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right), Expression("UNARY_EXPRESSION")
 {
     this->uadd_oprt = oprt;
 }
-UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("", "UNARY_EXPRESSION")
+UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("UNARY_EXPRESSION")
 {
     this->op_type = op_type;
     this->operand = operand;
@@ -536,31 +544,59 @@ const string &UnaryExpression::getOperator()
 {
     return op_symbol;
 }
-RelOp::RelOp(Expression *left, Expression *right, const string &rel_oprt) : BinaryExpression("RELOP", rel_oprt, left, right)
+RelOp::RelOp(Expression *left, Expression *right, const string &rel_oprt) : BinaryExpression("RELOP", rel_oprt, left, right), BooleanExpression("RELOP"), Expression("BINARY_BOOLEAN")
 {
     this->rel_oprt = rel_oprt;
 }
 
-AddOp::AddOp(Expression *left, Expression *right, const string &add_oprt) : BinaryExpression("ADDOP", add_oprt, left, right)
+AddOp::AddOp(Expression *left, Expression *right, const string &add_oprt) : BinaryExpression("ADDOP", add_oprt, left, right), Expression("BINARY_EXPRESSION")
 {
     this->add_oprt = add_oprt;
 }
 
-MulOp::MulOp(Expression *left, Expression *right, const string &mul_oprt) : BinaryExpression("MULOP", mul_oprt, left, right)
+MulOp::MulOp(Expression *left, Expression *right, const string &mul_oprt) : BinaryExpression("MULOP", mul_oprt, left, right), Expression("BINARY_EXPRESSION")
 {
     this->mul_oprt = mul_oprt;
 }
 
-LogicOp::LogicOp(Expression *left, Expression *right, const string &logic_oprt) : BinaryExpression("LOGICOP", logic_oprt, left, right)
+LogicOp::LogicOp(Expression *left, Expression *right, const string &logic_oprt) : BinaryExpression("LOGICOP", logic_oprt, left, right), BooleanExpression("LOGICOP"), Expression("BINARY_BOOLEAN")
 {
     this->logic_oprt = logic_oprt;
 }
 
-AssignOp::AssignOp(VariableCall *left, Expression *right) : BinaryExpression("ASSIGNOP", "=", left, right)
+AssignOp::AssignOp(VariableCall *left, Expression *right) : BinaryExpression("ASSIGNOP", "=", left, right), Expression("BINARY_EXPRESSION")
 {
 }
 
-BinaryExpression::BinaryExpression(const string &op_type, const string &op_symbol, Expression *left, Expression *right) : Expression("", "BINARY_EXPRESSION")
+BooleanExpression::BooleanExpression(const string &bool_type) : Expression("BOOLEAN_EXPRESSION")
+{
+    this->bool_type = bool_type;
+}
+void BooleanExpression::setTrueLabel(const string &label)
+{
+    this->true_label = label;
+}
+const string &BooleanExpression::getTrueLabel()
+{
+    return true_label;
+}
+void BooleanExpression::setFalseLabel(const string &label)
+{
+    this->false_label = label;
+}
+const string &BooleanExpression::getFalseLabel()
+{
+    return false_label;
+}
+void BooleanExpression::setBoolType(const string &type)
+{
+    this->bool_type = type;
+}
+const string &BooleanExpression::getBoolType()
+{
+    return bool_type;
+}
+BinaryExpression::BinaryExpression(const string &op_type, const string &op_symbol, Expression *left, Expression *right) : Expression("BINARY_EXPRESSION")
 {
     this->op_type = op_type;
     this->left_opr = left;
@@ -583,8 +619,9 @@ const string &BinaryExpression::getOperator()
 {
     return op_symbol;
 }
-CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression(data_type, "CALL_EXPRESSION")
+CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression("CALL_EXPRESSION")
 {
+    this->data_type = data_type;
     this->call_type = call_type;
 }
 const string &CallExpression::getCallType()
@@ -646,7 +683,7 @@ FloatCall::FloatCall(const string &literal) : ConstantCall(literal, "FLOAT")
 {
 }
 
-ConditionalStatement::ConditionalStatement(string c_type, Expression *condition) : Statement("CONDITIONAL_STATEMENT")
+ConditionalStatement::ConditionalStatement(string c_type, Expression *condition) : Statement("CONDITIONAL_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->condition = condition;
     this->c_type = c_type;
@@ -660,7 +697,7 @@ const string &ConditionalStatement::getConditionType()
 {
     return c_type;
 }
-IfStatement::IfStatement(Expression *condition, Statement *body) : ConditionalStatement("IF_STATEMENT", condition)
+IfStatement::IfStatement(Expression *condition, Statement *body) : ConditionalStatement("IF_STATEMENT", condition), NonTerminal("STATEMENT")
 {
     this->if_body = body;
 }
@@ -668,7 +705,7 @@ Statement *IfStatement::getIfBody()
 {
     return if_body;
 }
-IfElseStatement::IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body) : ConditionalStatement("IFELSE_STATEMENT", condition)
+IfElseStatement::IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body) : ConditionalStatement("IFELSE_STATEMENT", condition), NonTerminal("STATEMENT")
 {
     this->if_body = if_body;
     this->else_body = else_body;
@@ -681,7 +718,7 @@ Statement *IfElseStatement::getElseBody()
 {
     return else_body;
 }
-LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT")
+LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->condition = condition;
     this->body = body;
@@ -699,7 +736,7 @@ const string &LoopStatement::getLoopType()
 {
     return l_type;
 }
-ForLoop::ForLoop(Expression *initialize, Expression *condition, Expression *inc_dec, Statement *body) : LoopStatement(condition, body, "FOR_LOOP")
+ForLoop::ForLoop(Expression *initialize, Expression *condition, Expression *inc_dec, Statement *body) : LoopStatement(condition, body, "FOR_LOOP"), NonTerminal("STATEMENT")
 {
     this->initialize = initialize;
     this->inc_dec = inc_dec;
@@ -712,11 +749,11 @@ Expression *ForLoop::getIncDec()
 {
     return inc_dec;
 }
-WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(condition, body, "WHILE_LOOP")
+WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(condition, body, "WHILE_LOOP"), NonTerminal("STATEMENT")
 {
 }
 
-PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT")
+PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->var_call = var_call;
 }
@@ -724,7 +761,7 @@ VariableCall *PrintStatement::getVariableCall()
 {
     return var_call;
 }
-ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT")
+ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->expr = expr;
 }
@@ -732,7 +769,7 @@ Expression *ReturnStatement::getExpression()
 {
     return expr;
 }
-ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT")
+ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->expr = expr;
 }
@@ -747,7 +784,16 @@ Statement::Statement(const string &stmt_type) : NonTerminal("STATEMENT")
     this->stmt_type = stmt_type;
 }
 
-CompoundStatement::CompoundStatement() : Statement("COMPOUND_STATEMENT")
+void Statement::setNextLabel(const string &label)
+{
+    this->next_label = label;
+}
+
+const string &Statement::getNextLabel()
+{
+    return next_label;
+}
+CompoundStatement::CompoundStatement() : Statement("COMPOUND_STATEMENT"), NonTerminal("STATEMENT")
 {
 }
 

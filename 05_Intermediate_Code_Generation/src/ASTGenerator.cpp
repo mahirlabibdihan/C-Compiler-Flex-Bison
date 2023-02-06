@@ -75,13 +75,13 @@ std::string ASTGenerator::getExpression(Expression *expr, int depth)
     {
         tree += getCallExpression((CallExpression *)expr, depth);
     }
-    if (type == "BINARY_EXPRESSION")
+    if (type == "BINARY_EXPRESSION" || type == "BINARY_BOOLEAN")
     {
-        tree += getBinaryExpression((BinaryExpression *)expr, depth);
+        tree += getBinaryExpression(dynamic_cast<BinaryExpression *>(expr), depth);
     }
-    if (type == "UNARY_EXPRESSION")
+    if (type == "UNARY_EXPRESSION" || type == "UNARY_BOOLEAN")
     {
-        tree += getUnaryExpression((UnaryExpression *)expr, depth);
+        tree += getUnaryExpression(dynamic_cast<UnaryExpression *>(expr), depth);
     }
     return tree;
 }

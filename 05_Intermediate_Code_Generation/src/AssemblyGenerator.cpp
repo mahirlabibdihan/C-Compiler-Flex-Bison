@@ -39,18 +39,17 @@ void AssemblyGenerator::startProgram(Program *prog)
     }
 
     print(".CODE");
-    indent++;
     definePrintFunction();
     for (FunctionDefinition *func_def : func_defs)
     {
         defineFunction(func_def);
     }
-    indent--;
-
     print("END MAIN");
 }
 void AssemblyGenerator::declareVariables(VariableDeclaration *var_decl)
 {
+    // Keep track of how many(size) local variables are created in local scope, and ADD SP, size on exiting scope
+    // Is it applicable for compound statements?
     vector<Variable *> vars = var_decl->getDeclarationList();
     comment(var_decl->getSymbol());
     for (Variable *var : vars)
@@ -100,7 +99,7 @@ void AssemblyGenerator::declareArray(Array *arr)
         int sz = stoi(arr_size) * 2;
         print("SUB SP, " + to_string(sz));
         new_arr->setOffset(offset_history.back());
-        offset_history.back() -= SC_ZOOM; // Stack decrease downward
+        offset_history.back() -= sz; // Stack decrease downward
     }
 }
 void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
@@ -120,17 +119,16 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 }
 void AssemblyGenerator::returnFunction()
 {
-    if (curr_func->getReturnType() != "VOID" && curr_func->getFunctionName() != "main")
-    {
-        print("POP AX");
-        print("MOV [BP+" + std::to_string(2 * curr_func->getParams().size() + 4) + "], AX");
-    }
-
+    print("MOV SP, BP");
+    print("POP BP");
     if (curr_func->getFunctionName() != "main")
     {
-        print("MOV SP, BP");
-        print("POP BP");
         print("RET " + std::to_string(2 * curr_func->getParams().size()));
+    }
+    else
+    {
+        print("MOV AX, 4CH");
+        print("INT 21H");
     }
 }
 void AssemblyGenerator::analyzePrintStatement(PrintStatement *print_stmt)
@@ -158,6 +156,9 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
 
     Function *new_func = new Function(func_name, ret_type);
 
+    string ret_label = newLabel();
+    func_def->setReturnLabel(ret_label);
+
     curr_func = func_def;
 
     for (auto p : params)
@@ -176,8 +177,8 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     {
         print("MOV AX, @DATA");
         print("MOV DS, AX");
+        print("PUSH BP");
         print("MOV BP, SP");
-
         offset_history.push_back(-2);
     }
     else
@@ -188,18 +189,37 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     }
 
     declareFunctionParams(params);
-    for (Statement *stmt : stmt_list)
+
+    string last_label = "";
+
+    for (int i = 0; i < stmt_list.size(); i++)
     {
-        analyzeStatement(stmt);
+        if (i < stmt_list.size() - 1)
+        {
+            if (last_label != "")
+            {
+                printLabel(last_label);
+            }
+            string label = newLabel();
+            stmt_list[i]->setNextLabel(label);
+            analyzeStatement(stmt_list[i]);
+            last_label = label;
+        }
+        else
+        {
+            if (last_label != "")
+            {
+                printLabel(last_label);
+            }
+            stmt_list[i]->setNextLabel(ret_label);
+            analyzeStatement(stmt_list[i]);
+        }
     }
 
-    if (func_def->getFunctionName() == "main")
-    {
-        print("MOV AH, 4CH");
-        print("INT 21H");
-    }
+    printLabel(ret_label);
 
     returnFunction();
+
     offset_history.pop_back();
     table->exitScope();
     indent--;
@@ -235,6 +255,10 @@ void AssemblyGenerator::print(const string &code)
         }
         asmout << lines[i] << std::endl;
     }
+}
+void AssemblyGenerator::printLabel(const string &label)
+{
+    asmout << label << ":" << std::endl;
 }
 void AssemblyGenerator::comment(const string &msg)
 {
@@ -278,6 +302,7 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
     if (type == "EXPRESSION_STATEMENT")
     {
         analyzeExpressionStatement((ExpressionStatement *)stmt);
+        print("POP AX");
     }
     if (type == "COMPOUND_STATEMENT")
     {
@@ -298,9 +323,29 @@ void AssemblyGenerator::analyzeExpressionStatement(ExpressionStatement *expr_stm
 void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *stmt_list)
 {
     vector<Statement *> list = stmt_list->getStatements();
-    for (Statement *stmt : list)
+    string last_label = "";
+    for (int i = 0; i < list.size(); i++)
     {
-        analyzeStatement(stmt);
+        if (i < list.size() - 1)
+        {
+            if (last_label != "")
+            {
+                printLabel(last_label);
+            }
+            string label = newLabel();
+            list[i]->setNextLabel(label);
+            analyzeStatement(list[i]);
+            last_label = label;
+        }
+        else
+        {
+            if (last_label != "")
+            {
+                printLabel(last_label);
+            }
+            list[i]->setNextLabel(stmt_list->getNextLabel());
+            analyzeStatement(list[i]);
+        }
     }
 }
 void AssemblyGenerator::evaluateExpression(Expression *expr)
@@ -312,16 +357,125 @@ void AssemblyGenerator::evaluateExpression(Expression *expr)
         {
             evaluateCallExpression((CallExpression *)expr);
         }
-        if (type == "BINARY_EXPRESSION")
+        else if (type == "BINARY_EXPRESSION" || type == "BINARY_BOOLEAN")
         {
-            evaluateBinaryExpression((BinaryExpression *)expr);
+            evaluateBinaryExpression(dynamic_cast<BinaryExpression *>(expr));
         }
-        if (type == "UNARY_EXPRESSION")
+        else if (type == "UNARY_EXPRESSION" || type == "UNARY_BOOLEAN")
         {
-            return evaluateUnaryExpression((UnaryExpression *)expr);
+            evaluateUnaryExpression(dynamic_cast<UnaryExpression *>(expr));
         }
     }
 }
+
+void AssemblyGenerator::evaluateCondition(BooleanExpression *expr)
+{
+    if (expr != NULL)
+    {
+        string type = expr->getBoolType();
+        if (type == "LOGICOP")
+        {
+            evaluateLogicOp(dynamic_cast<LogicOp *>(expr));
+        }
+        else if (type == "RELOP")
+        {
+            evaluateRelOp(dynamic_cast<RelOp *>(expr));
+        }
+        else if (type == "NOTOP")
+        {
+            evaluateNotOp(dynamic_cast<NotOp *>(expr));
+        }
+    }
+}
+
+void AssemblyGenerator::evaluateAndOp(LogicOp *expr)
+{
+    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
+    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
+    left->setTrueLabel(newLabel());
+    left->setFalseLabel(expr->getFalseLabel());
+    right->setTrueLabel(expr->getTrueLabel());
+    right->setFalseLabel(expr->getFalseLabel());
+
+    evaluateExpression(expr->getLeftOpr());
+    print("POP AX");
+
+    print("CMP AX, 0");
+    print("JNE " + left->getTrueLabel());
+    print("JMP " + left->getFalseLabel()); // False
+
+    printLabel(left->getTrueLabel());
+
+    evaluateExpression(expr->getRightOpr());
+    print("POP AX");
+
+    print("CMP AX, 0");
+    print("JNE " + right->getTrueLabel());  // True
+    print("JMP " + right->getFalseLabel()); // False
+}
+
+void AssemblyGenerator::evaluateOrOp(LogicOp *expr)
+{
+    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
+    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
+
+    left->setTrueLabel(expr->getTrueLabel());
+    left->setFalseLabel(newLabel());
+    right->setTrueLabel(expr->getTrueLabel());
+    right->setFalseLabel(expr->getFalseLabel());
+
+    evaluateExpression(expr->getLeftOpr());
+    print("POP AX");
+
+    print("CMP AX, 0");
+    print("JNE " + left->getTrueLabel());
+    print("JMP " + left->getFalseLabel()); // False
+
+    printLabel(left->getFalseLabel());
+
+    evaluateExpression(expr->getRightOpr());
+    print("POP AX");
+
+    print("CMP AX, 0");
+    print("JNE " + right->getTrueLabel());  // True
+    print("JMP " + right->getFalseLabel()); // False
+}
+void AssemblyGenerator::evaluateLogicOp(LogicOp *expr)
+{
+    std::string op = expr->getOperator();
+
+    if (op == "&&")
+    {
+        evaluateAndOp(expr);
+    }
+    else if (op == "||")
+    {
+        evaluateOrOp(expr);
+    }
+}
+void AssemblyGenerator::evaluateRelOp(RelOp *expr)
+{
+    evaluateExpression(expr->getLeftOpr());
+    evaluateExpression(expr->getRightOpr());
+
+    string op = getRelOpASM(expr->getOperator());
+    print("POP DX");
+    print("POP AX");
+    print("CMP AX, DX");
+
+    print(op + " " + expr->getTrueLabel());
+    print("JMP " + expr->getFalseLabel());
+}
+void AssemblyGenerator::evaluateNotOp(NotOp *expr)
+{
+    evaluateExpression(expr->getOperand());
+    print("POP AX");
+
+    print("CMP AX, 0");
+    print("JNE " + expr->getFalseLabel());
+    print("JMP " + expr->getTrueLabel());
+}
+
 void AssemblyGenerator::evaluateBinaryExpression(BinaryExpression *bin_expr)
 {
     string type = bin_expr->getOpType();
@@ -329,19 +483,19 @@ void AssemblyGenerator::evaluateBinaryExpression(BinaryExpression *bin_expr)
     {
         assignOp((AssignOp *)bin_expr);
     }
-    if (type == "ADDOP")
+    else if (type == "ADDOP")
     {
         addOp((AddOp *)bin_expr);
     }
-    if (type == "MULOP")
+    else if (type == "MULOP")
     {
         mulOp((MulOp *)bin_expr);
     }
-    if (type == "RELOP")
+    else if (type == "RELOP")
     {
         relOp((RelOp *)bin_expr);
     }
-    if (type == "LOGICOP")
+    else if (type == "LOGICOP")
     {
         logicOp((LogicOp *)bin_expr);
     }
@@ -393,78 +547,115 @@ void AssemblyGenerator::analyzeLoopStatement(LoopStatement *loop_stmt)
 }
 void AssemblyGenerator::analyzeIfStatement(IfStatement *if_stmt)
 {
-    comment(if_stmt->getCondition()->getSymbol());
-    evaluateExpression(if_stmt->getCondition());
-
     string true_label = newLabel();
-    string end_label = newLabel();
+    string false_label = if_stmt->getNextLabel();
 
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JE " + end_label);
-    analyzeStatement(if_stmt->getIfBody());
-    print(end_label + ":");
+    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(if_stmt->getCondition());
+    cond->setTrueLabel(true_label);
+    cond->setFalseLabel(false_label);
+
+    Statement *if_body = if_stmt->getIfBody();
+    if_body->setNextLabel(if_stmt->getNextLabel());
+
+    comment(if_stmt->getCondition()->getSymbol());
+
+    evaluateCondition(cond);
+    printLabel(true_label);
+    analyzeStatement(if_body);
 }
 void AssemblyGenerator::analyzeIfElseStatement(IfElseStatement *ifelse_stmt)
 {
-    comment(ifelse_stmt->getCondition()->getSymbol());
-    evaluateExpression(ifelse_stmt->getCondition());
-    string else_label = newLabel();
-    string end_label = newLabel();
+    string true_label = newLabel();
+    string false_label = newLabel();
 
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JE " + else_label);
-    analyzeStatement(ifelse_stmt->getIfBody());
-    print("JMP " + end_label);
-    print(else_label + ":");
-    analyzeStatement(ifelse_stmt->getElseBody());
-    print(end_label + ":");
+    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(ifelse_stmt->getCondition());
+    cond->setTrueLabel(true_label);
+    cond->setFalseLabel(false_label);
+
+    Statement *if_body = ifelse_stmt->getIfBody();
+    if_body->setNextLabel(ifelse_stmt->getNextLabel());
+
+    Statement *else_body = ifelse_stmt->getElseBody();
+    else_body->setNextLabel(ifelse_stmt->getNextLabel());
+
+    comment(ifelse_stmt->getCondition()->getSymbol());
+
+    evaluateCondition(cond);
+    printLabel(true_label);
+    analyzeStatement(if_body);
+    print("JMP " + ifelse_stmt->getNextLabel());
+    printLabel(false_label);
+    analyzeStatement(else_body);
 }
+
+// analyzeBooleanExpression - LogicOp, RelOp, NotOp
 void AssemblyGenerator::analyzeForLoop(ForLoop *for_loop)
 {
     std::string start_label = newLabel();
-    std::string end_label = newLabel();
+    std::string true_label = newLabel();
+    std::string false_label = for_loop->getNextLabel();
+    std::string incdec_label = newLabel();
+
+    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(for_loop->getCondition());
+    cond->setTrueLabel(true_label);
+    cond->setFalseLabel(false_label);
+
+    Statement *body = for_loop->getBody();
+    body->setNextLabel(incdec_label);
+
+    Expression *incdec = for_loop->getIncDec();
 
     comment(for_loop->getInitialize()->getSymbol());
     evaluateExpression(for_loop->getInitialize());
-    print(start_label + ":");
+
+    printLabel(start_label);
     comment(for_loop->getCondition()->getSymbol());
-    evaluateExpression(for_loop->getCondition());
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JE " + end_label);
-    analyzeStatement(for_loop->getBody());
+    evaluateCondition(cond);
+
+    printLabel(incdec_label);
     comment(for_loop->getIncDec()->getSymbol());
-    evaluateExpression(for_loop->getIncDec());
-    print("POP AX"); // Pop increment
+    evaluateExpression(incdec);
     print("JMP " + start_label);
-    print(end_label + ":");
+
+    printLabel(true_label);
+    analyzeStatement(body);
+    print("JMP " + incdec_label);
 }
 void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
 {
     std::string start_label = newLabel();
-    std::string end_label = newLabel();
+    std::string true_label = newLabel();
+    std::string false_label = while_loop->getNextLabel();
 
-    print(start_label + ":");
+    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(while_loop->getCondition());
+    cond->setTrueLabel(true_label);
+    cond->setFalseLabel(false_label);
+
+    Statement *body = while_loop->getBody();
+    body->setNextLabel(start_label);
+
+    printLabel(start_label);
     comment(while_loop->getCondition()->getSymbol());
-    evaluateExpression(while_loop->getCondition());
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JE " + end_label);
-    analyzeStatement(while_loop->getBody());
+    evaluateCondition(cond);
+    printLabel(true_label);
+    analyzeStatement(body);
     print("JMP " + start_label);
-    print(end_label + ":");
 }
 void AssemblyGenerator::analyzeReturnStatement(ReturnStatement *ret_stmt)
 {
     Expression *ret_expr = ret_stmt->getExpression();
     comment(ret_stmt->getSymbol());
     evaluateExpression(ret_expr);
-    returnFunction();
+    print("POP AX");
+    if (curr_func->getReturnType() != "VOID" && curr_func->getFunctionName() != "main")
+    {
+        print("MOV [BP+" + std::to_string(2 * curr_func->getParams().size() + 4) + "], AX");
+    }
+    print("JMP " + curr_func->getReturnLabel());
 }
 void AssemblyGenerator::evaluateCallExpression(CallExpression *call_expr)
 {
+    // MOV AX, constant/variable
     string type = call_expr->getCallType();
     if (type == "IDENTIFIER_CALL")
     {
@@ -532,9 +723,9 @@ void AssemblyGenerator::notOp(NotOp *expr)
     print("JE " + true_label);
     print("PUSH 0");
     print("JMP " + end_label);
-    print(true_label + ":");
+    printLabel(true_label);
     print("PUSH 1");
-    print(end_label + ":");
+    printLabel(end_label);
 }
 void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
 {
@@ -583,6 +774,12 @@ void AssemblyGenerator::decOp(DecOp *expr)
 {
     incdecOp((VariableCall *)expr->getOperand(), "DEC");
 }
+
+// If right side of assignment is boolean expression
+// E -> V = E
+// E -> V = B ->
+
+// Assign AX to left variable
 void AssemblyGenerator::assignOp(AssignOp *expr)
 {
     VariableCall *left_var = (VariableCall *)expr->getLeftOpr();
@@ -620,6 +817,7 @@ void AssemblyGenerator::assignOp(AssignOp *expr)
             print("MOV [BP + " + offset + "], AX");
         }
     }
+    print("PUSH AX");
 }
 void AssemblyGenerator::logicOp(LogicOp *expr)
 {
@@ -642,9 +840,9 @@ void AssemblyGenerator::logicOp(LogicOp *expr)
         print("JE " + false_label);
         print("PUSH 1");
         print("JMP " + end_label);
-        print(false_label + ":");
+        printLabel(false_label);
         print("PUSH 0");
-        print(end_label + ":");
+        printLabel(end_label);
     }
     else if (op == "||")
     {
@@ -654,9 +852,9 @@ void AssemblyGenerator::logicOp(LogicOp *expr)
         print("JNE " + true_label);
         print("PUSH 0");
         print("JMP " + end_label);
-        print(true_label + ":");
+        printLabel(true_label);
         print("PUSH 1");
-        print(end_label + ":");
+        printLabel(end_label);
     }
 }
 std::string AssemblyGenerator::getRelOpASM(string op)
@@ -687,6 +885,13 @@ std::string AssemblyGenerator::getRelOpASM(string op)
     }
     return "";
 }
+
+// Short circuit:
+// Condition in if,while,for
+// Relop - Both operand need to be evaluated
+// LogicOp - At least one operand need to be evaluated
+// So boolean expression will be stored in AX
+// Constant, Variable, Array, Boolean expression(LogicOp, RelOp, NotOp) will be stored in AX
 void AssemblyGenerator::relOp(RelOp *expr)
 {
     evaluateExpression(expr->getLeftOpr());
@@ -702,9 +907,9 @@ void AssemblyGenerator::relOp(RelOp *expr)
     print(op + " " + true_label);
     print("PUSH 0");
     print("JMP " + end_label);
-    print(true_label + ":");
+    printLabel(true_label);
     print("PUSH 1");
-    print(end_label + ":");
+    printLabel(end_label);
 }
 void AssemblyGenerator::addOp(AddOp *expr)
 {
@@ -810,7 +1015,44 @@ void AssemblyGenerator::assignVariable(VariableCall *var_call)
 }
 std::string AssemblyGenerator::newLabel()
 {
-    string lb = "L" + std::to_string(label_count);
     label_count++;
+    string lb = "L" + std::to_string(label_count);
     return lb;
 }
+
+bool AssemblyGenerator::isBooleanExpression(Expression *expr)
+{
+    if (expr != NULL)
+    {
+        string type = expr->getExpType();
+        if (type == "BINARY_EXPRESSION")
+        {
+            BinaryExpression *bin_expr = dynamic_cast<BinaryExpression *>(expr);
+            string type = bin_expr->getOpType();
+            if (type == "RELOP")
+            {
+                return true;
+            }
+            if (type == "LOGICOP")
+            {
+                return true;
+            }
+        }
+        if (type == "UNARY_EXPRESSION")
+        {
+            evaluateUnaryExpression(dynamic_cast<UnaryExpression *>(expr));
+        }
+    }
+    return false;
+}
+// If left operand is call expression, evaluate right first. Evaluation result based on right operand.
+
+// If left operand is not call expression, evaluate left first. Evaluation result will be stored in stack top.
+
+// If right operand is evaluated first.
+// If right operand is call expression, result is stored in AX
+// If not result is stored in stack top
+
+// In case of ADD, SUB always MOV AX, DX after right operand evaluation
+
+// In case of MUL, DIV - MOV CX, AX

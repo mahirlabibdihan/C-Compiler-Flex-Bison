@@ -28,6 +28,7 @@ public:
 
     void declareFunctionParams(std::vector<Variable *> params);
     void print(const string &code);
+    void printLabel(const string &label);
     void comment(const string &msg);
     void comment(const string &msg, int line);
     // Statements
@@ -49,6 +50,14 @@ public:
     void evaluateUnaryExpression(UnaryExpression *unr_expr);
     void evaluateCallExpression(CallExpression *call_expr);
 
+    // Short Circuit
+    void evaluateCondition(BooleanExpression *expr);
+    void evaluateLogicOp(LogicOp *expr);
+    void evaluateRelOp(RelOp *expr);
+    void evaluateNotOp(NotOp *expr);
+    void evaluateAndOp(LogicOp *expr);
+    void evaluateOrOp(LogicOp *expr);
+
     void assignOp(AssignOp *expr);
     void logicOp(LogicOp *expr);
     std::string getRelOpASM(string op);
@@ -67,7 +76,7 @@ public:
     void callFunction(FunctionCall *func_call);
 
     void assignVariable(VariableCall *var_call);
-
     std::string newLabel();
+    bool isBooleanExpression(Expression *expr);
 };
 #endif

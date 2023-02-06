@@ -71,6 +71,7 @@ class ForLoop;
 
 class CompoundStatement;
 
+class BooleanExpression;
 class ASTNode : public SymbolInfo
 {
 protected:
@@ -177,7 +178,7 @@ class NonTerminal : public ASTNode
     std::vector<SymbolInfo *> children;
 
 public:
-    NonTerminal(string nt_type = "");
+    NonTerminal(string nt_type);
     virtual ~NonTerminal();
     string getNonTerminalType();
     void setNonTerminalType(string nt_type);
@@ -192,7 +193,7 @@ protected:
     string exp_type;  // CallExpression, BinaryExpression, UnaryExpression
 
 public:
-    Expression(const string &data_type, const string &exp_type);
+    Expression(const string &exp_type);
     virtual ~Expression();
     const string &getDataType();
     void setDataType(const string &);
@@ -213,9 +214,13 @@ public:
 class Statement : virtual public NonTerminal
 {
     string stmt_type; // ConditionalStatement, LoopStatement, CompoundStatement
+    string next_label;
+
 public:
     Statement(const string &stmt_type);
     const string &getStatementType();
+    void setNextLabel(const string &label);
+    const string &getNextLabel();
 };
 
 class CompoundStatement : public Statement
@@ -426,7 +431,7 @@ public:
     FloatCall(const string &literal); // **
 };
 
-class BinaryExpression : public Expression
+class BinaryExpression : virtual public Expression
 {
     Expression *left_opr;
     Expression *right_opr;
@@ -464,7 +469,23 @@ public:
     MulOp(Expression *left, Expression *right, const string &mul_oprt);
 };
 
-class LogicOp : public BinaryExpression
+class BooleanExpression : virtual public Expression
+{
+    string true_label;
+    string false_label;
+    string bool_type;
+
+public:
+    BooleanExpression(const string &);
+    void setTrueLabel(const string &label);
+    const string &getTrueLabel();
+    void setFalseLabel(const string &label);
+    const string &getFalseLabel();
+    void setBoolType(const string &type);
+    const string &getBoolType();
+};
+
+class LogicOp : public BinaryExpression, public BooleanExpression
 {
     string logic_oprt;
 
@@ -472,7 +493,7 @@ public:
     LogicOp(Expression *left, Expression *right, const string &logic_oprt);
 };
 
-class RelOp : public BinaryExpression
+class RelOp : public BinaryExpression, public BooleanExpression
 {
     string rel_oprt;
 
@@ -480,7 +501,7 @@ public:
     RelOp(Expression *left, Expression *right, const string &rel_oprt);
 };
 
-class UnaryExpression : public Expression
+class UnaryExpression : virtual public Expression
 {
     Expression *operand;
     string op_type;
@@ -513,7 +534,7 @@ public:
     DecOp(Expression *left); // **
 };
 
-class NotOp : public UnaryExpression
+class NotOp : public UnaryExpression, public BooleanExpression
 {
 public:
     NotOp(Expression *right);
@@ -549,6 +570,7 @@ class FunctionDefinition : public Unit, public Statement
 {
     string ret_type;
     string func_name;
+    string return_label;
     vector<Variable *> params; // Replace with vector<Variable*> params
     vector<Statement *> body;  // Replace with vector<Statement*> params
 
@@ -558,6 +580,8 @@ public:
     const string &getFunctionName();
     const vector<Variable *> &getParams();
     const vector<Statement *> &getBody();
+    void setReturnLabel(const string &label);
+    const string &getReturnLabel(); 
 };
 
 class FunctionDeclaration : public Unit, public Statement

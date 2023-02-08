@@ -51,7 +51,7 @@ void AssemblyGenerator::declareVariables(VariableDeclaration *var_decl)
     // Keep track of how many(size) local variables are created in local scope, and ADD SP, size on exiting scope
     // Is it applicable for compound statements?
     vector<Variable *> vars = var_decl->getDeclarationList();
-    comment(var_decl->getSymbol());
+    comment(var_decl->getCode());
     for (Variable *var : vars)
     {
         if (var->getVarType() == "ARRAY")
@@ -119,6 +119,7 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 }
 void AssemblyGenerator::returnFunction()
 {
+    // print("ADD SP, " + std::to_string(2 * curr_func->getBody()->getDeclarationList().size()));
     print("MOV SP, BP");
     print("POP BP");
     if (curr_func->getFunctionName() != "main")
@@ -133,7 +134,7 @@ void AssemblyGenerator::returnFunction()
 }
 void AssemblyGenerator::analyzePrintStatement(PrintStatement *print_stmt)
 {
-    comment(print_stmt->getSymbol());
+    comment(print_stmt->getCode());
     callVariable(print_stmt->getVariableCall());
     print("CALL OUTPUT");
 }
@@ -152,7 +153,9 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     string ret_type = func_def->getReturnType();
     string func_name = func_def->getFunctionName();
     vector<Variable *> params = func_def->getParams();
-    vector<Statement *> stmt_list = func_def->getBody();
+    CompoundStatement *body = func_def->getBody();
+    vector<Statement *> stmt_list = body->getStatements();
+    vector<VariableDeclaration *> var_decs = body->getVariableDeclarations();
 
     Function *new_func = new Function(func_name, ret_type);
 
@@ -190,34 +193,9 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
 
     declareFunctionParams(params);
 
-    string last_label = "";
-
-    for (int i = 0; i < stmt_list.size(); i++)
-    {
-        if (i < stmt_list.size() - 1)
-        {
-            if (last_label != "")
-            {
-                printLabel(last_label);
-            }
-            string label = newLabel();
-            stmt_list[i]->setNextLabel(label);
-            analyzeStatement(stmt_list[i]);
-            last_label = label;
-        }
-        else
-        {
-            if (last_label != "")
-            {
-                printLabel(last_label);
-            }
-            stmt_list[i]->setNextLabel(ret_label);
-            analyzeStatement(stmt_list[i]);
-        }
-    }
-
+    body->setNextLabel(ret_label);
+    analyzeCompoundStatement(body);
     printLabel(ret_label);
-
     returnFunction();
 
     offset_history.pop_back();
@@ -225,6 +203,8 @@ void AssemblyGenerator::defineFunction(FunctionDefinition *func_def)
     indent--;
 
     print(func_name + " ENDP");
+
+    curr_func = NULL;
 }
 void AssemblyGenerator::declareFunction(FunctionDeclaration *func_decl)
 {
@@ -317,24 +297,33 @@ void AssemblyGenerator::analyzeStatement(Statement *stmt)
 }
 void AssemblyGenerator::analyzeExpressionStatement(ExpressionStatement *expr_stmt)
 {
-    comment(expr_stmt->getSymbol());
+    comment(expr_stmt->getCode());
     evaluateExpression(expr_stmt->getExpression());
 }
-void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *stmt_list)
+void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *compound)
 {
-    vector<Statement *> list = stmt_list->getStatements();
-    string last_label = "";
-    for (int i = 0; i < list.size(); i++)
+    vector<Statement *> stmt_list = compound->getStatements();
+    vector<VariableDeclaration *> var_decs = compound->getVariableDeclarations();
+
+    int count = 0;
+    for (VariableDeclaration *var_dec : var_decs)
     {
-        if (i < list.size() - 1)
+        declareVariables(var_dec);
+        count += var_dec->getDeclarationList().size();
+    }
+
+    string last_label = "";
+    for (int i = 0; i < stmt_list.size(); i++)
+    {
+        if (i < stmt_list.size() - 1)
         {
             if (last_label != "")
             {
                 printLabel(last_label);
             }
             string label = newLabel();
-            list[i]->setNextLabel(label);
-            analyzeStatement(list[i]);
+            stmt_list[i]->setNextLabel(label);
+            analyzeStatement(stmt_list[i]);
             last_label = label;
         }
         else
@@ -343,10 +332,11 @@ void AssemblyGenerator::analyzeCompoundStatement(CompoundStatement *stmt_list)
             {
                 printLabel(last_label);
             }
-            list[i]->setNextLabel(stmt_list->getNextLabel());
-            analyzeStatement(list[i]);
+            stmt_list[i]->setNextLabel(compound->getNextLabel());
+            analyzeStatement(stmt_list[i]);
         }
     }
+    print("ADD SP, " + std::to_string(2 * count));
 }
 void AssemblyGenerator::evaluateExpression(Expression *expr)
 {
@@ -557,7 +547,7 @@ void AssemblyGenerator::analyzeIfStatement(IfStatement *if_stmt)
     Statement *if_body = if_stmt->getIfBody();
     if_body->setNextLabel(if_stmt->getNextLabel());
 
-    comment(if_stmt->getCondition()->getSymbol());
+    comment(if_stmt->getCondition()->getCode());
 
     evaluateCondition(cond);
     printLabel(true_label);
@@ -578,7 +568,7 @@ void AssemblyGenerator::analyzeIfElseStatement(IfElseStatement *ifelse_stmt)
     Statement *else_body = ifelse_stmt->getElseBody();
     else_body->setNextLabel(ifelse_stmt->getNextLabel());
 
-    comment(ifelse_stmt->getCondition()->getSymbol());
+    comment(ifelse_stmt->getCondition()->getCode());
 
     evaluateCondition(cond);
     printLabel(true_label);
@@ -605,15 +595,15 @@ void AssemblyGenerator::analyzeForLoop(ForLoop *for_loop)
 
     Expression *incdec = for_loop->getIncDec();
 
-    comment(for_loop->getInitialize()->getSymbol());
+    comment(for_loop->getInitialize()->getCode());
     evaluateExpression(for_loop->getInitialize());
 
     printLabel(start_label);
-    comment(for_loop->getCondition()->getSymbol());
+    comment(for_loop->getCondition()->getCode());
     evaluateCondition(cond);
 
     printLabel(incdec_label);
-    comment(for_loop->getIncDec()->getSymbol());
+    comment(for_loop->getIncDec()->getCode());
     evaluateExpression(incdec);
     print("JMP " + start_label);
 
@@ -635,7 +625,7 @@ void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
     body->setNextLabel(start_label);
 
     printLabel(start_label);
-    comment(while_loop->getCondition()->getSymbol());
+    comment(while_loop->getCondition()->getCode());
     evaluateCondition(cond);
     printLabel(true_label);
     analyzeStatement(body);
@@ -644,7 +634,7 @@ void AssemblyGenerator::analyzeWhileLoop(WhileLoop *while_loop)
 void AssemblyGenerator::analyzeReturnStatement(ReturnStatement *ret_stmt)
 {
     Expression *ret_expr = ret_stmt->getExpression();
-    comment(ret_stmt->getSymbol());
+    comment(ret_stmt->getCode());
     evaluateExpression(ret_expr);
     print("POP AX");
     if (curr_func->getReturnType() != "VOID" && curr_func->getFunctionName() != "main")
@@ -695,7 +685,7 @@ void AssemblyGenerator::callFunction(FunctionCall *func_call)
         print("SUB SP, 2");
     }
 
-    comment(func_call->getSymbol());
+    comment(func_call->getCode());
     for (Expression *e : args)
     {
         evaluateExpression(e);

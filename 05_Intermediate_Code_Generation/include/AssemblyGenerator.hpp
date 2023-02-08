@@ -6,12 +6,14 @@
 #include <stack>
 class AssemblyGenerator
 {
+
+public:
     SymbolTable *table;
     std::ofstream &asmout;
-    int indent;
     std::vector<int> offset_history;
     FunctionDefinition *curr_func;
     int label_count;
+    int indent;
 
 public:
     AssemblyGenerator(SymbolTable *table, std::ofstream &asmout);

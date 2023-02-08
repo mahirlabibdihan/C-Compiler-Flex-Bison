@@ -5,8 +5,19 @@
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/Util.hpp"
 #include "../include/Logger.hpp"
+#include "../include/AssemblyGenerator.hpp"
+#include "../include/SemanticAnalyzer.hpp"
 #include <iostream>
+#include <fstream>
 
+extern std::ofstream asmout;
+extern std::ofstream codeout;
+extern std::ofstream parseout;
+extern std::ofstream errorout;
+extern AssemblyGenerator *asm_gen;
+extern SemanticAnalyzer *sem_anlzr;
+extern ErrorHandler *error_hndlr;
+extern SymbolTable *table;
 ASTNode::ASTNode(const string &ast_type, const string &name, const string &type) : SymbolInfo(name, type)
 {
     this->ast_type = ast_type;
@@ -199,6 +210,7 @@ Expression::Expression(const string &exp_type) : NonTerminal("EXPRESSION")
 {
     this->exp_type = exp_type;
 }
+
 Expression::~Expression()
 {
 }
@@ -437,6 +449,43 @@ const vector<VariableDeclaration *> &Program::getVariableDeclarations()
     return var_decs;
 }
 
+string Program::getCode()
+{
+    string code = "";
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        code += var_dec->getCode() + "\n";
+    }
+    for (FunctionDeclaration *func_dec : func_decs)
+    {
+        code += func_dec->getCode() + "\n";
+    }
+    for (FunctionDefinition *func_def : func_defs)
+    {
+        code += func_def->getCode() + "\n";
+    }
+    return code;
+}
+
+void Program::toCode()
+{
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        var_dec->toCode();
+        cout << "\n";
+    }
+    for (FunctionDeclaration *func_dec : func_decs)
+    {
+        func_dec->toCode();
+        cout << "\n";
+    }
+    for (FunctionDefinition *func_def : func_defs)
+    {
+        func_def->toCode();
+        cout << "\n";
+    }
+}
+
 Unit::Unit(const string &u_type) : NonTerminal("UNIT")
 {
     this->u_type = u_type;
@@ -460,6 +509,44 @@ const vector<Variable *> &VariableDeclaration::getDeclarationList()
     return decl_list;
 }
 
+string VariableDeclaration::getCode()
+{
+    string code = Util::toLower(decl_list.front()->getDataType()) + " ";
+
+    for (Variable *var : decl_list)
+    {
+        code += var->getIdName();
+        if (var->getVarType() == "ARRAY")
+        {
+            code += +"[" + ((Array *)var)->getArraySize() + "]";
+        }
+        code += ",";
+    }
+    if (code.back() == ',')
+    {
+        code.pop_back();
+    }
+    code += ";";
+    return code;
+}
+void VariableDeclaration::toCode()
+{
+    cout << Util::toLower(decl_list.front()->getDataType()) + " ";
+    for (int i = 0; i < decl_list.size(); i++)
+    {
+        cout << decl_list[i]->getIdName();
+        if (decl_list[i]->getVarType() == "ARRAY")
+        {
+            cout << "[" + ((Array *)decl_list[i])->getArraySize() + "]";
+        }
+        if (i < decl_list.size() - 1)
+        {
+            cout << ",";
+        }
+    }
+    cout << ";";
+}
+
 FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION"), NonTerminal("UNIT")
 {
     this->ret_type = ret_type;
@@ -478,7 +565,38 @@ const vector<Variable *> &FunctionDeclaration::getParams()
 {
     return params;
 }
-FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION"), NonTerminal("UNIT")
+string FunctionDeclaration::getCode()
+{
+    string code = "";
+    code += Util::toLower(ret_type) + " ";
+    code += func_name + "(";
+    for (Variable *var : params)
+    {
+        code += Util::toLower(var->getDataType()) + " " + var->getIdName() + ",";
+    }
+    if (code.back() == ',')
+    {
+        code.pop_back();
+    }
+    code += ");";
+    return code;
+}
+void FunctionDeclaration::toCode()
+{
+    cout << Util::toLower(ret_type) + " ";
+    cout << func_name + "(";
+    for (int i = 0; i < params.size(); i++)
+    {
+        cout << Util::toLower(params[i]->getDataType()) + " " + params[i]->getIdName();
+        if (i < params.size() - 1)
+        {
+            cout << ",";
+        }
+    }
+    cout << ");";
+}
+
+FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, CompoundStatement *body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION"), NonTerminal("UNIT")
 {
     this->ret_type = ret_type;
     this->func_name = func_name;
@@ -497,11 +615,10 @@ const vector<Variable *> &FunctionDefinition::getParams()
 {
     return params;
 }
-const vector<Statement *> &FunctionDefinition::getBody()
+CompoundStatement *FunctionDefinition::getBody()
 {
     return body;
 }
-
 void FunctionDefinition::setReturnLabel(const string &label)
 {
     this->return_label = label;
@@ -510,22 +627,94 @@ const string &FunctionDefinition::getReturnLabel()
 {
     return return_label;
 }
+string FunctionDefinition::getCode()
+{
+    string code = "";
+    code += Util::toLower(ret_type) + " ";
+    code += func_name + "(";
+    for (Variable *var : params)
+    {
+        code += Util::toLower(var->getDataType()) + " " + var->getIdName() + ",";
+    }
+    if (code.back() == ',')
+    {
+        code.pop_back();
+    }
+    code += ")";
+    code += body->getCode();
+    return code;
+}
+void FunctionDefinition::toCode()
+{
+    cout << Util::toLower(ret_type) + " ";
+    cout << func_name + "(";
+    for (int i = 0; i < params.size(); i++)
+    {
+        cout << Util::toLower(params[i]->getDataType()) + " " + params[i]->getIdName();
+        if (i < params.size() - 1)
+        {
+            cout << ",";
+        }
+    }
+    cout << ")";
+    body->toCode();
+}
+
 NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanExpression("NOTOP"), Expression("UNARY_BOOLEAN")
 {
+}
+string NotOp::getCode()
+{
+    return op_symbol + operand->getCode();
+}
+void NotOp::toCode()
+{
+    cout << op_symbol;
+    operand->toCode();
 }
 
 DecOp::DecOp(Expression *left) : UnaryExpression("DECOP", "--", left), Expression("UNARY_EXPRESSION")
 {
 }
 
+string DecOp::getCode()
+{
+    return operand->getCode() + op_symbol;
+}
+void DecOp::toCode()
+{
+    operand->toCode();
+    op_symbol;
+}
+
 IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left), Expression("UNARY_EXPRESSION")
 {
+}
+string IncOp::getCode()
+{
+    return operand->getCode() + op_symbol;
+}
+
+void IncOp::toCode()
+{
+    operand->toCode();
+    cout << op_symbol;
 }
 
 UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right), Expression("UNARY_EXPRESSION")
 {
     this->uadd_oprt = oprt;
 }
+string UAddOp::getCode()
+{
+    return op_symbol + operand->getCode();
+}
+void UAddOp::toCode()
+{
+    cout << op_symbol;
+    operand->toCode();
+}
+
 UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("UNARY_EXPRESSION")
 {
     this->op_type = op_type;
@@ -619,6 +808,16 @@ const string &BinaryExpression::getOperator()
 {
     return op_symbol;
 }
+string BinaryExpression::getCode()
+{
+    return this->left_opr->getCode() + op_symbol + this->right_opr->getCode();
+}
+void BinaryExpression::toCode()
+{
+    left_opr->toCode();
+    cout << op_symbol;
+    right_opr->toCode();
+}
 CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression("CALL_EXPRESSION")
 {
     this->data_type = data_type;
@@ -649,6 +848,34 @@ const vector<Expression *> &FunctionCall::getArgs()
 {
     return args;
 }
+string FunctionCall::getCode()
+{
+    string code = id_name + "(";
+    for (Expression *arg : args)
+    {
+        code += arg->getCode() + ",";
+    }
+    if (code.back() == ',')
+    {
+        code.pop_back();
+    }
+    code += ")";
+    return code;
+}
+void FunctionCall::toCode()
+{
+    cout << id_name + "(";
+    for (int i = 0; i < args.size(); i++)
+    {
+        args[i]->toCode();
+        if (i < args.size() - 1)
+        {
+            cout << ",";
+        }
+    }
+    cout << ")";
+}
+
 VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall(var_name, "VARIABLE_CALL")
 {
     this->var_type = var_type;
@@ -657,6 +884,15 @@ const string &VariableCall::getVarType()
 {
     return var_type;
 }
+string VariableCall::getCode()
+{
+    return id_name;
+}
+void VariableCall::toCode()
+{
+    cout << id_name;
+}
+
 ArrayCall::ArrayCall(const string &var_name, Expression *idx) : VariableCall(var_name, "ARRAY_CALL")
 {
     this->idx = idx;
@@ -665,6 +901,17 @@ Expression *ArrayCall::getIndex()
 {
     return idx;
 }
+string ArrayCall::getCode()
+{
+    return id_name + "[" + idx->getCode() + "]";
+}
+void ArrayCall::toCode()
+{
+    cout << id_name + "[";
+    idx->toCode();
+    cout << "]";
+}
+
 ConstantCall::ConstantCall(const string &literal, const string &data_type) : CallExpression(data_type, "CONSTANT_CALL")
 {
     this->literal = literal;
@@ -673,6 +920,16 @@ ConstantCall::ConstantCall(const string &literal, const string &data_type) : Cal
 const string &ConstantCall::getLiteral()
 {
     return literal;
+}
+
+string ConstantCall::getCode()
+{
+    return this->literal;
+}
+
+void ConstantCall::toCode()
+{
+    cout << literal;
 }
 
 IntegerCall::IntegerCall(const string &literal) : ConstantCall(literal, "INT")
@@ -705,6 +962,22 @@ Statement *IfStatement::getIfBody()
 {
     return if_body;
 }
+string IfStatement::getCode()
+{
+    string code = "";
+    code += "if(";
+    code += condition->getCode() + ")";
+    code += if_body->getCode();
+    return code;
+}
+void IfStatement::toCode()
+{
+    cout << "if(";
+    condition->toCode();
+    cout << ")";
+    if_body->toCode();
+}
+
 IfElseStatement::IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body) : ConditionalStatement("IFELSE_STATEMENT", condition), NonTerminal("STATEMENT")
 {
     this->if_body = if_body;
@@ -718,6 +991,27 @@ Statement *IfElseStatement::getElseBody()
 {
     return else_body;
 }
+
+string IfElseStatement::getCode()
+{
+    string code = "";
+    code += "if(";
+    code += condition->getCode() + ")";
+    code += if_body->getCode();
+    code += "else ";
+    code += else_body->getCode();
+    return code;
+}
+void IfElseStatement::toCode()
+{
+    cout << "if(";
+    condition->toCode();
+    cout << ")";
+    if_body->toCode();
+    cout << "else ";
+    else_body->toCode();
+}
+
 LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->condition = condition;
@@ -749,8 +1043,45 @@ Expression *ForLoop::getIncDec()
 {
     return inc_dec;
 }
+string ForLoop::getCode()
+{
+    string code = "";
+    code += "for(";
+    code += initialize->getCode() + ";";
+    code += condition->getCode() + ";";
+    code += inc_dec->getCode() + ")";
+    code += body->getCode();
+    return code;
+}
+void ForLoop::toCode()
+{
+    cout << "for(";
+    initialize->toCode();
+    cout << ";";
+    condition->toCode();
+    cout << ";";
+    inc_dec->toCode();
+    cout << ")";
+    body->toCode();
+}
+
 WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(condition, body, "WHILE_LOOP"), NonTerminal("STATEMENT")
 {
+}
+string WhileLoop::getCode()
+{
+    string code = "";
+    code += "while(";
+    code += condition->getCode() + ")";
+    code += body->getCode();
+    return code;
+}
+void WhileLoop::toCode()
+{
+    cout << "while(";
+    condition->toCode();
+    cout << ")";
+    body->toCode();
 }
 
 PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT"), NonTerminal("STATEMENT")
@@ -761,6 +1092,17 @@ VariableCall *PrintStatement::getVariableCall()
 {
     return var_call;
 }
+string PrintStatement::getCode()
+{
+    return "println(" + this->var_call->getCode() + ");";
+}
+void PrintStatement::toCode()
+{
+    cout << "println(";
+    var_call->toCode();
+    cout << ");";
+}
+
 ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->expr = expr;
@@ -769,6 +1111,17 @@ Expression *ReturnStatement::getExpression()
 {
     return expr;
 }
+string ReturnStatement::getCode()
+{
+    return "return " + expr->getCode() + ";";
+}
+void ReturnStatement::toCode()
+{
+    cout << "return ";
+    expr->toCode();
+    cout << ";";
+}
+
 ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT"), NonTerminal("STATEMENT")
 {
     this->expr = expr;
@@ -777,6 +1130,16 @@ ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSI
 Expression *ExpressionStatement::getExpression()
 {
     return expr;
+}
+
+string ExpressionStatement::getCode()
+{
+    return expr->getCode() + ";";
+}
+void ExpressionStatement::toCode()
+{
+    expr->toCode();
+    cout << ";";
 }
 
 Statement::Statement(const string &stmt_type) : NonTerminal("STATEMENT")
@@ -799,14 +1162,236 @@ CompoundStatement::CompoundStatement() : Statement("COMPOUND_STATEMENT"), NonTer
 
 void CompoundStatement::addStatement(Statement *stmt)
 {
-    this->list.push_back(stmt);
+    this->stmt_list.push_back(stmt);
 }
-
 const vector<Statement *> &CompoundStatement::getStatements()
 {
-    return this->list;
+    return this->stmt_list;
+}
+void CompoundStatement::addVariableDeclaration(VariableDeclaration *var_dec)
+{
+    var_decs.push_back(var_dec);
+}
+const vector<VariableDeclaration *> &CompoundStatement::getVariableDeclarations()
+{
+    return var_decs;
+}
+
+string CompoundStatement::getCode()
+{
+    string code = "{\n";
+
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        code += var_dec->getCode() + "\n";
+    }
+    for (Statement *stmt : stmt_list)
+    {
+        code += stmt->getCode() + "\n";
+    }
+    code += "}";
+    return code;
+}
+void CompoundStatement::toCode()
+{
+    cout << "{\n";
+
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        var_dec->toCode();
+        cout << "\n";
+    }
+    for (Statement *stmt : stmt_list)
+    {
+        stmt->toCode();
+        cout << "\n";
+    }
+    cout << "}";
 }
 const string &Statement::getStatementType()
 {
     return stmt_type;
+}
+
+// Semantic Analysis
+void Program::checkSemantics()
+{
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        var_dec->checkSemantics();
+    }
+    for (FunctionDeclaration *func_dec : func_decs)
+    {
+        func_dec->checkSemantics();
+    }
+    for (FunctionDefinition *func_def : func_defs)
+    {
+        func_def->checkSemantics();
+    }
+}
+void VariableDeclaration::checkSemantics()
+{
+    for (Variable *var : decl_list)
+    {
+        if (var->getDataType() == "VOID")
+        {
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_VARIABLE, this->getStartLine(), var->getIdName()) << std::endl;
+        }
+        else
+        {
+            var->setStartLine(this->getStartLine());
+            if (var->getVarType() == "ARRAY")
+            {
+                sem_anlzr->declareArray((Array *)var);
+            }
+            else
+            {
+                sem_anlzr->declareVariable(var);
+            }
+        }
+    }
+}
+void FunctionDeclaration::checkSemantics()
+{
+    Function *new_func = new Function(func_name, ret_type);
+
+    for (auto p : params)
+    {
+        new_func->addParam(new Variable(p->getIdName(), p->getDataType()));
+    }
+
+    if (!table->insert(new_func))
+    {
+        Identifier *id = (Identifier *)table->find(func_name);
+        if (id->getIdentity() != "FUNCTION") // Already declared as non-function type or Defined as function
+        {
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, this->getStartLine(), func_name) << std::endl;
+        }
+        else
+        {
+            Function *func = (Function *)id;
+            if (sem_anlzr->matchTwoFunction(func, new_func))
+            {
+                // Same declaration
+            }
+            else
+            {
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, this->getStartLine(), func_name) << std::endl;
+            }
+        }
+        delete new_func;
+    }
+    else
+    {
+        /** Function inserted successfully **/
+    }
+}
+void FunctionDefinition::checkSemantics()
+{
+    if (!sem_anlzr->functions.empty())
+    {
+        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NESTED_FUNCTION, this->getStartLine(), sem_anlzr->functions.top()->getFunctionName()) << std::endl;
+    }
+
+    sem_anlzr->checkFunctionDefinition(this);
+    // sem_anlzr->startScope();
+    sem_anlzr->functions.push(this);
+    sem_anlzr->declareFunctionParams(params);
+    body->checkSemantics();
+    sem_anlzr->functions.pop();
+    // sem_anlzr->endScope();
+}
+
+// Expression
+string ArrayCall::checkSemantics()
+{
+    idx->setDataType(idx->checkSemantics());
+    sem_anlzr->checkArrayCall(this);
+}
+string VariableCall::checkSemantics()
+{
+    if (var_type == "PRIMITIVE_CALL")
+    {
+        return sem_anlzr->checkVariableCall(this);
+    }
+    return "NULL";
+}
+string ConstantCall::checkSemantics()
+{
+    return data_type;
+}
+string AssignOp::checkSemantics()
+{
+    sem_anlzr->assignOp(this);
+}
+string AddOp::checkSemantics()
+{
+    sem_anlzr->addOp(this);
+}
+string MulOp::checkSemantics()
+{
+    sem_anlzr->mulOp(this);
+}
+string RelOp::checkSemantics()
+{
+    sem_anlzr->relOp(this);
+}
+string LogicOp::checkSemantics()
+{
+    sem_anlzr->logicOp(this);
+}
+string UAddOp::checkSemantics()
+{
+    return data_type;
+}
+string NotOp::checkSemantics()
+{
+    return "INT";
+}
+string DecOp::checkSemantics()
+{
+    return data_type;
+}
+string IncOp::checkSemantics()
+{
+    return data_type;
+}
+string FunctionCall::checkSemantics()
+{
+    sem_anlzr->evaluateFunctionCall(this);
+}
+// Statement
+void IfStatement::checkSemantics()
+{
+    sem_anlzr->analyzeIfStatement(this);
+}
+void IfElseStatement::checkSemantics()
+{
+    sem_anlzr->analyzeIfElseStatement(this);
+}
+void ForLoop::checkSemantics()
+{
+    sem_anlzr->analyzeForLoop(this);
+}
+void WhileLoop::checkSemantics()
+{
+    sem_anlzr->analyzeWhileLoop(this);
+}
+void PrintStatement::checkSemantics()
+{
+    sem_anlzr->analyzePrintStatement(this);
+}
+void ReturnStatement::checkSemantics()
+{
+    sem_anlzr->analyzeReturnStatement(this);
+}
+void ExpressionStatement::checkSemantics()
+{
+    expr->checkSemantics();
+}
+void CompoundStatement::checkSemantics()
+{
+    sem_anlzr->startScope();
+    sem_anlzr->analyzeCompoundStatement(this);
+    sem_anlzr->endScope();
 }

@@ -199,6 +199,10 @@ public:
     void setDataType(const string &);
     const string &getExpType();
     void setExpType(const string &);
+    virtual string getCode() = 0;
+    virtual void toCode() = 0;
+    virtual void toAssembly() = 0;
+    virtual string checkSemantics() = 0;
 };
 
 class List : public NonTerminal
@@ -221,15 +225,26 @@ public:
     const string &getStatementType();
     void setNextLabel(const string &label);
     const string &getNextLabel();
+    virtual string getCode() = 0;
+    virtual void toCode() = 0;
+    virtual void toAssembly() = 0;
+    virtual void checkSemantics() = 0;
 };
 
 class CompoundStatement : public Statement
 {
-    vector<Statement *> list; // Need to destruct
+    vector<VariableDeclaration *> var_decs;
+    vector<Statement *> stmt_list; // Need to destruct
 public:
     CompoundStatement(); // **
     void addStatement(Statement *stmt);
     const vector<Statement *> &getStatements();
+    void addVariableDeclaration(VariableDeclaration *var_dec);
+    const vector<VariableDeclaration *> &getVariableDeclarations();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class ParameterList : public List
@@ -275,6 +290,7 @@ public:
 
 class ConditionalStatement : public Statement
 {
+protected:
     Expression *condition;
     string c_type; // IF, IF_ELSE
 
@@ -291,6 +307,10 @@ class IfStatement : public ConditionalStatement
 public:
     IfStatement(Expression *condition, Statement *body); // **
     Statement *getIfBody();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class IfElseStatement : public ConditionalStatement
@@ -302,10 +322,15 @@ public:
     IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body);
     Statement *getIfBody();
     Statement *getElseBody();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class LoopStatement : public Statement
 {
+protected:
     Expression *condition;
     Statement *body;
     string l_type;
@@ -326,12 +351,20 @@ public:
     ForLoop(Expression *initialize, Expression *condition, Expression *inc_dec, Statement *body); // **
     Expression *getInitialize();
     Expression *getIncDec();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class WhileLoop : public LoopStatement
 {
 public:
     WhileLoop(Expression *condition, Statement *body); // **
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class PrintStatement : public Statement
@@ -341,6 +374,10 @@ class PrintStatement : public Statement
 public:
     PrintStatement(VariableCall *var_call); // **
     VariableCall *getVariableCall();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class ReturnStatement : public Statement
@@ -350,6 +387,10 @@ class ReturnStatement : public Statement
 public:
     ReturnStatement(Expression *expr); // **
     Expression *getExpression();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class ExpressionStatement : public Statement
@@ -359,6 +400,10 @@ class ExpressionStatement : public Statement
 public:
     ExpressionStatement(Expression *expr); // **
     Expression *getExpression();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class CallExpression : public Expression
@@ -372,6 +417,7 @@ public:
 
 class IdentifierCall : public CallExpression
 {
+protected:
     string id_name;
     string id_type;
 
@@ -388,6 +434,10 @@ class FunctionCall : public IdentifierCall
 public:
     FunctionCall(const string &func_name, const vector<Expression *> &args); // **
     const vector<Expression *> &getArgs();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class VariableCall : public IdentifierCall
@@ -397,6 +447,10 @@ class VariableCall : public IdentifierCall
 public:
     VariableCall(const string &var_name, const string &var_type = "PRIMITIVE_CALL"); // **
     const string &getVarType();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class ArrayCall : public VariableCall
@@ -408,15 +462,24 @@ public:
     ~ArrayCall();
     Expression *getIndex();
     void setIndex(Expression *);
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class ConstantCall : public CallExpression
 {
+protected:
     string literal;
 
 public:
     ConstantCall(const string &literal, const string &data_type);
     const string &getLiteral();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class IntegerCall : public ConstantCall
@@ -433,6 +496,7 @@ public:
 
 class BinaryExpression : virtual public Expression
 {
+protected:
     Expression *left_opr;
     Expression *right_opr;
     string op_type;
@@ -444,6 +508,8 @@ public:
     Expression *getRightOpr();
     const string &getOpType();
     const string &getOperator();
+    string getCode();
+    void toCode();
 };
 
 class AssignOp : public BinaryExpression
@@ -451,6 +517,8 @@ class AssignOp : public BinaryExpression
 
 public:
     AssignOp(VariableCall *left, Expression *right); // **
+    void toAssembly();
+    string checkSemantics();
 };
 
 class AddOp : public BinaryExpression
@@ -459,6 +527,8 @@ class AddOp : public BinaryExpression
 
 public:
     AddOp(Expression *left, Expression *right, const string &add_oprt);
+    void toAssembly();
+    string checkSemantics();
 };
 
 class MulOp : public BinaryExpression
@@ -467,6 +537,8 @@ class MulOp : public BinaryExpression
 
 public:
     MulOp(Expression *left, Expression *right, const string &mul_oprt);
+    void toAssembly();
+    string checkSemantics();
 };
 
 class BooleanExpression : virtual public Expression
@@ -491,6 +563,8 @@ class LogicOp : public BinaryExpression, public BooleanExpression
 
 public:
     LogicOp(Expression *left, Expression *right, const string &logic_oprt);
+    void toAssembly();
+    string checkSemantics();
 };
 
 class RelOp : public BinaryExpression, public BooleanExpression
@@ -499,10 +573,13 @@ class RelOp : public BinaryExpression, public BooleanExpression
 
 public:
     RelOp(Expression *left, Expression *right, const string &rel_oprt);
+    void toAssembly();
+    string checkSemantics();
 };
 
 class UnaryExpression : virtual public Expression
 {
+protected:
     Expression *operand;
     string op_type;
     string op_symbol;
@@ -520,24 +597,40 @@ class UAddOp : public UnaryExpression
 
 public:
     UAddOp(Expression *right, const string &oprt);
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class IncOp : public UnaryExpression
 {
 public:
     IncOp(Expression *left); // **
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class DecOp : public UnaryExpression
 {
 public:
     DecOp(Expression *left); // **
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class NotOp : public UnaryExpression, public BooleanExpression
 {
 public:
     NotOp(Expression *right);
+    string getCode();
+    void toCode();
+    void toAssembly();
+    string checkSemantics();
 };
 
 class Program : public NonTerminal
@@ -555,6 +648,10 @@ public:
     const vector<FunctionDefinition *> &getFunctionDefinitions();
     const vector<FunctionDeclaration *> &getFunctionDeclarations();
     const vector<VariableDeclaration *> &getVariableDeclarations();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class Unit : virtual public NonTerminal
@@ -572,16 +669,20 @@ class FunctionDefinition : public Unit, public Statement
     string func_name;
     string return_label;
     vector<Variable *> params; // Replace with vector<Variable*> params
-    vector<Statement *> body;  // Replace with vector<Statement*> params
+    CompoundStatement *body;   // Replace with vector<Statement*> params
 
 public:
-    FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, vector<Statement *> body); // **
+    FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, CompoundStatement *body);
     const string &getReturnType();
     const string &getFunctionName();
     const vector<Variable *> &getParams();
-    const vector<Statement *> &getBody();
+    CompoundStatement *getBody();
     void setReturnLabel(const string &label);
-    const string &getReturnLabel(); 
+    const string &getReturnLabel();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class FunctionDeclaration : public Unit, public Statement
@@ -595,6 +696,10 @@ public:
     const string &getReturnType();
     const string &getFunctionName();
     const vector<Variable *> &getParams();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 class VariableDeclaration : public Unit, public Statement
@@ -605,6 +710,10 @@ public:
     VariableDeclaration(const string &data_type, const vector<Variable *> &list); // **
     void setDeclarationList(const vector<Variable *> &list);
     const vector<Variable *> &getDeclarationList();
+    string getCode();
+    void toCode();
+    void toAssembly();
+    void checkSemantics();
 };
 
 #endif

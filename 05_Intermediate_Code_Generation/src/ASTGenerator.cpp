@@ -149,10 +149,11 @@ std::string ASTGenerator::getList(List *list, int depth)
     string type = list->getListType();
     return tree;
 }
+
 std::string ASTGenerator::getVariableDeclaration(VariableDeclaration *var_decl, int depth)
 {
     std::string tree = "";
-    tree += getIndent(depth);
+    // tree += getIndent(depth);
     for (Variable *var : var_decl->getDeclarationList())
     {
         tree += getIndent(depth);
@@ -199,10 +200,7 @@ std::string ASTGenerator::getFunctionDefinition(FunctionDefinition *func_def, in
     }
     tree += getIndent(depth);
     tree += "FUNCTION_BODY\n";
-    for (Statement *stmt : func_def->getBody())
-    {
-        tree += getStatement(stmt, depth + 1);
-    }
+    tree += getCompoundStatement(func_def->getBody(), depth + 1);
     return tree;
 }
 std::string ASTGenerator::getDeclarationList(DeclarationList *decl_list, int depth)
@@ -423,13 +421,20 @@ std::string ASTGenerator::getReturnStatement(ReturnStatement *ret_stmt, int dept
     tree += getExpression(ret_stmt->getExpression(), depth + 1);
     return tree;
 }
-std::string ASTGenerator::getCompoundStatement(CompoundStatement *stmt_list, int depth)
+std::string ASTGenerator::getCompoundStatement(CompoundStatement *compound, int depth)
 {
     std::string tree = "";
     // tree += getIndent(depth);
-    vector<Statement *> list = stmt_list->getStatements();
+    vector<Statement *> stmt_list = compound->getStatements();
+    vector<VariableDeclaration *> var_decs = compound->getVariableDeclarations();
 
-    for (Statement *stmt : list)
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        tree += getIndent(depth);
+        tree += "VARIABLE_DECLARATION\n";
+        tree += getVariableDeclaration(var_dec, depth + 1);
+    }
+    for (Statement *stmt : stmt_list)
     {
         tree += getStatement(stmt, depth);
     }

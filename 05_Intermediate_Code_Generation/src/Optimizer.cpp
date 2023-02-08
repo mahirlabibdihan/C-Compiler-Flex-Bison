@@ -124,52 +124,49 @@ void Optimizer::optimize()
             {
                 if (portions[1] == nextPortions[1])
                 { // PUSH AX ; POP AX
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                     lines[i + 1] = ";" + lines[i + 1];
+                }
+                else
+                {
+                    lines[i] = ";" + lines[i] + "\n\t\t;" + lines[i + 1];
+                    lines[i + 1] = "MOV " + nextPortions[1] + ", " + portions[1];
                 }
             }
         }
 
-        else if (portions[0] == "POP")
+        if (portions[0] == "POP")
         {
             if (nextPortions[0] == "PUSH")
             {
                 if (portions[1] == nextPortions[1])
                 { // POP AX ; PUSH AX
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                     lines[i + 1] = ";" + lines[i + 1];
                 }
             }
         }
 
-        else if (portions[0] == "MOV")
+        if (portions[0] == "MOV")
         {
             if (portions[1] == portions[2])
             { // MOV AX, AX
-                lines[i] = "\t\t;----Optimized Code----\n";
-                lines[i] += "\t\t;" + lines[i];
+                lines[i] = ";" + lines[i];
             }
             if (nextPortions[0] == "MOV")
             {
                 if ((portions[1] == nextPortions[2]) && (portions[2] == nextPortions[1]))
                 { // MOV AX, BX ; MOV BX, AX
-                    lines[i + 1] = ";----Optimized Code----\n\t\t;" + lines[i + 1];
+                    lines[i + 1] = ";" + lines[i + 1];
                 }
                 if (portions[1] == nextPortions[1])
                 { // MOV AX, BX ; MOV AX, CX or MOV AX, BX ; MOV AX, BX
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                 }
             }
         }
-        // else if (nextPortions[0] == "MOV")
-        // {
-        //     if (nextPortions[1] == nextPortions[2])
-        //     { // MOV AX, AX
-        //         lines[i + 1] = ";----Optimized Code----\n";
-        //         lines[i + 1] += "\t\t;" + lines[i + 1];
-        //     }
-        // }
-        else if (portions[0] == "ADD" || portions[0] == "SUB")
+
+        if (portions[0] == "ADD" || portions[0] == "SUB")
         {
             if (isNumber(portions[2]))
             {
@@ -177,12 +174,12 @@ void Optimizer::optimize()
                 {
                     // SUB AX, 0
                     // ADD AX, 0
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                 }
             }
         }
 
-        /*else if (nextPortions[0] == "IMUL" || nextPortions[0] == "IDIV")
+        if (nextPortions[0] == "IMUL" || nextPortions[0] == "IDIV")
         {
             if (isNumber(portions[2]))
             {
@@ -190,12 +187,12 @@ void Optimizer::optimize()
                 {
                     // IMUL AX
                     // IDIV AX
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                 }
             }
-        }*/
+        }
 
-        else if ((portions[0] == "ADD" && nextPortions[0] == "ADD") || (portions[0] == "SUB" && nextPortions[0] == "SUB"))
+        if ((portions[0] == "ADD" && nextPortions[0] == "ADD") || (portions[0] == "SUB" && nextPortions[0] == "SUB"))
         {
             if (isNumber(portions[2]) && isNumber(nextPortions[2]))
             {
@@ -204,24 +201,20 @@ void Optimizer::optimize()
                     // ADD AX, 1
                     // ADD AX, 2
                     // ADD AX, 3
-                    lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+                    lines[i] = ";" + lines[i];
                     int x = strToInt(portions[2]) + strToInt(nextPortions[2]);
                     lines[i + 1] = portions[0] + " " + portions[1] + ", " + to_string(x);
                 }
             }
         }
 
-        else if (isJump(portions[0]) && portions[1] == getLabel(nextPortions[0])) // L1: -> L1
+        if (isJump(portions[0]) && portions[1] == getLabel(nextPortions[0])) // L1: -> L1
         {
-            lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
+            lines[i] = ";" + lines[i];
         }
-        else if (portions[0] == "CMP" && !isJump((nextPortions[0])))
+        if (portions[0] == "CMP" && !isJump((nextPortions[0])))
         {
-            lines[i] = ";----Optimized Code----\n\t\t;" + lines[i];
-        }
-        else
-        {
-            // std::cout << lines[i] << std::endl;
+            lines[i] = ";" + lines[i];
         }
         // Add condition for dead codes
     }

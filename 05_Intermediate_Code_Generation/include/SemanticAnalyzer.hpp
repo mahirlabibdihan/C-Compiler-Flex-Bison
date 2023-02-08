@@ -14,6 +14,8 @@ using namespace std;
 
 class SemanticAnalyzer
 {
+
+public:
     SymbolTable *table;
     ErrorHandler *error_hndlr;
     LexicalAnalyzer *lexer;
@@ -21,12 +23,9 @@ class SemanticAnalyzer
     ofstream &errorout;
     Program *tree_root;
     stack<FunctionDefinition *> functions;
-
-private:
     bool matchTwoFunction(Function *f1, Function *f2);
     bool isZero(Expression *expr);
 
-public:
     SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
     ~SemanticAnalyzer();
 

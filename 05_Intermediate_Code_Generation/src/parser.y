@@ -155,7 +155,7 @@ func_declaration 		: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON //
 
 func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 						{
-							$$ = new FunctionDefinition($2->getSymbol(),$1->getType(), $4->getParams(), $6->getStatements());
+							$$ = new FunctionDefinition($2->getSymbol(),$1->getType(), $4->getParams(), $6);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};	
 							// $$->setSymbol(Util::formatCode(child));				
@@ -170,7 +170,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_stat
 						}
 						| type_specifier ID LPAREN RPAREN compound_statement
 						{
-							$$ = new FunctionDefinition($2->getSymbol(), $1->getType(), {}, $5->getStatements());
+							$$ = new FunctionDefinition($2->getSymbol(), $1->getType(), {}, $5);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							// $$->setSymbol(Util::formatCode(child));				
@@ -330,8 +330,15 @@ declaration_list 		: declaration_list COMMA ID
 statements 				: statement
 						{
 							$$ = new CompoundStatement(); 
-							if($1 != NULL) $$->addStatement($1);
-
+							if($1 != NULL) {
+								if($1->getStatementType() == "VARIABLE_DECLARATION"){
+									VariableDeclaration *var_decl = dynamic_cast<VariableDeclaration *>($1);
+									$$->addVariableDeclaration(var_decl);
+								}
+								else {
+									$$->addStatement($1);
+								}	
+							}
 							vector<SymbolInfo*> child = {$1};
 							// $$->setSymbol(Util::formatCode(child));				
 							syn_anlzr->setChildren($$, child, "statements");
@@ -339,7 +346,15 @@ statements 				: statement
 						| statements statement
 						{
 							$$ = $1; 
-							if($2 != NULL) $$->addStatement($2);
+							if($2 != NULL) {
+								if($2->getStatementType() == "VARIABLE_DECLARATION"){
+									VariableDeclaration *var_decl = dynamic_cast<VariableDeclaration *>($2);
+									$$->addVariableDeclaration(var_decl);
+								}
+								else {
+									$$->addStatement($2);
+								}	
+							}
 
 							vector<SymbolInfo*> child = {$1,$2};
 							// $$->setSymbol(Util::formatCode(child));				
@@ -525,15 +540,9 @@ variable 				: ID
 						}
 						| variable ASSIGNOP logic_expression
 						{
-							vector<SymbolInfo*> child = {$1,$2,$3};
-
-							// if($3->getExpType() == "BINARY_BOOLEAN" || $3->getExpType() == "UNARY_BOOLEAN")
-							// {
-							// 	$3 = new RelOp($3,new IntegerCall("0"), "!=");
-							// }
-
 							$$ = new AssignOp($1,$3);
-														
+
+							vector<SymbolInfo*> child = {$1,$2,$3};						
 							// $$->setSymbol(Util::formatCode(child));				
 							syn_anlzr->setChildren($$, child, "expression");
 						}

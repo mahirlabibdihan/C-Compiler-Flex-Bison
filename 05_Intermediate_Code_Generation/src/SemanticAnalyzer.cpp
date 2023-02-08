@@ -560,10 +560,15 @@ void SemanticAnalyzer::analyzePrintStatement(PrintStatement *print_stmt)
     callVariable(print_stmt->getVariableCall());
 }
 
-void SemanticAnalyzer::analyzeCompoundStatement(CompoundStatement *stmt_list)
+void SemanticAnalyzer::analyzeCompoundStatement(CompoundStatement *compound)
 {
-    vector<Statement *> list = stmt_list->getStatements();
-    for (Statement *stmt : list)
+    vector<Statement *> stmt_list = compound->getStatements();
+    vector<VariableDeclaration *> var_decs = compound->getVariableDeclarations();
+    for (VariableDeclaration *var_dec : var_decs)
+    {
+        declareVariables(var_dec);
+    }
+    for (Statement *stmt : stmt_list)
     {
         analyzeStatement(stmt);
     }
@@ -869,18 +874,13 @@ void SemanticAnalyzer::defineFunction(FunctionDefinition *func_def)
     string ret_type = func_def->getReturnType();
     string func_name = func_def->getFunctionName();
     vector<Variable *> params = func_def->getParams();
-    vector<Statement *> stmt_list = func_def->getBody();
+
     checkFunctionDefinition(func_def);
 
     this->startScope();
     functions.push(func_def);
-
     declareFunctionParams(params);
-    for (Statement *stmt : stmt_list)
-    {
-        analyzeStatement(stmt);
-    }
-
+    analyzeCompoundStatement(func_def->getBody());
     functions.pop();
     this->endScope();
 }

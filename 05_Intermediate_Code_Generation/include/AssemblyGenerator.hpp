@@ -41,7 +41,6 @@ public:
     void evaluateAndOp(LogicOp *expr);
     void evaluateOrOp(LogicOp *expr);
 
-    std::string getRelOpASM(string op);
     void incdecOp(VariableCall *expr, std::string op);
 
     void assignVariable(VariableCall *var_call);

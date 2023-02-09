@@ -454,6 +454,8 @@ void Optimizer::optimize(string in_file, string out_file)
                     _print(line);
                     break;
                 }
+                if (line[0] == ';')
+                    continue;
                 lines.push_back(line);
                 peephole(lines);
                 lines.erase(lines.begin());

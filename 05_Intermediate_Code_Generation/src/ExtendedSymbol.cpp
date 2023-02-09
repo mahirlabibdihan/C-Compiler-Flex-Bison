@@ -449,24 +449,6 @@ const vector<VariableDeclaration *> &Program::getVariableDeclarations()
     return var_decs;
 }
 
-string Program::getCode()
-{
-    string code = "";
-    for (VariableDeclaration *var_dec : var_decs)
-    {
-        code += var_dec->getCode() + "\n";
-    }
-    for (FunctionDeclaration *func_dec : func_decs)
-    {
-        code += func_dec->getCode() + "\n";
-    }
-    for (FunctionDefinition *func_def : func_defs)
-    {
-        code += func_def->getCode() + "\n";
-    }
-    return code;
-}
-
 Unit::Unit(const string &u_type) : NonTerminal("UNIT")
 {
     this->u_type = u_type;
@@ -490,27 +472,6 @@ const vector<Variable *> &VariableDeclaration::getDeclarationList()
     return decl_list;
 }
 
-string VariableDeclaration::getCode()
-{
-    string code = Util::toLower(decl_list.front()->getDataType()) + " ";
-
-    for (Variable *var : decl_list)
-    {
-        code += var->getIdName();
-        if (var->getVarType() == "ARRAY")
-        {
-            code += +"[" + ((Array *)var)->getArraySize() + "]";
-        }
-        code += ",";
-    }
-    if (code.back() == ',')
-    {
-        code.pop_back();
-    }
-    code += ";";
-    return code;
-}
-
 FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION"), NonTerminal("UNIT")
 {
     this->ret_type = ret_type;
@@ -528,22 +489,6 @@ const string &FunctionDeclaration::getFunctionName()
 const vector<Variable *> &FunctionDeclaration::getParams()
 {
     return params;
-}
-string FunctionDeclaration::getCode()
-{
-    string code = "";
-    code += Util::toLower(ret_type) + " ";
-    code += func_name + "(";
-    for (Variable *var : params)
-    {
-        code += Util::toLower(var->getDataType()) + " " + var->getIdName() + ",";
-    }
-    if (code.back() == ',')
-    {
-        code.pop_back();
-    }
-    code += ");";
-    return code;
 }
 
 FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, CompoundStatement *body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION"), NonTerminal("UNIT")
@@ -577,56 +522,22 @@ const string &FunctionDefinition::getReturnLabel()
 {
     return return_label;
 }
-string FunctionDefinition::getCode()
-{
-    string code = "";
-    code += Util::toLower(ret_type) + " ";
-    code += func_name + "(";
-    for (Variable *var : params)
-    {
-        code += Util::toLower(var->getDataType()) + " " + var->getIdName() + ",";
-    }
-    if (code.back() == ',')
-    {
-        code.pop_back();
-    }
-    code += ")";
-    code += body->getCode();
-    return code;
-}
 
 NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanExpression("NOTOP"), Expression("UNARY_BOOLEAN")
 {
-}
-string NotOp::getCode()
-{
-    return op_symbol + operand->getCode();
 }
 
 DecOp::DecOp(Expression *left) : UnaryExpression("DECOP", "--", left), Expression("UNARY_EXPRESSION")
 {
 }
 
-string DecOp::getCode()
-{
-    return operand->getCode() + op_symbol;
-}
-
 IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left), Expression("UNARY_EXPRESSION")
 {
-}
-string IncOp::getCode()
-{
-    return operand->getCode() + op_symbol;
 }
 
 UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right), Expression("UNARY_EXPRESSION")
 {
     this->uadd_oprt = oprt;
-}
-string UAddOp::getCode()
-{
-    return op_symbol + operand->getCode();
 }
 
 UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("UNARY_EXPRESSION")
@@ -722,10 +633,6 @@ const string &BinaryExpression::getOperator()
 {
     return op_symbol;
 }
-string BinaryExpression::getCode()
-{
-    return this->left_opr->getCode() + op_symbol + this->right_opr->getCode();
-}
 
 CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression("CALL_EXPRESSION")
 {
@@ -757,20 +664,6 @@ const vector<Expression *> &FunctionCall::getArgs()
 {
     return args;
 }
-string FunctionCall::getCode()
-{
-    string code = id_name + "(";
-    for (Expression *arg : args)
-    {
-        code += arg->getCode() + ",";
-    }
-    if (code.back() == ',')
-    {
-        code.pop_back();
-    }
-    code += ")";
-    return code;
-}
 
 VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall(var_name, "VARIABLE_CALL")
 {
@@ -779,10 +672,6 @@ VariableCall::VariableCall(const string &var_name, const string &var_type) : Ide
 const string &VariableCall::getVarType()
 {
     return var_type;
-}
-string VariableCall::getCode()
-{
-    return id_name;
 }
 
 ArrayCall::ArrayCall(const string &var_name, Expression *idx) : VariableCall(var_name, "ARRAY_CALL")
@@ -793,10 +682,6 @@ Expression *ArrayCall::getIndex()
 {
     return idx;
 }
-string ArrayCall::getCode()
-{
-    return id_name + "[" + idx->getCode() + "]";
-}
 
 ConstantCall::ConstantCall(const string &literal, const string &data_type) : CallExpression(data_type, "CONSTANT_CALL")
 {
@@ -806,11 +691,6 @@ ConstantCall::ConstantCall(const string &literal, const string &data_type) : Cal
 const string &ConstantCall::getLiteral()
 {
     return literal;
-}
-
-string ConstantCall::getCode()
-{
-    return this->literal;
 }
 
 IntegerCall::IntegerCall(const string &literal) : ConstantCall(literal, "INT")
@@ -843,14 +723,6 @@ Statement *IfStatement::getIfBody()
 {
     return if_body;
 }
-string IfStatement::getCode()
-{
-    string code = "";
-    code += "if(";
-    code += condition->getCode() + ")";
-    code += if_body->getCode();
-    return code;
-}
 
 IfElseStatement::IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body) : ConditionalStatement("IFELSE_STATEMENT", condition), NonTerminal("STATEMENT")
 {
@@ -864,17 +736,6 @@ Statement *IfElseStatement::getIfBody()
 Statement *IfElseStatement::getElseBody()
 {
     return else_body;
-}
-
-string IfElseStatement::getCode()
-{
-    string code = "";
-    code += "if(";
-    code += condition->getCode() + ")";
-    code += if_body->getCode();
-    code += "else ";
-    code += else_body->getCode();
-    return code;
 }
 
 LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT"), NonTerminal("STATEMENT")
@@ -908,27 +769,9 @@ Expression *ForLoop::getIncDec()
 {
     return inc_dec;
 }
-string ForLoop::getCode()
-{
-    string code = "";
-    code += "for(";
-    code += initialize->getCode() + ";";
-    code += condition->getCode() + ";";
-    code += inc_dec->getCode() + ")";
-    code += body->getCode();
-    return code;
-}
 
 WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(condition, body, "WHILE_LOOP"), NonTerminal("STATEMENT")
 {
-}
-string WhileLoop::getCode()
-{
-    string code = "";
-    code += "while(";
-    code += condition->getCode() + ")";
-    code += body->getCode();
-    return code;
 }
 
 PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT"), NonTerminal("STATEMENT")
@@ -939,10 +782,6 @@ VariableCall *PrintStatement::getVariableCall()
 {
     return var_call;
 }
-string PrintStatement::getCode()
-{
-    return "println(" + this->var_call->getCode() + ");";
-}
 
 ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT"), NonTerminal("STATEMENT")
 {
@@ -951,10 +790,6 @@ ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT
 Expression *ReturnStatement::getExpression()
 {
     return expr;
-}
-string ReturnStatement::getCode()
-{
-    return "return " + expr->getCode() + ";";
 }
 
 ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT"), NonTerminal("STATEMENT")
@@ -965,11 +800,6 @@ ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSI
 Expression *ExpressionStatement::getExpression()
 {
     return expr;
-}
-
-string ExpressionStatement::getCode()
-{
-    return expr->getCode() + ";";
 }
 
 Statement::Statement(const string &stmt_type) : NonTerminal("STATEMENT")
@@ -1005,22 +835,6 @@ void CompoundStatement::addVariableDeclaration(VariableDeclaration *var_dec)
 const vector<VariableDeclaration *> &CompoundStatement::getVariableDeclarations()
 {
     return var_decs;
-}
-
-string CompoundStatement::getCode()
-{
-    string code = "{\n";
-
-    for (VariableDeclaration *var_dec : var_decs)
-    {
-        code += var_dec->getCode() + "\n";
-    }
-    for (Statement *stmt : stmt_list)
-    {
-        code += stmt->getCode() + "\n";
-    }
-    code += "}";
-    return code;
 }
 
 const string &Statement::getStatementType()
@@ -1101,6 +915,7 @@ void FunctionDeclaration::checkSemantics()
         /** Function inserted successfully **/
     }
 }
+
 void FunctionDefinition::checkSemantics()
 {
     if (!sem_anlzr->functions.empty())

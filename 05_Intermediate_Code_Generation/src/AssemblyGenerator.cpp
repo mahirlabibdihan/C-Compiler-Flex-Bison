@@ -15,14 +15,15 @@
 // #include <unistd.h>
 // #endif
 
-extern std::ofstream asmout;
-extern std::ofstream codeout;
-extern std::ofstream parseout;
-extern std::ofstream errorout;
+std::map<std::string, std::string> AssemblyGenerator::RelOpASM = {
+    {">", "JG"},
+    {">=", "JGE"},
+    {"<", "JL"},
+    {"<=", "JLE"},
+    {"!=", "JNE"},
+    {"==", "JE"}};
+
 extern AssemblyGenerator *asm_gen;
-extern SemanticAnalyzer *sem_anlzr;
-extern ErrorHandler *error_hndlr;
-extern SymbolTable *table;
 
 AssemblyGenerator::AssemblyGenerator(SymbolTable *table, std::ofstream &out) : asmout(out)
 {
@@ -237,7 +238,7 @@ void AssemblyGenerator::evaluateRelOp(RelOp *expr)
     expr->getLeftOpr()->toAssembly();
     expr->getRightOpr()->toAssembly();
 
-    string op = getRelOpASM(expr->getOperator());
+    string op = this->RelOpASM[expr->getOperator()];
     print("POP DX");
     print("POP AX");
     print("CMP AX, DX");
@@ -295,35 +296,6 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
     }
 }
 
-std::string AssemblyGenerator::getRelOpASM(string op)
-{
-    if (op == ">")
-    {
-        return "JG";
-    }
-    else if (op == ">=")
-    {
-        return "JGE";
-    }
-    else if (op == "<")
-    {
-        return "JL";
-    }
-    else if (op == "<=")
-    {
-        return "JLE";
-    }
-    else if (op == "!=")
-    {
-        return "JNE";
-    }
-    else if (op == "==")
-    {
-        return "JE";
-    }
-    return "";
-}
-
 void AssemblyGenerator::assignVariable(VariableCall *var_call)
 {
     if (var_call->getVarType() == "ARRAY_CALL")
@@ -342,13 +314,18 @@ std::string AssemblyGenerator::newLabel()
     return lb;
 }
 
+/**********************************************************************************/
+/**********************************************************************************/
 // Unit
 void Program::toAssembly()
 {
     asm_gen->print(".MODEL SMALL");
-    asm_gen->print(".STACK 100H");
+    asm_gen->print(".STACK 1000H");
     asm_gen->print(".DATA");
     asm_gen->indent++;
+    asm_gen->print("CR EQU 0DH");
+    asm_gen->print("LF EQU 0AH");
+    asm_gen->print("number DB \"00000$\"");
     for (VariableDeclaration *var_dec : var_decs)
     {
         var_dec->toAssembly();
@@ -361,11 +338,11 @@ void Program::toAssembly()
     }
 
     asm_gen->print(".CODE");
-    asm_gen->definePrintFunction();
     for (FunctionDefinition *func_def : func_defs)
     {
         func_def->toAssembly();
     }
+    asm_gen->definePrintFunction();
     asm_gen->print("END MAIN");
 }
 void VariableDeclaration::toAssembly()
@@ -392,7 +369,7 @@ void FunctionDeclaration::toAssembly()
         new_func->addParam(new Variable(p->getIdName(), p->getDataType()));
     }
 
-    if (!table->insert(new_func))
+    if (!asm_gen->table->insert(new_func))
     {
     }
 }
@@ -530,7 +507,7 @@ void RelOp::toAssembly()
     string true_label = asm_gen->newLabel();
     string end_label = asm_gen->newLabel();
 
-    string op = asm_gen->getRelOpASM(op_symbol);
+    string op = asm_gen->RelOpASM[op_symbol];
     asm_gen->print("POP BX");
     asm_gen->print("POP AX");
     asm_gen->print("CMP AX, BX");
@@ -543,13 +520,14 @@ void RelOp::toAssembly()
 }
 void AddOp::toAssembly()
 {
-    left_opr->toAssembly();
-    right_opr->toAssembly();
-
     string opr = (op_symbol == "+" ? "ADD" : "SUB");
 
+    // For constant and variable, MOV AX, [BP-4] MOV BX, 5
+    left_opr->toAssembly();
+    right_opr->toAssembly();
     asm_gen->print("POP BX");
     asm_gen->print("POP AX");
+
     asm_gen->print(opr + " AX, BX");
     asm_gen->print("PUSH AX");
 }
@@ -667,12 +645,12 @@ void IfStatement::toAssembly()
     string true_label = asm_gen->newLabel();
     string false_label = this->getNextLabel();
 
-    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(this->getCondition());
-    cond->setTrueLabel(true_label);
-    cond->setFalseLabel(false_label);
+    condition->setTrueLabel(true_label);
+    condition->setFalseLabel(false_label);
     if_body->setNextLabel(this->getNextLabel());
-    asm_gen->comment(this->getCondition()->getCode());
-    asm_gen->evaluateCondition(cond);
+
+    asm_gen->comment(condition->getCode());
+    asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(true_label);
     if_body->toAssembly();
 }
@@ -681,15 +659,14 @@ void IfElseStatement::toAssembly()
     string true_label = asm_gen->newLabel();
     string false_label = asm_gen->newLabel();
 
-    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(this->getCondition());
-    cond->setTrueLabel(true_label);
-    cond->setFalseLabel(false_label);
+    condition->setTrueLabel(true_label);
+    condition->setFalseLabel(false_label);
 
     if_body->setNextLabel(this->getNextLabel());
     else_body->setNextLabel(this->getNextLabel());
 
-    asm_gen->comment(this->getCondition()->getCode());
-    asm_gen->evaluateCondition(cond);
+    asm_gen->comment(condition->getCode());
+    asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(true_label);
     if_body->toAssembly();
     asm_gen->print("JMP " + this->getNextLabel());
@@ -703,16 +680,15 @@ void ForLoop::toAssembly()
     std::string false_label = this->getNextLabel();
     std::string incdec_label = asm_gen->newLabel();
 
-    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(this->getCondition());
-    cond->setTrueLabel(true_label);
-    cond->setFalseLabel(false_label);
-
+    condition->setTrueLabel(true_label);
+    condition->setFalseLabel(false_label);
     body->setNextLabel(incdec_label);
+
     asm_gen->comment(initialize->getCode());
     initialize->toAssembly();
     asm_gen->printLabel(start_label);
-    asm_gen->comment(this->getCondition()->getCode());
-    asm_gen->evaluateCondition(cond);
+    asm_gen->comment(condition->getCode());
+    asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(incdec_label);
     asm_gen->comment(inc_dec->getCode());
     inc_dec->toAssembly();
@@ -727,13 +703,13 @@ void WhileLoop::toAssembly()
     std::string true_label = asm_gen->newLabel();
     std::string false_label = this->getNextLabel();
 
-    BooleanExpression *cond = dynamic_cast<BooleanExpression *>(this->getCondition());
-    cond->setTrueLabel(true_label);
-    cond->setFalseLabel(false_label);
+    condition->setTrueLabel(true_label);
+    condition->setFalseLabel(false_label);
     body->setNextLabel(start_label);
+
     asm_gen->printLabel(start_label);
-    asm_gen->comment(this->getCondition()->getCode());
-    asm_gen->evaluateCondition(cond);
+    asm_gen->comment(condition->getCode());
+    asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(true_label);
     body->toAssembly();
     asm_gen->print("JMP " + start_label);
@@ -742,7 +718,9 @@ void PrintStatement::toAssembly()
 {
     asm_gen->comment(this->getCode());
     this->getVariableCall()->toAssembly();
-    asm_gen->print("CALL OUTPUT");
+    asm_gen->print("POP AX");
+    asm_gen->print("CALL print_output");
+    asm_gen->print("CALL new_line");
 }
 void ReturnStatement::toAssembly()
 {
@@ -764,7 +742,10 @@ void ExpressionStatement::toAssembly()
 void CompoundStatement::toAssembly()
 {
     if (asm_gen->curr_func == NULL)
+    {
         asm_gen->table->enterScope();
+    }
+
     int count = 0;
     for (VariableDeclaration *var_dec : var_decs)
     {
@@ -772,7 +753,7 @@ void CompoundStatement::toAssembly()
         count += var_dec->getDeclarationList().size();
     }
 
-    string last_label = "";
+    string last_label = count > 0 ? asm_gen->newLabel() : "";
     for (int i = 0; i < stmt_list.size(); i++)
     {
         if (i < stmt_list.size() - 1)
@@ -796,10 +777,15 @@ void CompoundStatement::toAssembly()
             stmt_list[i]->toAssembly();
         }
     }
-    asm_gen->print("ADD SP, " + std::to_string(2 * count));
+    if (count > 0)
+    {
+        asm_gen->print("ADD SP, " + std::to_string(2 * count));
+    }
 
     if (asm_gen->curr_func == NULL)
+    {
         asm_gen->table->enterScope();
+    }
 }
 void FunctionCall::toAssembly()
 {

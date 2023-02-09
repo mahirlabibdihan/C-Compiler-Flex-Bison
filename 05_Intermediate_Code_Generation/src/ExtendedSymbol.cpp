@@ -936,7 +936,7 @@ void FunctionDefinition::checkSemantics()
 string ArrayCall::checkSemantics()
 {
     idx->setDataType(idx->checkSemantics());
-    sem_anlzr->checkArrayCall(this);
+    return sem_anlzr->checkArrayCall(this);
 }
 string VariableCall::checkSemantics()
 {
@@ -952,23 +952,23 @@ string ConstantCall::checkSemantics()
 }
 string AssignOp::checkSemantics()
 {
-    sem_anlzr->assignOp(this);
+    return sem_anlzr->assignOp(this);
 }
 string AddOp::checkSemantics()
 {
-    sem_anlzr->addOp(this);
+    return sem_anlzr->addOp(this);
 }
 string MulOp::checkSemantics()
 {
-    sem_anlzr->mulOp(this);
+    return sem_anlzr->mulOp(this);
 }
 string RelOp::checkSemantics()
 {
-    sem_anlzr->relOp(this);
+    return sem_anlzr->relOp(this);
 }
 string LogicOp::checkSemantics()
 {
-    sem_anlzr->logicOp(this);
+    return sem_anlzr->logicOp(this);
 }
 string UAddOp::checkSemantics()
 {
@@ -988,7 +988,7 @@ string IncOp::checkSemantics()
 }
 string FunctionCall::checkSemantics()
 {
-    sem_anlzr->evaluateFunctionCall(this);
+    return sem_anlzr->evaluateFunctionCall(this);
 }
 // Statement
 void IfStatement::checkSemantics()

@@ -87,7 +87,7 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 }
 void AssemblyGenerator::returnFunction()
 {
-    // print("ADD SP, " + std::to_string(2 * curr_func->getBody()->getDeclarationList().size()));
+    // print("ADD SP, " + std::to_string(-asm_gen->offset_history.back() - 2));
     print("MOV SP, BP");
     print("POP BP");
     if (curr_func->getFunctionName() != "main")
@@ -790,14 +790,24 @@ void CompoundStatement::toAssembly()
         asm_gen->table->enterScope();
     }
 
-    int count = 0;
+    int allocated = 0;
     for (VariableDeclaration *var_dec : var_decs)
     {
         var_dec->toAssembly();
-        count += var_dec->getDeclarationList().size();
+        for (Variable *var : var_dec->getDeclarationList())
+        {
+            if (var->getVarType() == "ARRAY")
+            {
+                allocated += 2 * stoi(((Array *)var)->getArraySize());
+            }
+            else
+            {
+                allocated += 2;
+            }
+        }
     }
 
-    string last_label = count > 0 ? asm_gen->newLabel() : "";
+    string last_label = allocated > 0 ? asm_gen->newLabel() : "";
     for (int i = 0; i < stmt_list.size(); i++)
     {
         if (i < stmt_list.size() - 1)
@@ -821,9 +831,11 @@ void CompoundStatement::toAssembly()
             stmt_list[i]->toAssembly();
         }
     }
-    if (count > 0)
+    if (allocated > 0)
     {
-        asm_gen->print("ADD SP, " + std::to_string(2 * count));
+        asm_gen->comment("Deallocating Variables");
+        asm_gen->print("ADD SP, " + std::to_string(allocated));
+        asm_gen->offset_history.back() += allocated;
     }
 
     if (asm_gen->curr_func == NULL)

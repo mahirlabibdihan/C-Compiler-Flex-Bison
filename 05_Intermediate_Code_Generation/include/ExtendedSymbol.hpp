@@ -235,6 +235,7 @@ class CompoundStatement : public Statement
 {
     vector<VariableDeclaration *> var_decs;
     vector<Statement *> stmt_list; // Need to destruct
+
 public:
     CompoundStatement(); // **
     void addStatement(Statement *stmt);
@@ -291,7 +292,7 @@ public:
 class ConditionalStatement : public Statement
 {
 protected:
-    Expression *condition;
+    BooleanExpression *condition;
     string c_type; // IF, IF_ELSE
 
 public:
@@ -331,7 +332,7 @@ public:
 class LoopStatement : public Statement
 {
 protected:
-    Expression *condition;
+    BooleanExpression *condition;
     Statement *body;
     string l_type;
 

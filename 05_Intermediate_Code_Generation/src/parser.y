@@ -12,12 +12,13 @@
 #include "../include/Util.hpp"
 #include "../include/ExtendedSymbol.hpp"
 #include "../include/SyntaxAnalyzer.hpp"
+#include "../include/Compiler.hpp"
 using namespace std;
 
 int yylex(void);
 extern FILE *yyin;
 extern SyntaxAnalyzer *syn_anlzr;
-
+extern Compiler *compiler;
 void yyerror(string error){
 	syn_anlzr->handleError();
 }
@@ -75,6 +76,7 @@ start 					: program
 							syn_anlzr->setChildren($$, child, "start");
 
 							syn_anlzr->setASTRoot($$);
+							compiler->setASTRoot($$);
 							$$ = NULL;
 						}
 						;

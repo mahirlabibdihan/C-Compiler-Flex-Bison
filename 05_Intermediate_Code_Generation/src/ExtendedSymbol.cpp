@@ -467,25 +467,6 @@ string Program::getCode()
     return code;
 }
 
-void Program::toCode()
-{
-    for (VariableDeclaration *var_dec : var_decs)
-    {
-        var_dec->toCode();
-        cout << "\n";
-    }
-    for (FunctionDeclaration *func_dec : func_decs)
-    {
-        func_dec->toCode();
-        cout << "\n";
-    }
-    for (FunctionDefinition *func_def : func_defs)
-    {
-        func_def->toCode();
-        cout << "\n";
-    }
-}
-
 Unit::Unit(const string &u_type) : NonTerminal("UNIT")
 {
     this->u_type = u_type;
@@ -529,23 +510,6 @@ string VariableDeclaration::getCode()
     code += ";";
     return code;
 }
-void VariableDeclaration::toCode()
-{
-    cout << Util::toLower(decl_list.front()->getDataType()) + " ";
-    for (int i = 0; i < decl_list.size(); i++)
-    {
-        cout << decl_list[i]->getIdName();
-        if (decl_list[i]->getVarType() == "ARRAY")
-        {
-            cout << "[" + ((Array *)decl_list[i])->getArraySize() + "]";
-        }
-        if (i < decl_list.size() - 1)
-        {
-            cout << ",";
-        }
-    }
-    cout << ";";
-}
 
 FunctionDeclaration::FunctionDeclaration(const string &func_name, const string &ret_type, vector<Variable *> params) : Unit("FUNCTION_DECLARATION"), Statement("FUNCTION_DECLARATION"), NonTerminal("UNIT")
 {
@@ -580,20 +544,6 @@ string FunctionDeclaration::getCode()
     }
     code += ");";
     return code;
-}
-void FunctionDeclaration::toCode()
-{
-    cout << Util::toLower(ret_type) + " ";
-    cout << func_name + "(";
-    for (int i = 0; i < params.size(); i++)
-    {
-        cout << Util::toLower(params[i]->getDataType()) + " " + params[i]->getIdName();
-        if (i < params.size() - 1)
-        {
-            cout << ",";
-        }
-    }
-    cout << ");";
 }
 
 FunctionDefinition::FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, CompoundStatement *body) : Unit("FUNCTION_DEFINITION"), Statement("FUNCTION_DEFINITION"), NonTerminal("UNIT")
@@ -644,21 +594,6 @@ string FunctionDefinition::getCode()
     code += body->getCode();
     return code;
 }
-void FunctionDefinition::toCode()
-{
-    cout << Util::toLower(ret_type) + " ";
-    cout << func_name + "(";
-    for (int i = 0; i < params.size(); i++)
-    {
-        cout << Util::toLower(params[i]->getDataType()) + " " + params[i]->getIdName();
-        if (i < params.size() - 1)
-        {
-            cout << ",";
-        }
-    }
-    cout << ")";
-    body->toCode();
-}
 
 NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanExpression("NOTOP"), Expression("UNARY_BOOLEAN")
 {
@@ -666,11 +601,6 @@ NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanE
 string NotOp::getCode()
 {
     return op_symbol + operand->getCode();
-}
-void NotOp::toCode()
-{
-    cout << op_symbol;
-    operand->toCode();
 }
 
 DecOp::DecOp(Expression *left) : UnaryExpression("DECOP", "--", left), Expression("UNARY_EXPRESSION")
@@ -681,11 +611,6 @@ string DecOp::getCode()
 {
     return operand->getCode() + op_symbol;
 }
-void DecOp::toCode()
-{
-    operand->toCode();
-    op_symbol;
-}
 
 IncOp::IncOp(Expression *left) : UnaryExpression("INCOP", "++", left), Expression("UNARY_EXPRESSION")
 {
@@ -695,12 +620,6 @@ string IncOp::getCode()
     return operand->getCode() + op_symbol;
 }
 
-void IncOp::toCode()
-{
-    operand->toCode();
-    cout << op_symbol;
-}
-
 UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP", oprt, right), Expression("UNARY_EXPRESSION")
 {
     this->uadd_oprt = oprt;
@@ -708,11 +627,6 @@ UAddOp::UAddOp(Expression *right, const string &oprt) : UnaryExpression("UADDOP"
 string UAddOp::getCode()
 {
     return op_symbol + operand->getCode();
-}
-void UAddOp::toCode()
-{
-    cout << op_symbol;
-    operand->toCode();
 }
 
 UnaryExpression::UnaryExpression(const string &op_type, const string &op_symbol, Expression *operand) : Expression("UNARY_EXPRESSION")
@@ -812,12 +726,7 @@ string BinaryExpression::getCode()
 {
     return this->left_opr->getCode() + op_symbol + this->right_opr->getCode();
 }
-void BinaryExpression::toCode()
-{
-    left_opr->toCode();
-    cout << op_symbol;
-    right_opr->toCode();
-}
+
 CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression("CALL_EXPRESSION")
 {
     this->data_type = data_type;
@@ -862,19 +771,6 @@ string FunctionCall::getCode()
     code += ")";
     return code;
 }
-void FunctionCall::toCode()
-{
-    cout << id_name + "(";
-    for (int i = 0; i < args.size(); i++)
-    {
-        args[i]->toCode();
-        if (i < args.size() - 1)
-        {
-            cout << ",";
-        }
-    }
-    cout << ")";
-}
 
 VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall(var_name, "VARIABLE_CALL")
 {
@@ -888,10 +784,6 @@ string VariableCall::getCode()
 {
     return id_name;
 }
-void VariableCall::toCode()
-{
-    cout << id_name;
-}
 
 ArrayCall::ArrayCall(const string &var_name, Expression *idx) : VariableCall(var_name, "ARRAY_CALL")
 {
@@ -904,12 +796,6 @@ Expression *ArrayCall::getIndex()
 string ArrayCall::getCode()
 {
     return id_name + "[" + idx->getCode() + "]";
-}
-void ArrayCall::toCode()
-{
-    cout << id_name + "[";
-    idx->toCode();
-    cout << "]";
 }
 
 ConstantCall::ConstantCall(const string &literal, const string &data_type) : CallExpression(data_type, "CONSTANT_CALL")
@@ -927,11 +813,6 @@ string ConstantCall::getCode()
     return this->literal;
 }
 
-void ConstantCall::toCode()
-{
-    cout << literal;
-}
-
 IntegerCall::IntegerCall(const string &literal) : ConstantCall(literal, "INT")
 {
 }
@@ -942,7 +823,7 @@ FloatCall::FloatCall(const string &literal) : ConstantCall(literal, "FLOAT")
 
 ConditionalStatement::ConditionalStatement(string c_type, Expression *condition) : Statement("CONDITIONAL_STATEMENT"), NonTerminal("STATEMENT")
 {
-    this->condition = condition;
+    this->condition = dynamic_cast<BooleanExpression *>(condition);
     this->c_type = c_type;
 }
 
@@ -970,13 +851,6 @@ string IfStatement::getCode()
     code += if_body->getCode();
     return code;
 }
-void IfStatement::toCode()
-{
-    cout << "if(";
-    condition->toCode();
-    cout << ")";
-    if_body->toCode();
-}
 
 IfElseStatement::IfElseStatement(Expression *condition, Statement *if_body, Statement *else_body) : ConditionalStatement("IFELSE_STATEMENT", condition), NonTerminal("STATEMENT")
 {
@@ -1002,19 +876,10 @@ string IfElseStatement::getCode()
     code += else_body->getCode();
     return code;
 }
-void IfElseStatement::toCode()
-{
-    cout << "if(";
-    condition->toCode();
-    cout << ")";
-    if_body->toCode();
-    cout << "else ";
-    else_body->toCode();
-}
 
 LoopStatement::LoopStatement(Expression *condition, Statement *body, const string &l_type) : Statement("LOOP_STATEMENT"), NonTerminal("STATEMENT")
 {
-    this->condition = condition;
+    this->condition = dynamic_cast<BooleanExpression *>(condition);
     this->body = body;
     this->l_type = l_type;
 }
@@ -1053,17 +918,6 @@ string ForLoop::getCode()
     code += body->getCode();
     return code;
 }
-void ForLoop::toCode()
-{
-    cout << "for(";
-    initialize->toCode();
-    cout << ";";
-    condition->toCode();
-    cout << ";";
-    inc_dec->toCode();
-    cout << ")";
-    body->toCode();
-}
 
 WhileLoop::WhileLoop(Expression *condition, Statement *body) : LoopStatement(condition, body, "WHILE_LOOP"), NonTerminal("STATEMENT")
 {
@@ -1075,13 +929,6 @@ string WhileLoop::getCode()
     code += condition->getCode() + ")";
     code += body->getCode();
     return code;
-}
-void WhileLoop::toCode()
-{
-    cout << "while(";
-    condition->toCode();
-    cout << ")";
-    body->toCode();
 }
 
 PrintStatement::PrintStatement(VariableCall *var_call) : Statement("PRINT_STATEMENT"), NonTerminal("STATEMENT")
@@ -1096,12 +943,6 @@ string PrintStatement::getCode()
 {
     return "println(" + this->var_call->getCode() + ");";
 }
-void PrintStatement::toCode()
-{
-    cout << "println(";
-    var_call->toCode();
-    cout << ");";
-}
 
 ReturnStatement::ReturnStatement(Expression *expr) : Statement("RETURN_STATEMENT"), NonTerminal("STATEMENT")
 {
@@ -1114,12 +955,6 @@ Expression *ReturnStatement::getExpression()
 string ReturnStatement::getCode()
 {
     return "return " + expr->getCode() + ";";
-}
-void ReturnStatement::toCode()
-{
-    cout << "return ";
-    expr->toCode();
-    cout << ";";
 }
 
 ExpressionStatement::ExpressionStatement(Expression *expr) : Statement("EXPRESSION_STATEMENT"), NonTerminal("STATEMENT")
@@ -1135,11 +970,6 @@ Expression *ExpressionStatement::getExpression()
 string ExpressionStatement::getCode()
 {
     return expr->getCode() + ";";
-}
-void ExpressionStatement::toCode()
-{
-    expr->toCode();
-    cout << ";";
 }
 
 Statement::Statement(const string &stmt_type) : NonTerminal("STATEMENT")
@@ -1192,22 +1022,7 @@ string CompoundStatement::getCode()
     code += "}";
     return code;
 }
-void CompoundStatement::toCode()
-{
-    cout << "{\n";
 
-    for (VariableDeclaration *var_dec : var_decs)
-    {
-        var_dec->toCode();
-        cout << "\n";
-    }
-    for (Statement *stmt : stmt_list)
-    {
-        stmt->toCode();
-        cout << "\n";
-    }
-    cout << "}";
-}
 const string &Statement::getStatementType()
 {
     return stmt_type;
@@ -1294,12 +1109,12 @@ void FunctionDefinition::checkSemantics()
     }
 
     sem_anlzr->checkFunctionDefinition(this);
-    // sem_anlzr->startScope();
+    sem_anlzr->startScope();
     sem_anlzr->functions.push(this);
     sem_anlzr->declareFunctionParams(params);
     body->checkSemantics();
     sem_anlzr->functions.pop();
-    // sem_anlzr->endScope();
+    sem_anlzr->endScope();
 }
 
 // Expression

@@ -172,20 +172,19 @@ void AssemblyGenerator::evaluateAndOp(LogicOp *expr)
 {
     BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
     BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
-    left->setTrueLabel(newLabel());
+    // left->setTrueLabel(newLabel()); // Optimized
     left->setFalseLabel(expr->getFalseLabel());
     right->setTrueLabel(expr->getTrueLabel());
     right->setFalseLabel(expr->getFalseLabel());
 
     expr->getLeftOpr()->toAssembly();
     print("POP AX");
-
     print("CMP AX, 0");
-    print("JNE " + left->getTrueLabel());
-    print("JMP " + left->getFalseLabel()); // False
-
-    printLabel(left->getTrueLabel());
-
+    // print("JNE " + left->getTrueLabel());
+    // print("JMP " + left->getFalseLabel()); // False
+    // printLabel(left->getTrueLabel());
+    // Optimized
+    print("JE " + left->getFalseLabel());
     expr->getRightOpr()->toAssembly();
     print("POP AX");
 
@@ -200,22 +199,20 @@ void AssemblyGenerator::evaluateOrOp(LogicOp *expr)
     BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
 
     left->setTrueLabel(expr->getTrueLabel());
-    left->setFalseLabel(newLabel());
+    // left->setFalseLabel(newLabel()); // Optimized
     right->setTrueLabel(expr->getTrueLabel());
     right->setFalseLabel(expr->getFalseLabel());
 
     expr->getLeftOpr()->toAssembly();
     print("POP AX");
-
     print("CMP AX, 0");
     print("JNE " + left->getTrueLabel());
-    print("JMP " + left->getFalseLabel()); // False
-
-    printLabel(left->getFalseLabel());
+    // print("JMP " + left->getFalseLabel()); // False
+    // printLabel(left->getFalseLabel());
+    // Optimized
 
     expr->getRightOpr()->toAssembly();
     print("POP AX");
-
     print("CMP AX, 0");
     print("JNE " + right->getTrueLabel());  // True
     print("JMP " + right->getFalseLabel()); // False
@@ -250,7 +247,6 @@ void AssemblyGenerator::evaluateNotOp(NotOp *expr)
 {
     expr->getOperand()->toAssembly();
     print("POP AX");
-
     print("CMP AX, 0");
     print("JNE " + expr->getFalseLabel());
     print("JMP " + expr->getTrueLabel());
@@ -347,7 +343,7 @@ void Program::toAssembly()
 }
 void VariableDeclaration::toAssembly()
 {
-    asm_gen->comment(this->getCode());
+    asm_gen->comment(this->getCode(), this->start_line);
     for (Variable *var : decl_list)
     {
         if (var->getVarType() == "ARRAY")
@@ -422,6 +418,7 @@ void FunctionDefinition::toAssembly()
 // Expression
 void ArrayCall::toAssembly()
 {
+    asm_gen->comment(this->getCode());
     idx->toAssembly();
     asm_gen->print("POP BX");
     asm_gen->print("SHL BX, 1");
@@ -494,9 +491,9 @@ void UAddOp::toAssembly()
     operand->toAssembly();
     if (op_symbol == "-")
     {
-        asm_gen->print("POP BX");
-        asm_gen->print("NEG BX");
-        asm_gen->print("PUSH BX");
+        asm_gen->print("POP AX");
+        asm_gen->print("NEG AX");
+        asm_gen->print("PUSH AX");
     }
 }
 void RelOp::toAssembly()
@@ -508,9 +505,9 @@ void RelOp::toAssembly()
     string end_label = asm_gen->newLabel();
 
     string op = asm_gen->RelOpASM[op_symbol];
-    asm_gen->print("POP BX");
+    asm_gen->print("POP DX");
     asm_gen->print("POP AX");
-    asm_gen->print("CMP AX, BX");
+    asm_gen->print("CMP AX, DX");
     asm_gen->print(op + " " + true_label);
     asm_gen->print("PUSH 0");
     asm_gen->print("JMP " + end_label);
@@ -521,35 +518,72 @@ void RelOp::toAssembly()
 void AddOp::toAssembly()
 {
     string opr = (op_symbol == "+" ? "ADD" : "SUB");
-
-    // For constant and variable, MOV AX, [BP-4] MOV BX, 5
     left_opr->toAssembly();
-    right_opr->toAssembly();
-    asm_gen->print("POP BX");
-    asm_gen->print("POP AX");
+    if (asm_gen->isZero(right_opr))
+    {
+        asm_gen->comment("Skipping " + op_symbol + ", since right operand is 0");
+        return;
+    }
 
-    asm_gen->print(opr + " AX, BX");
+    right_opr->toAssembly();
+    asm_gen->print("POP DX");
+
+    asm_gen->print("POP AX");
+    asm_gen->print(opr + " AX, DX");
     asm_gen->print("PUSH AX");
+}
+
+bool AssemblyGenerator::isZero(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            ConstantCall *const_call = dynamic_cast<ConstantCall *>(call_expr);
+            return const_call->getLiteral() == "0";
+        }
+    }
+    return false;
+}
+bool AssemblyGenerator::isOne(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            ConstantCall *const_call = dynamic_cast<ConstantCall *>(call_expr);
+            return const_call->getLiteral() == "1";
+        }
+    }
+    return false;
 }
 void MulOp::toAssembly()
 {
-    left_opr->toAssembly();
-    right_opr->toAssembly();
-
     string op = op_symbol;
+    left_opr->toAssembly();
 
-    asm_gen->print("POP BX");
+    if (asm_gen->isOne(right_opr) && (op == "*" || op == "/"))
+    {
+        asm_gen->comment("Skipping " + op + ", since right operand is 1");
+        return;
+    }
+
+    right_opr->toAssembly();
+    asm_gen->print("POP CX");
+
     asm_gen->print("POP AX");
     if (op == "*")
     {
         asm_gen->print("CWD");
-        asm_gen->print("IMUL BX");
+        asm_gen->print("IMUL CX");
         asm_gen->print("PUSH AX");
     }
     else
     {
         asm_gen->print("CWD");
-        asm_gen->print("IDIV BX");
+        asm_gen->print("IDIV CX");
 
         if (op == "%")
         {
@@ -563,23 +597,24 @@ void MulOp::toAssembly()
 }
 void LogicOp::toAssembly()
 {
-    left_opr->toAssembly();
-    right_opr->toAssembly();
 
     std::string op = op_symbol;
     string false_label = asm_gen->newLabel();
     string true_label = asm_gen->newLabel();
     string end_label = asm_gen->newLabel();
 
-    asm_gen->print("POP BX");
-    asm_gen->print("POP AX");
-
     if (op == "&&")
     {
+        left_opr->toAssembly();
+        asm_gen->print("POP AX");
         asm_gen->print("CMP AX, 0");
         asm_gen->print("JE " + false_label);
+
+        right_opr->toAssembly();
+        asm_gen->print("POP AX");
+        asm_gen->print("CMP AX, 0");
         asm_gen->print("JE " + false_label);
-        asm_gen->print("CMP BX, 0");
+
         asm_gen->print("PUSH 1");
         asm_gen->print("JMP " + end_label);
         asm_gen->printLabel(false_label);
@@ -588,10 +623,16 @@ void LogicOp::toAssembly()
     }
     else if (op == "||")
     {
+        left_opr->toAssembly();
+        asm_gen->print("POP AX");
         asm_gen->print("CMP AX, 0");
         asm_gen->print("JNE " + true_label);
-        asm_gen->print("CMP BX, 0");
+
+        right_opr->toAssembly();
+        asm_gen->print("POP AX");
+        asm_gen->print("CMP AX, 0");
         asm_gen->print("JNE " + true_label);
+
         asm_gen->print("PUSH 0");
         asm_gen->print("JMP " + end_label);
         asm_gen->printLabel(true_label);
@@ -649,6 +690,7 @@ void IfStatement::toAssembly()
     condition->setFalseLabel(false_label);
     if_body->setNextLabel(this->getNextLabel());
 
+    asm_gen->comment("If Statement", this->start_line);
     asm_gen->comment(condition->getCode());
     asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(true_label);
@@ -661,10 +703,10 @@ void IfElseStatement::toAssembly()
 
     condition->setTrueLabel(true_label);
     condition->setFalseLabel(false_label);
-
     if_body->setNextLabel(this->getNextLabel());
     else_body->setNextLabel(this->getNextLabel());
 
+    asm_gen->comment("If-Else Statement", this->start_line);
     asm_gen->comment(condition->getCode());
     asm_gen->evaluateCondition(condition);
     asm_gen->printLabel(true_label);
@@ -684,6 +726,7 @@ void ForLoop::toAssembly()
     condition->setFalseLabel(false_label);
     body->setNextLabel(incdec_label);
 
+    asm_gen->comment("For Loop", this->start_line);
     asm_gen->comment(initialize->getCode());
     initialize->toAssembly();
     asm_gen->printLabel(start_label);
@@ -707,6 +750,7 @@ void WhileLoop::toAssembly()
     condition->setFalseLabel(false_label);
     body->setNextLabel(start_label);
 
+    asm_gen->comment("While Loop", this->start_line);
     asm_gen->printLabel(start_label);
     asm_gen->comment(condition->getCode());
     asm_gen->evaluateCondition(condition);
@@ -716,7 +760,7 @@ void WhileLoop::toAssembly()
 }
 void PrintStatement::toAssembly()
 {
-    asm_gen->comment(this->getCode());
+    asm_gen->comment(this->getCode(), this->start_line);
     this->getVariableCall()->toAssembly();
     asm_gen->print("POP AX");
     asm_gen->print("CALL print_output");
@@ -724,7 +768,7 @@ void PrintStatement::toAssembly()
 }
 void ReturnStatement::toAssembly()
 {
-    asm_gen->comment(this->getCode());
+    asm_gen->comment(this->getCode(), this->start_line);
     expr->toAssembly();
     asm_gen->print("POP AX");
     if (asm_gen->curr_func->getReturnType() != "VOID" && asm_gen->curr_func->getFunctionName() != "main")
@@ -735,7 +779,7 @@ void ReturnStatement::toAssembly()
 }
 void ExpressionStatement::toAssembly()
 {
-    asm_gen->comment(this->getCode());
+    asm_gen->comment(this->getCode(), this->start_line);
     expr->toAssembly();
     asm_gen->print("POP AX");
 }

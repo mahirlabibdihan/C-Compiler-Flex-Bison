@@ -46,8 +46,8 @@ void AssemblyGenerator::declareVariable(Variable *var)
     else
     {
         print("SUB SP, 2");
-        new_var->setOffset(offset_history.back());
-        offset_history.back() -= 2;
+        new_var->setOffset(offset_history);
+        offset_history -= 2;
     }
 }
 void AssemblyGenerator::declareArray(Array *arr)
@@ -66,8 +66,8 @@ void AssemblyGenerator::declareArray(Array *arr)
     {
         int sz = stoi(arr_size) * 2;
         print("SUB SP, " + to_string(sz));
-        new_arr->setOffset(offset_history.back());
-        offset_history.back() -= sz; // Stack decrease downward
+        new_arr->setOffset(offset_history);
+        offset_history -= sz; // Stack decrease downward
     }
 }
 void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
@@ -87,7 +87,7 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 }
 void AssemblyGenerator::returnFunction()
 {
-    // print("ADD SP, " + std::to_string(-asm_gen->offset_history.back() - 2));
+    // print("ADD SP, " + std::to_string(-asm_gen->offset_history - 2));
     print("MOV SP, BP");
     print("POP BP");
     if (curr_func->getFunctionName() != "main")
@@ -393,13 +393,13 @@ void FunctionDefinition::toAssembly()
         asm_gen->print("MOV DS, AX");
         asm_gen->print("PUSH BP");
         asm_gen->print("MOV BP, SP");
-        asm_gen->offset_history.push_back(-2);
+        asm_gen->offset_history = -2;
     }
     else
     {
         asm_gen->print("PUSH BP");
         asm_gen->print("MOV BP, SP");
-        asm_gen->offset_history.push_back(-2);
+        asm_gen->offset_history = -2;
     }
 
     asm_gen->declareFunctionParams(params);
@@ -408,7 +408,7 @@ void FunctionDefinition::toAssembly()
     asm_gen->printLabel(ret_label);
     asm_gen->returnFunction();
 
-    asm_gen->offset_history.pop_back();
+    asm_gen->offset_history = 0;
     asm_gen->table->exitScope();
     asm_gen->indent--;
     asm_gen->print(func_name + " ENDP");
@@ -835,7 +835,7 @@ void CompoundStatement::toAssembly()
     {
         asm_gen->comment("Deallocating Variables");
         asm_gen->print("ADD SP, " + std::to_string(allocated));
-        asm_gen->offset_history.back() += allocated;
+        asm_gen->offset_history += allocated;
     }
 
     if (asm_gen->curr_func == NULL)

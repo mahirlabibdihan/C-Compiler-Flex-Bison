@@ -6,14 +6,13 @@
 class SyntaxAnalyzer
 {
     Program *ast_root;
-    SymbolTable *table;
     ErrorHandler *error_hndlr;
     LexicalAnalyzer *lexer;
     ofstream &logout;
     ofstream &errorout;
 
 public:
-    SyntaxAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
+    SyntaxAnalyzer(LexicalAnalyzer *lexer, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
     void setASTRoot(Program *ast_root);
     Program *getASTRoot();
     void deleteChildren(vector<SymbolInfo *> child);

@@ -123,6 +123,7 @@ class Variable : public Identifier
     string var_type;  // Primitive, Array
     string data_type; // int, float, char
     int offset;
+    bool is_global;
 
 public:
     Variable(const string &var_name, const string &data_type, const string &var_type = "PRIMITIVE");
@@ -133,6 +134,8 @@ public:
     void setDataType(const string &);
     void setOffset(int offset);
     int getOffset();
+    bool isGlobal();
+    void makeGlobal();
 };
 
 class Array : public Variable
@@ -421,11 +424,14 @@ class IdentifierCall : public CallExpression
 protected:
     string id_name;
     string id_type;
+    Identifier *id;
 
 public:
     IdentifierCall(const string &id_name, const string &id_type);
     const string &getIdName();
     const string &getIdentity();
+    void setIdentifier(Identifier *id);
+    Identifier *getIdentifier();
 };
 
 class FunctionCall : public IdentifierCall
@@ -448,6 +454,7 @@ class VariableCall : public IdentifierCall
 public:
     VariableCall(const string &var_name, const string &var_type = "PRIMITIVE_CALL"); // **
     const string &getVarType();
+
     string getCode();
     void toCode();
     void toAssembly();

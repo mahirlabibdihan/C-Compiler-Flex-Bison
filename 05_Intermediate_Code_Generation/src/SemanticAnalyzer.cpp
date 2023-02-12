@@ -367,21 +367,21 @@ string SemanticAnalyzer::callIdentifier(IdentifierCall *id_call)
     }
     return "NULL";
 }
-string SemanticAnalyzer::checkVariableCall(VariableCall *var)
+string SemanticAnalyzer::checkVariableCall(VariableCall *var_call)
 {
-    string var_name = var->getIdName();
+    string var_name = var_call->getIdName();
     Identifier *id = (Identifier *)table->find(var_name);
-
+    var_call->setIdentifier(id);
     if (id == NULL)
     {
-        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDECLARED_VARIABLE, var->getStartLine(), var_name) << std::endl;
+        errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDECLARED_VARIABLE, var_call->getStartLine(), var_name) << std::endl;
         return "NULL";
     }
     else
     {
         if (id->getIdentity() != "VARIABLE")
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_MISMATCH, var->getStartLine(), var_name + " is not a variable") << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_MISMATCH, var_call->getStartLine(), var_name + " is not a variable") << std::endl;
             return "NULL";
         }
 
@@ -413,7 +413,7 @@ string SemanticAnalyzer::checkArrayCall(ArrayCall *arr_call)
     Expression *index = arr_call->getIndex();
 
     Identifier *id = (Identifier *)table->find(arr_name);
-
+    arr_call->setIdentifier(id);
     if (id == NULL)
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDECLARED_VARIABLE, arr_call->getStartLine(), arr_name) << std::endl;
@@ -584,6 +584,8 @@ string SemanticAnalyzer::evaluateFunctionCall(FunctionCall *func_call)
     vector<Expression *> args = func_call->getArgs();
 
     Identifier *id = (Identifier *)table->find(func_name);
+    func_call->setIdentifier(id);
+
     if (id == NULL)
     {
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::UNDECLARED_FUNCTION, func_call->getStartLine(), func_name) << std::endl;
@@ -636,25 +638,25 @@ void SemanticAnalyzer::declareArray(Array *arr)
     string arr_name = arr->getIdName();
     string arr_size = arr->getArraySize();
 
-    Array *new_arr = new Array(arr_name, data_type, arr_size);
-    if (!table->insert(new_arr)) // already present in current scope
+    // Array *new_arr = new Array(arr_name, data_type, arr_size);
+    if (!table->insert(arr)) // already present in current scope
     {
         Identifier *old_id = (Identifier *)table->find(arr_name);
-        if (old_id->getIdentity() != new_arr->getIdentity())
+        if (old_id->getIdentity() != arr->getIdentity())
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, arr->getStartLine(), arr_name) << std::endl;
         }
         else
         {
             Variable *old_var = (Variable *)old_id;
-            if (old_var->getVarType() != new_arr->getVarType())
+            if (old_var->getVarType() != arr->getVarType())
             {
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, arr->getStartLine(), arr_name) << std::endl;
             }
             else
             {
                 Array *old_arr = (Array *)old_var;
-                if (old_arr->getDataType() != new_arr->getDataType())
+                if (old_arr->getDataType() != arr->getDataType())
                 {
                     errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, arr->getStartLine(), arr_name) << std::endl;
                 }
@@ -668,11 +670,14 @@ void SemanticAnalyzer::declareArray(Array *arr)
                 }
             }
         }
-        delete new_arr;
     }
     else
     {
         /** Array inserted successfully **/
+        if (table->getCurrentScope()->getId() == 1)
+        {
+            arr->makeGlobal();
+        }
     }
 }
 void SemanticAnalyzer::declareVariable(Variable *var)
@@ -681,23 +686,23 @@ void SemanticAnalyzer::declareVariable(Variable *var)
     string data_type = var->getDataType();
     string var_name = var->getIdName();
 
-    Variable *new_var = new Variable(var_name, data_type);
+    // Variable *new_var = new Variable(var_name, data_type);
 
-    if (!table->insert(new_var)) // Already present in current scope
+    if (!table->insert(var)) // Already present in current scope
     {
         Identifier *old_id = (Identifier *)table->find(var_name);
-        if (old_id->getIdentity() != new_var->getIdentity())
+        if (old_id->getIdentity() != var->getIdentity())
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::DIFF_DECLARATION, var->getStartLine(), var_name) << std::endl;
         }
         else
         {
             Variable *old_var = (Variable *)old_id;
-            if (old_var->getVarType() != new_var->getVarType())
+            if (old_var->getVarType() != var->getVarType())
             {
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, var->getStartLine(), var_name) << std::endl;
             }
-            else if (old_var->getDataType() != new_var->getDataType())
+            else if (old_var->getDataType() != var->getDataType())
             {
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::TYPE_CONFLICT, var->getStartLine(), var_name) << std::endl;
             }
@@ -706,11 +711,14 @@ void SemanticAnalyzer::declareVariable(Variable *var)
                 errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MULTIPLE_DECLARATION, var->getStartLine(), var_name) << std::endl;
             }
         }
-        delete new_var;
     }
     else
     {
         /** Variable inserted successfully **/
+        if (table->getCurrentScope()->getId() == 1)
+        {
+            var->makeGlobal();
+        }
     }
 }
 void SemanticAnalyzer::declareVariables(VariableDeclaration *var_decl)
@@ -846,16 +854,16 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
 }
 void SemanticAnalyzer::declareFunctionParams(vector<Variable *> params)
 {
-    for (auto i : params)
+    for (auto p : params)
     {
-        string param_name = i->getIdName();
+        string param_name = p->getIdName();
         if (param_name == "blank")
             continue;
-        Variable *var = new Variable(param_name, i->getDataType());
-        if (!table->insert(var))
+        // Variable *var = new Variable(param_name, i->getDataType());
+        if (!table->insert(p))
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::PARAM_REDEFINITION, i->getStartLine(), param_name) << std::endl;
-            delete var;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::PARAM_REDEFINITION, p->getStartLine(), param_name) << std::endl;
+            // delete var;
             return;
         }
         else

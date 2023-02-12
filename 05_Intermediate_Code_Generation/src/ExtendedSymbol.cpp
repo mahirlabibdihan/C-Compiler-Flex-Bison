@@ -281,6 +281,7 @@ Variable::Variable(const string &var_name, const string &data_type, const string
     this->var_type = var_type;
     this->data_type = data_type;
     this->offset = 0;
+    this->is_global = false;
 }
 Variable::~Variable()
 {
@@ -308,6 +309,14 @@ void Variable::setOffset(int offset)
 int Variable::getOffset()
 {
     return offset;
+}
+bool Variable::isGlobal()
+{
+    return is_global;
+}
+void Variable::makeGlobal()
+{
+    is_global = true;
 }
 Array::Array(const string &arr_name, const string &data_type, string arr_size) : Variable(arr_name, data_type, "ARRAY")
 {
@@ -668,6 +677,14 @@ const vector<Expression *> &FunctionCall::getArgs()
 VariableCall::VariableCall(const string &var_name, const string &var_type) : IdentifierCall(var_name, "VARIABLE_CALL")
 {
     this->var_type = var_type;
+}
+void IdentifierCall::setIdentifier(Identifier *id)
+{
+    this->id = id;
+}
+Identifier *IdentifierCall::getIdentifier()
+{
+    return id;
 }
 const string &VariableCall::getVarType()
 {

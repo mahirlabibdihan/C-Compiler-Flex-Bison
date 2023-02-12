@@ -9,9 +9,8 @@ class AssemblyGenerator
 {
 
 public:
-    SymbolTable *table;
     std::ofstream &asmout;
-    std::vector<int> offset_history;
+    int offset_history;
     FunctionDefinition *curr_func;
     int label_count;
     int indent;
@@ -20,7 +19,7 @@ public:
     static map<string, string> RelOpASM;
 
 public:
-    AssemblyGenerator(SymbolTable *table, std::ofstream &asmout);
+    AssemblyGenerator(std::ofstream &asmout);
 
     void declareVariable(Variable *var);
     void declareArray(Array *arr);

@@ -44,17 +44,19 @@ int main(int argc, char *argv[])
     logout.open("io/log.txt");
     tokenout.open("io/token.txt");
     errorout.open("io/error.txt");
-    parseout.open("io/parsetree.txt");
+    parseout.open("io/ast.txt");
     codeout.open("io/code.c");
     asmout.open("io/code.asm");
+
     table = new SymbolTable(11);
     error_hndlr = new ErrorHandler();
     lexer = new LexicalAnalyzer(error_hndlr, logout, tokenout);
     sem_anlzr = new SemanticAnalyzer(lexer, table, error_hndlr, logout, errorout);
-    syn_anlzr = new SyntaxAnalyzer(lexer, table, error_hndlr, logout, errorout);
-    asm_gen = new AssemblyGenerator(table, asmout);
+    syn_anlzr = new SyntaxAnalyzer(lexer, error_hndlr, logout, errorout);
+    asm_gen = new AssemblyGenerator(asmout);
     code_gen = new CodeGenerator(codeout);
     compiler = new Compiler(runParser, lexer, sem_anlzr, error_hndlr, logout, parseout);
+
     compiler->compile(argv[1]);
 
     asmout.close();
@@ -64,6 +66,10 @@ int main(int argc, char *argv[])
     errorout.close();
     tokenout.close();
 
+    delete compiler;
+    delete code_gen;
+    delete asm_gen;
+    delete syn_anlzr;
     delete sem_anlzr;
     delete lexer;
     delete error_hndlr;

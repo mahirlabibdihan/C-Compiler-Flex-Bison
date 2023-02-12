@@ -36,7 +36,6 @@ int Compiler::compile(const string &code_file)
         prog->toCode();
         parseout << ASTGenerator::getAST(prog) << std::endl;
         prog->checkSemantics();
-        // sem_anlzr->startProgram(prog);
         if (error_hndlr->getErrorCount())
         {
             std::cout << "Code compiled with errors" << std::endl;
@@ -45,9 +44,9 @@ int Compiler::compile(const string &code_file)
         {
             cout << "Code compiled successfully" << endl;
             prog->toAssembly();
-
             (new Optimizer())->optimize("io/code.asm", "io/optcode.asm");
         }
     }
     fclose(fin);
+    return EXIT_SUCCESS;
 }

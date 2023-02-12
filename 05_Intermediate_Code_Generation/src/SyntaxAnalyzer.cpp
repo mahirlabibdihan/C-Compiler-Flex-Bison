@@ -1,9 +1,8 @@
 #include "../include/SyntaxAnalyzer.hpp"
 #include "../include/Util.hpp"
-SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &log, ofstream &error) : logout(log), errorout(error)
+SyntaxAnalyzer::SyntaxAnalyzer(LexicalAnalyzer *lexer, ErrorHandler *error_hndlr, ofstream &log, ofstream &error) : logout(log), errorout(error)
 {
     this->lexer = lexer;
-    this->table = table;
     this->error_hndlr = error_hndlr;
 }
 void SyntaxAnalyzer::setASTRoot(Program *ast_root)

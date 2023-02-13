@@ -47,5 +47,11 @@ public:
 
     bool isZero(Expression *expr);
     bool isOne(Expression *expr);
+    bool isConstant(Expression *expr);
+    string getConstant(Expression *expr);
+
+    void assignRegister(Expression *expr, string dst_reg);
+    void popExpression(Expression *expr);
+    void pushExpression(Expression *expr);
 };
 #endif

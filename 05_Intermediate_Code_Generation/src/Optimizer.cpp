@@ -176,14 +176,14 @@ void Optimizer::peephole(vector<string> &lines)
         if (isNumber(portions0[2]) && strToInt(portions0[2]) == 0)
         {
             // SUB AX, 0 || ADD AX, 0
-            lines[0] = ";" + lines[0];
+            lines[0] = "; " + lines[0];
         }
     }
 
     if (portions0[0] == "MOV" && (portions0[1] == portions0[2]))
     {
         // MOV AX, AX
-        lines[0] = ";" + lines[0];
+        lines[0] = "; " + lines[0];
     }
 
     if (portions1.empty())
@@ -194,8 +194,8 @@ void Optimizer::peephole(vector<string> &lines)
 
     if (portions0[0] == "PUSH" && portions1[0] == "PUSH" && portions2[0] == "POP" && portions3[0] == "POP")
     {
-        lines[0] = ";" + lines[0] + "\n;" + lines[3];
-        lines[2] = ";" + lines[1] + "\n;" + lines[2];
+        lines[0] = "; " + lines[0] + "\n;" + lines[3];
+        lines[2] = "; " + lines[1] + "\n;" + lines[2];
 
         lines[1] = "MOV " + portions3[1] + ", " + ArrayToString(portions0, 1);
         lines[3] = "MOV " + portions2[1] + ", " + ArrayToString(portions1, 1);
@@ -205,12 +205,12 @@ void Optimizer::peephole(vector<string> &lines)
     {
         if (portions0[1] == portions1[1])
         { // PUSH AX ; POP AX
-            lines[0] = ";" + lines[0];
-            lines[1] = ";" + lines[1];
+            lines[0] = "; " + lines[0];
+            lines[1] = "; " + lines[1];
         }
         else
         {
-            lines[0] = ";" + lines[0] + "\n;" + lines[1];
+            lines[0] = "; " + lines[0] + "\n;" + lines[1];
             lines[1] = "MOV " + portions1[1] + ", " + ArrayToString(portions0, 1);
         }
     }
@@ -219,8 +219,8 @@ void Optimizer::peephole(vector<string> &lines)
     {
         if (portions0[1] == portions1[1])
         { // POP AX ; PUSH AX
-            lines[0] = ";" + lines[0];
-            lines[1] = ";" + lines[1];
+            lines[0] = "; " + lines[0];
+            lines[1] = "; " + lines[1];
         }
     }
 
@@ -228,11 +228,11 @@ void Optimizer::peephole(vector<string> &lines)
     {
         if ((portions0[1] == portions1[2]) && (portions0[2] == portions1[1]))
         { // MOV AX, BX ; MOV BX, AX
-            lines[0] = ";" + lines[0];
+            lines[0] = "; " + lines[0];
         }
-        if (portions0[1] == portions1[1])
+        else if (portions0[1] == portions1[1])
         { // MOV AX, BX ; MOV AX, CX or MOV AX, BX ; MOV AX, BX
-            lines[0] = ";" + lines[0];
+            lines[0] = "; " + lines[0];
         }
     }
 
@@ -245,7 +245,7 @@ void Optimizer::peephole(vector<string> &lines)
                 // ADD AX, 1
                 // ADD AX, 2
                 // ADD AX, 3
-                lines[0] = ";" + lines[0];
+                lines[0] = "; " + lines[0];
                 int x = strToInt(portions0[2]) + strToInt(portions1[2]);
                 lines[1] = portions0[0] + " " + portions0[1] + ", " + to_string(x);
             }
@@ -256,7 +256,7 @@ void Optimizer::peephole(vector<string> &lines)
     {
         if (portions0[1] == getLabel(portions1[0]))
         {
-            lines[0] = ";" + lines[0];
+            lines[0] = "; " + lines[0];
         }
     }
 
@@ -288,11 +288,17 @@ void Optimizer::optimize(string in_file, string out_file)
 
             vector<string> lines;
             string line;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3;) // First three not commented line
             {
                 std::getline(asmin, line);
                 line = removeIndent(line);
+                if (line[0] == ';')
+                {
+                    print(line);
+                    continue;
+                }
                 lines.push_back(line);
+                i++;
             }
             while (std::getline(asmin, line))
             {
@@ -309,7 +315,10 @@ void Optimizer::optimize(string in_file, string out_file)
                     break;
                 }
                 if (line[0] == ';')
+                {
+                    print(line);
                     continue;
+                }
                 lines.push_back(line);
                 peephole(lines);
                 lines.erase(lines.begin());

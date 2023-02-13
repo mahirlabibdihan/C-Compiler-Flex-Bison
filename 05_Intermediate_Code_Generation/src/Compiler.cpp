@@ -33,9 +33,9 @@ int Compiler::compile(const string &code_file)
         logout << "Total Lines: " << lexer->getLineCount() << std::endl;
         logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
 
-        prog->toCode();
         parseout << ASTGenerator::getAST(prog) << std::endl;
         prog->checkSemantics();
+        prog->toCode();
         if (error_hndlr->getErrorCount())
         {
             std::cout << "Code compiled with errors" << std::endl;

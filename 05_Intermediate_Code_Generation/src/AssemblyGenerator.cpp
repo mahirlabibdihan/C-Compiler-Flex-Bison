@@ -15,6 +15,7 @@
 // #include <unistd.h>
 // #endif
 
+extern AssemblyGenerator *asm_gen;
 std::map<std::string, std::string> AssemblyGenerator::RelOpASM = {
     {">", "JG"},
     {">=", "JGE"},
@@ -23,50 +24,38 @@ std::map<std::string, std::string> AssemblyGenerator::RelOpASM = {
     {"!=", "JNE"},
     {"==", "JE"}};
 
-extern AssemblyGenerator *asm_gen;
-
-AssemblyGenerator::AssemblyGenerator(SymbolTable *table, std::ofstream &out) : asmout(out)
+AssemblyGenerator::AssemblyGenerator(std::ofstream &out) : asmout(out)
 {
-    this->table = table;
     indent = 0;
     label_count = 0;
 }
 
 void AssemblyGenerator::declareVariable(Variable *var)
 {
-    string data_type = var->getDataType();
-    string var_name = var->getIdName();
-    Variable *new_var = new Variable(var_name, data_type);
-    table->insert(new_var);
-
-    if (table->getCurrentScope()->getId() == 1)
+    if (var->isGlobal())
     {
-        print(var->getIdName() + " DW ?");
+        print(var->getIdName() + " DW (0000H)");
     }
     else
     {
         print("SUB SP, 2");
-        new_var->setOffset(offset_history);
+        var->setOffset(offset_history);
         offset_history -= 2;
     }
 }
 void AssemblyGenerator::declareArray(Array *arr)
 {
-    string data_type = arr->getDataType();
-    string arr_name = arr->getIdName();
     string arr_size = arr->getArraySize();
-    Array *new_arr = new Array(arr_name, data_type, arr_size);
-    table->insert(new_arr);
 
-    if (table->getCurrentScope()->getId() == 1)
+    if (arr->isGlobal())
     {
-        print(arr->getIdName() + " DW " + arr->getArraySize() + " DUP(?)");
+        print(arr->getIdName() + " DW " + arr_size + " DUP(0000H)");
     }
     else
     {
         int sz = stoi(arr_size) * 2;
         print("SUB SP, " + to_string(sz));
-        new_arr->setOffset(offset_history);
+        arr->setOffset(offset_history);
         offset_history -= sz; // Stack decrease downward
     }
 }
@@ -74,14 +63,9 @@ void AssemblyGenerator::declareFunctionParams(vector<Variable *> params)
 {
     std::reverse(params.begin(), params.end());
     int offset = 4;
-    for (auto i : params)
+    for (auto p : params)
     {
-        string param_name = i->getIdName();
-        Variable *var = new Variable(param_name, i->getDataType());
-        var->setOffset(offset);
-        if (!table->insert(var))
-        {
-        }
+        p->setOffset(offset);
         offset += 2;
     }
 }
@@ -236,8 +220,10 @@ void AssemblyGenerator::evaluateRelOp(RelOp *expr)
     expr->getRightOpr()->toAssembly();
 
     string op = this->RelOpASM[expr->getOperator()];
-    print("POP DX");
-    print("POP AX");
+    // print("POP DX");
+    // print("POP AX");
+    asm_gen->assignRegister(expr->getRightOpr(), "DX");
+    asm_gen->assignRegister(expr->getLeftOpr(), "AX");
     print("CMP AX, DX");
 
     print(op + " " + expr->getTrueLabel());
@@ -246,7 +232,8 @@ void AssemblyGenerator::evaluateRelOp(RelOp *expr)
 void AssemblyGenerator::evaluateNotOp(NotOp *expr)
 {
     expr->getOperand()->toAssembly();
-    print("POP AX");
+    // print("POP AX");
+    asm_gen->assignRegister(expr->getOperand(), "AX");
     print("CMP AX, 0");
     print("JNE " + expr->getFalseLabel());
     print("JMP " + expr->getTrueLabel());
@@ -255,16 +242,14 @@ void AssemblyGenerator::evaluateNotOp(NotOp *expr)
 void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
 {
     assignVariable(var_call);
-
-    Variable *var = (Variable *)table->find(var_call->getIdName());
-
+    Variable *var = (Variable *)var_call->getIdentifier();
     if (var->getVarType() == "ARRAY")
     {
         print("POP BX");
-        if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
+        if (var->isGlobal())
         {
-            print("PUSH " + var->getIdName() + "[BX]");           // Pushing previous value to stack
-            print(op + " WORD PTR " + var->getIdName() + "[BX]"); // Increment the value
+            print("PUSH " + var->getIdName() + "[BX]");  // Pushing previous value to stack
+            print(op + " " + var->getIdName() + "[BX]"); // Increment the value
         }
         else
         {
@@ -278,10 +263,10 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
     }
     else
     {
-        if (table->getScopeIdOfSymbol(var->getIdName()) == 1)
+        if (var->isGlobal())
         {
             print("PUSH " + var->getIdName());
-            print(op + " WORD PTR  " + var->getIdName());
+            print(op + " " + var->getIdName());
         }
         else
         {
@@ -328,10 +313,10 @@ void Program::toAssembly()
     }
     asm_gen->indent--;
 
-    for (FunctionDeclaration *func_dec : func_decs)
-    {
-        func_dec->toAssembly();
-    }
+    // for (FunctionDeclaration *func_dec : func_decs)
+    // {
+    //     func_dec->toAssembly();
+    // }
 
     asm_gen->print(".CODE");
     for (FunctionDefinition *func_def : func_defs)
@@ -358,34 +343,15 @@ void VariableDeclaration::toAssembly()
 }
 void FunctionDeclaration::toAssembly()
 {
-    Function *new_func = new Function(func_name, ret_type);
-
-    for (auto p : params)
-    {
-        new_func->addParam(new Variable(p->getIdName(), p->getDataType()));
-    }
-
-    if (!asm_gen->table->insert(new_func))
-    {
-    }
 }
 void FunctionDefinition::toAssembly()
 {
-    Function *new_func = new Function(func_name, ret_type);
     string ret_label = asm_gen->newLabel();
     this->setReturnLabel(ret_label);
 
     asm_gen->curr_func = this;
-
-    for (auto p : params)
-    {
-        new_func->addParam(new Variable(p->getIdName(), p->getDataType()));
-    }
-
-    asm_gen->table->insert(new_func);
     asm_gen->print(func_name + " PROC");
     asm_gen->indent++;
-    asm_gen->table->enterScope();
 
     if (func_name == "main")
     {
@@ -409,7 +375,6 @@ void FunctionDefinition::toAssembly()
     asm_gen->returnFunction();
 
     asm_gen->offset_history = 0;
-    asm_gen->table->exitScope();
     asm_gen->indent--;
     asm_gen->print(func_name + " ENDP");
     asm_gen->curr_func = NULL;
@@ -422,8 +387,8 @@ void ArrayCall::toAssembly()
     idx->toAssembly();
     asm_gen->print("POP BX");
     asm_gen->print("SHL BX, 1");
-    Array *arr = (Array *)asm_gen->table->find(id_name);
-    if (asm_gen->table->getScopeIdOfSymbol(id_name) == 1)
+    Array *arr = (Array *)id;
+    if (arr->isGlobal())
     {
         asm_gen->print("MOV AX, " + id_name + "[BX]");
     }
@@ -440,9 +405,21 @@ void ArrayCall::toAssembly()
 
     asm_gen->print("PUSH AX");
 }
+string getVariable(VariableCall *var_call)
+{
+    Variable *var = (Variable *)var_call->getIdentifier();
+    if (var->isGlobal())
+    {
+        return var_call->getIdName();
+    }
+    else
+    {
+        return "[BP + " + to_string(var->getOffset()) + "]";
+    }
+}
 void VariableCall::toAssembly()
 {
-    Variable *var = (Variable *)asm_gen->table->find(id_name);
+    Variable *var = (Variable *)id;
 
     if (type == "ARRAY_CALL")
     {
@@ -450,7 +427,8 @@ void VariableCall::toAssembly()
     }
     else
     {
-        if (asm_gen->table->getScopeIdOfSymbol(id_name) == 1)
+        /*
+        if (var->isGlobal())
         {
             asm_gen->print("PUSH " + id_name);
         }
@@ -458,11 +436,21 @@ void VariableCall::toAssembly()
         {
             asm_gen->print("PUSH [BP + " + to_string(var->getOffset()) + "]");
         }
+        */
     }
+}
+string DecToHex(string dec)
+{
+    int decimal_value = stoi(dec);
+    stringstream ss;
+    ss << hex << decimal_value << 'h';
+    string res(ss.str());
+    return res;
 }
 void ConstantCall::toAssembly()
 {
-    asm_gen->print("PUSH " + literal);
+    // asm_gen->print("MOV AX, " + literal);
+    // asm_gen->print("PUSH AX");
 }
 void DecOp::toAssembly()
 {
@@ -477,7 +465,8 @@ void NotOp::toAssembly()
     operand->toAssembly();
     string true_label = asm_gen->newLabel();
     string end_label = asm_gen->newLabel();
-    asm_gen->print("POP AX");
+    // asm_gen->print("POP AX");
+    asm_gen->assignRegister(operand, "AX");
     asm_gen->print("CMP AX, 0");
     asm_gen->print("JE " + true_label);
     asm_gen->print("PUSH 0");
@@ -491,7 +480,8 @@ void UAddOp::toAssembly()
     operand->toAssembly();
     if (op_symbol == "-")
     {
-        asm_gen->print("POP AX");
+        // asm_gen->print("POP AX");
+        asm_gen->assignRegister(operand, "AX");
         asm_gen->print("NEG AX");
         asm_gen->print("PUSH AX");
     }
@@ -505,8 +495,10 @@ void RelOp::toAssembly()
     string end_label = asm_gen->newLabel();
 
     string op = asm_gen->RelOpASM[op_symbol];
-    asm_gen->print("POP DX");
-    asm_gen->print("POP AX");
+    // asm_gen->print("POP DX");
+    // asm_gen->print("POP AX");
+    asm_gen->assignRegister(right_opr, "DX");
+    asm_gen->assignRegister(left_opr, "AX");
     asm_gen->print("CMP AX, DX");
     asm_gen->print(op + " " + true_label);
     asm_gen->print("PUSH 0");
@@ -515,20 +507,52 @@ void RelOp::toAssembly()
     asm_gen->print("PUSH 1");
     asm_gen->printLabel(end_label);
 }
+
+void AssemblyGenerator::assignRegister(Expression *expr, string dst_reg)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            ConstantCall *const_call = dynamic_cast<ConstantCall *>(call_expr);
+            asm_gen->print("MOV " + dst_reg + ", " + const_call->getLiteral());
+            return;
+        }
+        else if (call_expr->getCallType() == "IDENTIFIER_CALL")
+        {
+            IdentifierCall *id_call = dynamic_cast<IdentifierCall *>(call_expr);
+            if (id_call->getIdentity() == "VARIABLE_CALL")
+            {
+                VariableCall *var_call = dynamic_cast<VariableCall *>(id_call);
+                if (var_call->getVarType() == "PRIMITIVE_CALL")
+                {
+                    asm_gen->print("MOV " + dst_reg + ", " + getVariable(var_call));
+                    return;
+                }
+            }
+        }
+    }
+    asm_gen->print("POP " + dst_reg);
+}
 void AddOp::toAssembly()
 {
     string opr = (op_symbol == "+" ? "ADD" : "SUB");
+
     left_opr->toAssembly();
     if (asm_gen->isZero(right_opr))
     {
         asm_gen->comment("Skipping " + op_symbol + ", since right operand is 0");
+        asm_gen->pushExpression(left_opr);
         return;
     }
 
     right_opr->toAssembly();
-    asm_gen->print("POP DX");
 
-    asm_gen->print("POP AX");
+    asm_gen->assignRegister(right_opr, "DX");
+    asm_gen->assignRegister(left_opr, "AX");
+    // asm_gen->print("POP DX");
+    // asm_gen->print("POP AX");
     asm_gen->print(opr + " AX, DX");
     asm_gen->print("PUSH AX");
 }
@@ -559,6 +583,49 @@ bool AssemblyGenerator::isOne(Expression *expr)
     }
     return false;
 }
+bool AssemblyGenerator::isConstant(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+string AssemblyGenerator::getConstant(Expression *expr)
+{
+    ConstantCall *const_call = dynamic_cast<ConstantCall *>(expr);
+    return const_call->getLiteral();
+}
+
+void AssemblyGenerator::pushExpression(Expression *expr)
+{
+    if (asm_gen->isConstant(expr))
+    {
+        asm_gen->print("MOV AX, " + asm_gen->getConstant(expr));
+        asm_gen->print("PUSH AX");
+    }
+    else if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+
+        IdentifierCall *id_call = dynamic_cast<IdentifierCall *>(call_expr);
+        if (id_call->getIdentity() == "VARIABLE_CALL")
+        {
+            VariableCall *var_call = dynamic_cast<VariableCall *>(id_call);
+            if (var_call->getVarType() == "PRIMITIVE_CALL")
+            {
+                asm_gen->print("PUSH " + getVariable(var_call));
+                return;
+            }
+        }
+    }
+}
+
 void MulOp::toAssembly()
 {
     string op = op_symbol;
@@ -567,13 +634,19 @@ void MulOp::toAssembly()
     if (asm_gen->isOne(right_opr) && (op == "*" || op == "/"))
     {
         asm_gen->comment("Skipping " + op + ", since right operand is 1");
+        asm_gen->pushExpression(left_opr);
         return;
     }
-
+    if (asm_gen->isConstant(right_opr) && asm_gen->getConstant(right_opr) == "2")
+    {
+        (new AddOp(this->getLeftOpr(), this->getLeftOpr(), "+"))->toAssembly();
+        return;
+    }
     right_opr->toAssembly();
-    asm_gen->print("POP CX");
-
-    asm_gen->print("POP AX");
+    asm_gen->assignRegister(right_opr, "CX");
+    asm_gen->assignRegister(left_opr, "AX");
+    // asm_gen->print("POP CX");
+    // asm_gen->print("POP AX");
     if (op == "*")
     {
         asm_gen->print("CWD");
@@ -646,13 +719,13 @@ void AssignOp::toAssembly()
     asm_gen->assignVariable(left_var);
     right_opr->toAssembly();
 
-    Variable *left = (Variable *)asm_gen->table->find(left_var->getIdName());
-    asm_gen->print("POP AX");
-
+    Variable *left = (Variable *)left_var->getIdentifier();
+    // asm_gen->print("POP AX");
+    asm_gen->assignRegister(right_opr, "AX");
     if (left->getVarType() == "ARRAY")
     {
         asm_gen->print("POP BX");
-        if (asm_gen->table->getScopeIdOfSymbol(left->getIdName()) == 1)
+        if (left->isGlobal())
         {
             asm_gen->print("MOV " + left->getIdName() + "[BX], AX");
         }
@@ -667,7 +740,7 @@ void AssignOp::toAssembly()
     }
     else
     {
-        if (asm_gen->table->getScopeIdOfSymbol(left->getIdName()) == 1)
+        if (left->isGlobal())
         {
             asm_gen->print("MOV " + left->getIdName() + ", AX");
         }
@@ -762,7 +835,8 @@ void PrintStatement::toAssembly()
 {
     asm_gen->comment(this->getCode(), this->start_line);
     this->getVariableCall()->toAssembly();
-    asm_gen->print("POP AX");
+    // asm_gen->print("POP AX");
+    asm_gen->assignRegister(this->getVariableCall(), "AX");
     asm_gen->print("CALL print_output");
     asm_gen->print("CALL new_line");
 }
@@ -770,26 +844,46 @@ void ReturnStatement::toAssembly()
 {
     asm_gen->comment(this->getCode(), this->start_line);
     expr->toAssembly();
-    asm_gen->print("POP AX");
+    asm_gen->assignRegister(this->getExpression(), "AX");
     if (asm_gen->curr_func->getReturnType() != "VOID" && asm_gen->curr_func->getFunctionName() != "main")
     {
         asm_gen->print("MOV [BP+" + std::to_string(2 * asm_gen->curr_func->getParams().size() + 4) + "], AX");
     }
     asm_gen->print("JMP " + asm_gen->curr_func->getReturnLabel());
 }
+void AssemblyGenerator::popExpression(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            ConstantCall *const_call = dynamic_cast<ConstantCall *>(call_expr);
+            return;
+        }
+        else if (call_expr->getCallType() == "IDENTIFIER_CALL")
+        {
+            IdentifierCall *id_call = dynamic_cast<IdentifierCall *>(call_expr);
+            if (id_call->getIdentity() == "VARIABLE_CALL")
+            {
+                VariableCall *var_call = dynamic_cast<VariableCall *>(id_call);
+                if (var_call->getVarType() == "PRIMITIVE_CALL")
+                {
+                    return;
+                }
+            }
+        }
+    }
+    asm_gen->print("POP AX");
+}
 void ExpressionStatement::toAssembly()
 {
     asm_gen->comment(this->getCode(), this->start_line);
     expr->toAssembly();
-    asm_gen->print("POP AX");
+    asm_gen->popExpression(this->expr);
 }
 void CompoundStatement::toAssembly()
 {
-    if (asm_gen->curr_func == NULL)
-    {
-        asm_gen->table->enterScope();
-    }
-
     int allocated = 0;
     for (VariableDeclaration *var_dec : var_decs)
     {
@@ -837,18 +931,12 @@ void CompoundStatement::toAssembly()
         asm_gen->print("ADD SP, " + std::to_string(allocated));
         asm_gen->offset_history += allocated;
     }
-
-    if (asm_gen->curr_func == NULL)
-    {
-        asm_gen->table->enterScope();
-    }
 }
 void FunctionCall::toAssembly()
 {
-    Function *func = (Function *)asm_gen->table->find(id_name);
     // Push reference for return type
     // Return type will be stored here
-    if (func->getReturnType() != "VOID")
+    if (((Function *)id)->getReturnType() != "VOID")
     {
         asm_gen->print("SUB SP, 2");
     }
@@ -856,6 +944,7 @@ void FunctionCall::toAssembly()
     for (Expression *e : args)
     {
         e->toAssembly();
+        asm_gen->pushExpression(e);
     }
     asm_gen->print("CALL " + id_name);
 }

@@ -130,9 +130,11 @@ void UAddOp::toCode()
 
 void BinaryExpression::toCode()
 {
+    code_gen->print("(");
     left_opr->toCode();
     code_gen->print(op_symbol);
     right_opr->toCode();
+    code_gen->print(")");
 }
 
 void FunctionCall::toCode()

@@ -164,6 +164,21 @@ string SemanticAnalyzer::addOp(AddOp *expr)
     {
         if (type != "ERROR")
         {
+            if (isConstant(expr->getLeftOpr()) && isConstant(expr->getRightOpr()))
+            {
+                int l = getConstant(expr->getLeftOpr());
+                int r = getConstant(expr->getRightOpr());
+                string result = expr->getOperator() == "+" ? to_string(l + r) : to_string(l - r);
+                expr->setLeftOpr(new ConstantCall(result, "INT"));
+                expr->setRightOpr(new ConstantCall("0", "INT"));
+            }
+            else if (isConstant(expr->getLeftOpr()) && expr->getOperator() == "+")
+            {
+                Expression *left_expr = expr->getLeftOpr();
+                Expression *right_expr = expr->getRightOpr();
+                expr->setLeftOpr(right_expr);
+                expr->setRightOpr(left_expr);
+            }
             return type;
         }
         else
@@ -224,6 +239,24 @@ string SemanticAnalyzer::mulOp(MulOp *expr)
         errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, expr->getStartLine()) << std::endl;
         return "NULL";
     }
+
+    if (isConstant(expr->getLeftOpr()) && isConstant(expr->getRightOpr()))
+    {
+        int l = getConstant(expr->getLeftOpr());
+        int r = getConstant(expr->getRightOpr());
+        string result = expr->getOperator() == "*" ? to_string(l * r) : (expr->getOperator() == "/" ? to_string(l / r) : to_string(l % r));
+        expr->setLeftOpr(new ConstantCall(result, "INT"));
+        expr->setRightOpr(new ConstantCall("1", "INT"));
+        expr->setOperator("*");
+    }
+    else if (isConstant(expr->getLeftOpr()) && expr->getOperator() == "*")
+    {
+        Expression *left_expr = expr->getLeftOpr();
+        Expression *right_expr = expr->getRightOpr();
+        expr->setLeftOpr(right_expr);
+        expr->setRightOpr(left_expr);
+    }
+
     return type;
 }
 
@@ -293,6 +326,26 @@ bool SemanticAnalyzer::isZero(Expression *expr)
     }
     return false;
 }
+
+bool SemanticAnalyzer::isConstant(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int SemanticAnalyzer::getConstant(Expression *expr)
+{
+    ConstantCall *const_call = dynamic_cast<ConstantCall *>(expr);
+    return stoi(const_call->getLiteral());
+}
+
 string SemanticAnalyzer::evaluateBinaryExpression(BinaryExpression *bin_expr)
 {
     string type = bin_expr->getOpType();

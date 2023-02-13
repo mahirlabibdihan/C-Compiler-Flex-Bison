@@ -630,9 +630,17 @@ Expression *BinaryExpression::getLeftOpr()
 {
     return left_opr;
 }
+void BinaryExpression::setLeftOpr(Expression *opr)
+{
+    this->left_opr = opr;
+}
 Expression *BinaryExpression::getRightOpr()
 {
     return right_opr;
+}
+void BinaryExpression::setRightOpr(Expression *opr)
+{
+    this->right_opr = opr;
 }
 const string &BinaryExpression::getOpType()
 {
@@ -642,7 +650,10 @@ const string &BinaryExpression::getOperator()
 {
     return op_symbol;
 }
-
+void BinaryExpression::setOperator(string op)
+{
+    this->op_symbol = op;
+}
 CallExpression::CallExpression(const string &data_type, const string &call_type) : Expression("CALL_EXPRESSION")
 {
     this->data_type = data_type;

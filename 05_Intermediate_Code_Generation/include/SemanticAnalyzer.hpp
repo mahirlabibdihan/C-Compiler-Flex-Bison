@@ -25,6 +25,8 @@ public:
     stack<FunctionDefinition *> functions;
     bool matchTwoFunction(Function *f1, Function *f2);
     bool isZero(Expression *expr);
+    bool isConstant(Expression *expr);
+    int getConstant(Expression *expr);
 
     SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, ErrorHandler *error_hndlr, ofstream &logout, ofstream &errorout);
     ~SemanticAnalyzer();

@@ -514,8 +514,11 @@ public:
     BinaryExpression(const string &op_type, const string &op_symbol, Expression *left, Expression *right);
     Expression *getLeftOpr();
     Expression *getRightOpr();
+    void setLeftOpr(Expression *);
+    void setRightOpr(Expression *);
     const string &getOpType();
     const string &getOperator();
+    void setOperator(string);
     string getCode();
     void toCode();
 };

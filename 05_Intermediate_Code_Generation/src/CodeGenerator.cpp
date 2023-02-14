@@ -226,7 +226,7 @@ void ExpressionStatement::toCode()
 }
 void CompoundStatement::toCode()
 {
-    code_gen->println("{");
+    code_gen->println("\n{");
     code_gen->indent++;
     for (VariableDeclaration *var_dec : var_decs)
     {

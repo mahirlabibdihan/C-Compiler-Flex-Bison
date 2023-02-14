@@ -34,7 +34,7 @@ void AssemblyGenerator::declareVariable(Variable *var)
 {
     if (var->isGlobal())
     {
-        print(var->getIdName() + " DW (0000H)");
+        print(var->getUniqueName() + " DW (0000H)");
     }
     else
     {
@@ -49,7 +49,7 @@ void AssemblyGenerator::declareArray(Array *arr)
 
     if (arr->isGlobal())
     {
-        print(arr->getIdName() + " DW " + arr_size + " DUP(0000H)");
+        print(arr->getUniqueName() + " DW " + arr_size + " DUP(0000H)");
     }
     else
     {
@@ -248,8 +248,8 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         print("POP BX");
         if (var->isGlobal())
         {
-            print("PUSH " + var->getIdName() + "[BX]");  // Pushing previous value to stack
-            print(op + " " + var->getIdName() + "[BX]"); // Increment the value
+            print("PUSH " + var->getUniqueName() + "[BX]");  // Pushing previous value to stack
+            print(op + " " + var->getUniqueName() + "[BX]"); // Increment the value
         }
         else
         {
@@ -265,8 +265,8 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
     {
         if (var->isGlobal())
         {
-            print("PUSH " + var->getIdName());
-            print(op + " " + var->getIdName());
+            print("PUSH " + var->getUniqueName());
+            print(op + " " + var->getUniqueName());
         }
         else
         {
@@ -350,7 +350,7 @@ void FunctionDefinition::toAssembly()
     this->setReturnLabel(ret_label);
 
     asm_gen->curr_func = this;
-    asm_gen->print(func_name + " PROC");
+    asm_gen->print((func_name == "main" ? func_name : func->getUniqueName()) + " PROC");
     asm_gen->indent++;
 
     if (func_name == "main")
@@ -376,7 +376,7 @@ void FunctionDefinition::toAssembly()
 
     asm_gen->offset_history = 0;
     asm_gen->indent--;
-    asm_gen->print(func_name + " ENDP");
+    asm_gen->print((func_name == "main" ? func_name : func->getUniqueName()) + " ENDP");
     asm_gen->curr_func = NULL;
 }
 
@@ -390,7 +390,7 @@ void ArrayCall::toAssembly()
     Array *arr = (Array *)id;
     if (arr->isGlobal())
     {
-        asm_gen->print("MOV AX, " + id_name + "[BX]");
+        asm_gen->print("MOV AX, " + this->id->getUniqueName() + "[BX]");
     }
     else
     {
@@ -408,9 +408,10 @@ void ArrayCall::toAssembly()
 string getVariable(VariableCall *var_call)
 {
     Variable *var = (Variable *)var_call->getIdentifier();
+
     if (var->isGlobal())
     {
-        return var_call->getIdName();
+        return var_call->getIdentifier()->getUniqueName();
     }
     else
     {
@@ -727,7 +728,7 @@ void AssignOp::toAssembly()
         asm_gen->print("POP BX");
         if (left->isGlobal())
         {
-            asm_gen->print("MOV " + left->getIdName() + "[BX], AX");
+            asm_gen->print("MOV " + left->getUniqueName() + "[BX], AX");
         }
         else
         {
@@ -742,7 +743,7 @@ void AssignOp::toAssembly()
     {
         if (left->isGlobal())
         {
-            asm_gen->print("MOV " + left->getIdName() + ", AX");
+            asm_gen->print("MOV " + left->getUniqueName() + ", AX");
         }
         else
         {
@@ -946,5 +947,5 @@ void FunctionCall::toAssembly()
         e->toAssembly();
         asm_gen->pushExpression(e);
     }
-    asm_gen->print("CALL " + id_name);
+    asm_gen->print("CALL " + this->getIdentifier()->getUniqueName());
 }

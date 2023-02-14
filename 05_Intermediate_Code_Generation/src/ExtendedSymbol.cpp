@@ -256,7 +256,7 @@ void Terminal::setTerminalType(string type)
 Identifier::Identifier(const string &id_name, const string &id_type) : Terminal(id_name, "ID", "IDENTIFIER")
 {
     this->id_type = id_type;
-    this->id_name = id_name;
+    this->unique_name = this->id_name = id_name;
 }
 
 Identifier::~Identifier()
@@ -275,6 +275,20 @@ void Identifier::setIdentity(const string &id_type)
 const string &Identifier::getIdName()
 {
     return id_name;
+}
+
+void Identifier::setIdName(const string &name)
+{
+    this->id_name = name;
+}
+
+void Identifier::setUniqueName(const string &name)
+{
+    this->unique_name = name;
+}
+const string &Identifier::getUniqueName()
+{
+    return unique_name;
 }
 Variable::Variable(const string &var_name, const string &data_type, const string &var_type) : Identifier(var_name, "VARIABLE")
 {
@@ -530,6 +544,14 @@ void FunctionDefinition::setReturnLabel(const string &label)
 const string &FunctionDefinition::getReturnLabel()
 {
     return return_label;
+}
+void FunctionDefinition::setFunction(Function *func)
+{
+    this->func = func;
+}
+Function *FunctionDefinition::getFunction()
+{
+    return func;
 }
 
 NotOp::NotOp(Expression *right) : UnaryExpression("NOTOP", "!", right), BooleanExpression("NOTOP"), Expression("UNARY_BOOLEAN")

@@ -14,6 +14,7 @@ using namespace std;
 
 class SemanticAnalyzer
 {
+    int id_count;
 
 public:
     SymbolTable *table;

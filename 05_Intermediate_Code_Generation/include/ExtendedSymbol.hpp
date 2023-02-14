@@ -109,13 +109,17 @@ class Identifier : public Terminal
 {
     string id_type; // Variable, Function
     string id_name;
+    string unique_name;
 
 public:
     Identifier(const string &id_name, const string &id_type);
     virtual ~Identifier();
     const string &getIdentity();
     void setIdentity(const string &);
+    void setIdName(const string &);
     const string &getIdName();
+    void setUniqueName(const string &);
+    const string &getUniqueName();
 };
 
 class Variable : public Identifier
@@ -681,6 +685,7 @@ class FunctionDefinition : public Unit, public Statement
     string return_label;
     vector<Variable *> params; // Replace with vector<Variable*> params
     CompoundStatement *body;   // Replace with vector<Statement*> params
+    Function *func;
 
 public:
     FunctionDefinition(const string &func_name, const string &ret_type, vector<Variable *> params, CompoundStatement *body);
@@ -694,6 +699,8 @@ public:
     void toCode();
     void toAssembly();
     void checkSemantics();
+    void setFunction(Function *func);
+    Function *getFunction();
 };
 
 class FunctionDeclaration : public Unit, public Statement

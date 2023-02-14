@@ -15,6 +15,7 @@ SemanticAnalyzer::SemanticAnalyzer(LexicalAnalyzer *lexer, SymbolTable *table, E
     this->lexer = lexer;
     this->table = table;
     this->error_hndlr = error_hndlr;
+    this->id_count = 0;
 }
 SemanticAnalyzer::~SemanticAnalyzer()
 {
@@ -730,6 +731,7 @@ void SemanticAnalyzer::declareArray(Array *arr)
         if (table->getCurrentScope()->getId() == 1)
         {
             arr->makeGlobal();
+            arr->setUniqueName(arr->getIdName() + to_string(id_count++));
         }
     }
 }
@@ -771,6 +773,7 @@ void SemanticAnalyzer::declareVariable(Variable *var)
         if (table->getCurrentScope()->getId() == 1)
         {
             var->makeGlobal();
+            var->setUniqueName(var->getIdName() + to_string(id_count++));
         }
     }
 }
@@ -839,6 +842,7 @@ void SemanticAnalyzer::checkFunctionDeclaration(FunctionDeclaration *func_dec)
     else
     {
         /** Function inserted successfully **/
+        new_func->setUniqueName(new_func->getIdName() + to_string(id_count++));
     }
 }
 void SemanticAnalyzer::declareFunction(FunctionDeclaration *func_decl)
@@ -851,7 +855,6 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
     string ret_type = func_def->getReturnType();
     string func_name = func_def->getFunctionName();
     vector<Variable *> params = func_def->getParams();
-
     Function *new_func = new Function(func_name, ret_type);
     for (auto p : params)
     {
@@ -903,6 +906,8 @@ void SemanticAnalyzer::checkFunctionDefinition(FunctionDefinition *func_def)
             }
         }
         new_func->defineFunction();
+        new_func->setUniqueName(new_func->getIdName() + to_string(id_count++));
+        func_def->setFunction(new_func);
     }
 }
 void SemanticAnalyzer::declareFunctionParams(vector<Variable *> params)

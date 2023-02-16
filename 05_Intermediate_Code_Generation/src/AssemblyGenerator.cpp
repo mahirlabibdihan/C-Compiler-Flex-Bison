@@ -272,7 +272,7 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         {
             string offset = std::to_string(var->getOffset());
             print("PUSH [BP+" + offset + "]");
-            print(op + " WORD PTR [BP+ " + offset + "]");
+            print(op + " WORD PTR [BP+" + offset + "]");
         }
     }
 }

@@ -231,7 +231,63 @@ void Expression::setExpType(const string &type)
 {
     this->exp_type = type;
 }
+bool Expression::isVariableCall(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "IDENTIFIER_CALL")
+        {
+            IdentifierCall *id_call = dynamic_cast<IdentifierCall *>(call_expr);
+            if (id_call->getIdentity() == "VARIABLE_CALL")
+            {
+                VariableCall *var_call = dynamic_cast<VariableCall *>(id_call);
+                if (var_call->getVarType() == "PRIMITIVE_CALL")
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+bool Expression::isArrayCall(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "IDENTIFIER_CALL")
+        {
+            IdentifierCall *id_call = dynamic_cast<IdentifierCall *>(call_expr);
+            if (id_call->getIdentity() == "VARIABLE_CALL")
+            {
+                VariableCall *var_call = dynamic_cast<VariableCall *>(id_call);
+                if (var_call->getVarType() == "ARRAY_CALL")
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+string Expression::getVariable(VariableCall *var_call)
+{
+    Variable *var = (Variable *)var_call->getIdentifier();
 
+    if (var->getVarType() == "PRIMITIVE")
+    {
+        if (var->isGlobal())
+        {
+            return var_call->getIdentifier()->getUniqueName();
+        }
+        else
+        {
+            return "[BP + " + to_string(var->getOffset()) + "]";
+        }
+    }
+    return nullptr;
+}
 ArrayCall::~ArrayCall()
 {
 }

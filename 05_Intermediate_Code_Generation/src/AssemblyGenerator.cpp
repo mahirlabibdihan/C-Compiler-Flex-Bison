@@ -271,8 +271,8 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         else
         {
             string offset = std::to_string(var->getOffset());
-            print("PUSH [BP + " + offset + "]");
-            print(op + " WORD PTR [BP + " + offset + "]");
+            print("PUSH [BP+" + offset + "]");
+            print(op + " WORD PTR [BP+ " + offset + "]");
         }
     }
 }
@@ -415,7 +415,7 @@ string getVariable(VariableCall *var_call)
     }
     else
     {
-        return "[BP + " + to_string(var->getOffset()) + "]";
+        return "[BP+" + to_string(var->getOffset()) + "]";
     }
 }
 void VariableCall::toAssembly()
@@ -435,7 +435,7 @@ void VariableCall::toAssembly()
         }
         else
         {
-            asm_gen->print("PUSH [BP + " + to_string(var->getOffset()) + "]");
+            asm_gen->print("PUSH [BP+" + to_string(var->getOffset()) + "]");
         }
         */
     }
@@ -538,6 +538,14 @@ void AssemblyGenerator::assignRegister(Expression *expr, string dst_reg)
 }
 void AddOp::toAssembly()
 {
+    if (Expression::isVariableCall(this->getLeftOpr()) && Expression::isVariableCall(this->getRightOpr()) && this->getOperator() == "-")
+    {
+        if (Expression::getVariable(dynamic_cast<VariableCall *>(this->getLeftOpr())) == Expression::getVariable(dynamic_cast<VariableCall *>(this->getRightOpr())))
+        {
+            this->setLeftOpr(new ConstantCall("0", "INT"));
+            this->setRightOpr(new ConstantCall("0", "INT"));
+        }
+    }
     string opr = (op_symbol == "+" ? "ADD" : "SUB");
 
     left_opr->toAssembly();
@@ -629,7 +637,31 @@ void AssemblyGenerator::pushExpression(Expression *expr)
 
 void MulOp::toAssembly()
 {
+    if (Expression::isVariableCall(this->getLeftOpr()) && Expression::isVariableCall(this->getRightOpr()))
+    {
+        if (Expression::getVariable(dynamic_cast<VariableCall *>(this->getLeftOpr())) == Expression::getVariable(dynamic_cast<VariableCall *>(this->getRightOpr())))
+        {
+            if (this->getOperator() == "/")
+            {
+                this->setLeftOpr(new ConstantCall("1", "INT"));
+                this->setRightOpr(new ConstantCall("1", "INT"));
+            }
+            else if (this->getOperator() == "%")
+            {
+                this->setLeftOpr(new ConstantCall("0", "INT"));
+                this->setRightOpr(new ConstantCall("0", "INT"));
+                this->setOperator("*");
+            }
+        }
+    }
     string op = op_symbol;
+
+    if (asm_gen->isZero(right_opr))
+    {
+        asm_gen->comment("Skipping " + op + ", since right operand is 0");
+        asm_gen->print("PUSH 0");
+        return;
+    }
     left_opr->toAssembly();
 
     if (asm_gen->isOne(right_opr) && (op == "*" || op == "/"))
@@ -732,6 +764,7 @@ void AssignOp::toAssembly()
         }
         else
         {
+            //
             string offset = std::to_string(left->getOffset());
             asm_gen->print("MOV SI, BX");
             asm_gen->print("SUB SI, " + offset);
@@ -748,7 +781,7 @@ void AssignOp::toAssembly()
         else
         {
             string offset = std::to_string(left->getOffset());
-            asm_gen->print("MOV [BP + " + offset + "], AX");
+            asm_gen->print("MOV [BP+" + offset + "], AX");
         }
     }
     asm_gen->print("PUSH AX");
@@ -924,6 +957,10 @@ void CompoundStatement::toAssembly()
             }
             stmt_list[i]->setNextLabel(this->getNextLabel());
             stmt_list[i]->toAssembly();
+        }
+        if (stmt_list[i]->getStatementType() == "RETURN_STATEMENT")
+        {
+            break;
         }
     }
     if (allocated > 0)

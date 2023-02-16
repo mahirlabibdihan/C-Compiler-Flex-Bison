@@ -210,6 +210,12 @@ public:
     virtual void toCode() = 0;
     virtual void toAssembly() = 0;
     virtual string checkSemantics() = 0;
+
+    static bool isVariableCall(Expression *);
+    static bool isArrayCall(Expression *);
+    static bool isConstantCall(Expression *);
+    static int getConstant(Expression *);
+    static string getVariable(VariableCall *);
 };
 
 class List : public NonTerminal

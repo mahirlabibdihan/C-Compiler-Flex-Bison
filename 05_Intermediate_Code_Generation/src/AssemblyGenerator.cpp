@@ -239,6 +239,15 @@ void AssemblyGenerator::evaluateNotOp(NotOp *expr)
     print("JMP " + expr->getTrueLabel());
 }
 
+string getOffset(int offset)
+{
+    string off = to_string(offset);
+    if (off.front() != '-')
+    {
+        off = "+" + off;
+    }
+    return off;
+}
 void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
 {
     assignVariable(var_call);
@@ -270,9 +279,9 @@ void AssemblyGenerator::incdecOp(VariableCall *var_call, std::string op)
         }
         else
         {
-            string offset = std::to_string(var->getOffset());
-            print("PUSH [BP+" + offset + "]");
-            print(op + " WORD PTR [BP+" + offset + "]");
+            string offset = getOffset(var->getOffset());
+            print("PUSH [BP" + offset + "]");
+            print(op + " WORD PTR [BP" + offset + "]");
         }
     }
 }
@@ -415,7 +424,7 @@ string getVariable(VariableCall *var_call)
     }
     else
     {
-        return "[BP+" + to_string(var->getOffset()) + "]";
+        return "[BP" + getOffset(var->getOffset()) + "]";
     }
 }
 void VariableCall::toAssembly()
@@ -435,7 +444,7 @@ void VariableCall::toAssembly()
         }
         else
         {
-            asm_gen->print("PUSH [BP+" + to_string(var->getOffset()) + "]");
+            asm_gen->print("PUSH [BP" + getOffset(var->getOffset()) + "]");
         }
         */
     }
@@ -780,8 +789,8 @@ void AssignOp::toAssembly()
         }
         else
         {
-            string offset = std::to_string(left->getOffset());
-            asm_gen->print("MOV [BP+" + offset + "], AX");
+            string offset = getOffset(left->getOffset());
+            asm_gen->print("MOV [BP" + offset + "], AX");
         }
     }
     asm_gen->print("PUSH AX");

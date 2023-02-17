@@ -921,7 +921,7 @@ YY_RULE_SETUP
 									tknzr->generateToken(CHARACTER_TOKEN, yytext); 
 									logger->printLogData(STRING_LOG,line_count,yytext);
 									line_count = yylineno; 
-									return tknzr->getToken(CHARACTER_TOKEN, yytext); 
+									return tknzr->getToken(STRING_TOKEN, yytext); 
 								}
 	YY_BREAK
 case 8:

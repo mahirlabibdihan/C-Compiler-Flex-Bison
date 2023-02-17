@@ -443,7 +443,6 @@ std::string ASTGenerator::getCompoundStatement(CompoundStatement *compound, int 
 std::string ASTGenerator::getExpressionStatement(ExpressionStatement *expr_stmt, int depth)
 {
     std::string tree = "";
-    // tree += getIndent(depth);
     tree += getExpression(expr_stmt->getExpression(), depth + 1);
     return tree;
 }

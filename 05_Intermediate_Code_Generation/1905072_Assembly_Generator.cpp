@@ -371,6 +371,7 @@ void AssemblyGenerator::addOp(string op, Expression *left, Expression *right)
     }
     string code = "";
     code += "\t\t; At line no " + to_string(line_count) + ": " + op + " " + left->getExpression() + " and " + right->getExpression() + "\n";
+
     code += "\t\tPOP BX";
     code += string("\t; ") + right->getExpression() + " popped from stack\n";
 
@@ -608,7 +609,7 @@ void AssemblyGenerator::mulOp(string op, Expression *left, Expression *right)
 
     if (op == "*")
     {
-        // AX = AX * BX
+        // DX:AX = AX * BX
         code += "\t\tIMUL BX" + string("\t; Multiplying ") + left->getExpression() + " and " + right->getExpression() + "\n";
     }
     else
@@ -619,7 +620,7 @@ void AssemblyGenerator::mulOp(string op, Expression *left, Expression *right)
         code += "\t\tIDIV BX";
         code += string("\t; Dividing ") + left->getExpression() + " by " + right->getExpression() + "\n";
 
-        // AX = AX / BX and DX = AX % BX
+        // AX = DX:AX / BX and DX = DX:AX % BX
         if (op == "%")
         {
             code += "\t\tMOV AX, DX";

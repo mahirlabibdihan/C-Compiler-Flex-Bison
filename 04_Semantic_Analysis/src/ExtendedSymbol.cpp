@@ -52,10 +52,6 @@ std::vector<SymbolInfo *> NonTerminal::getChildren()
     return children;
 }
 
-List::List()
-{
-}
-
 List::List(const string &name, const string &type) : NonTerminal(name, type)
 {
 }
@@ -63,9 +59,7 @@ List::List(const string &name, const string &type) : NonTerminal(name, type)
 List::~List()
 {
 }
-ParameterList::ParameterList()
-{
-}
+
 ParameterList::ParameterList(const string &name, const string &type) : List(name, type)
 {
 }
@@ -105,9 +99,6 @@ vector<Variable *> ParameterList::getParams()
     return list;
 }
 
-ArgumentList::ArgumentList()
-{
-}
 ArgumentList::ArgumentList(const string &name, const string &type) : List(name, type)
 {
 }
@@ -136,10 +127,6 @@ void ArgumentList::addArgs(ArgumentList *args)
 vector<Expression *> ArgumentList::getArgs()
 {
     return list;
-}
-
-DeclarationList::DeclarationList()
-{
 }
 
 DeclarationList::DeclarationList(const string &name, const string &type) : List(name, type)
@@ -194,11 +181,6 @@ vector<Variable *> DeclarationList::getDeclarations()
     return list;
 }
 
-Expression::Expression() : NonTerminal()
-{
-    this->data_type = "void";
-    // this->exp_type = "";
-}
 Expression::Expression(const string &exp_type) : NonTerminal()
 {
     this->data_type = "void";
@@ -250,10 +232,7 @@ void Expression::setExpType(const string &type)
 {
     this->exp_type = type;
 }
-ArrayCall::ArrayCall() : Expression("ARRAY_CALL")
-{
-    idx = "";
-}
+
 ArrayCall::ArrayCall(Expression *index) : Expression("ARRAY_CALL")
 {
     idx = "";
@@ -283,10 +262,6 @@ void ArrayCall::setIndex(string idx)
     this->idx = idx;
 }
 
-Terminal::Terminal()
-{
-    this->t_type = "";
-}
 Terminal::Terminal(const string &t_type) : SymbolInfo("blank", "TERMINAL")
 {
     this->t_type = t_type;
@@ -308,11 +283,6 @@ void Terminal::setTerminalType(string type)
     this->t_type = type;
 }
 
-Identifier::Identifier(const string &id_type) : Terminal("", "ID")
-{
-    this->id_type = id_type;
-}
-
 Identifier::Identifier(const string &id_name, const string &id_type) : Terminal(id_name, "ID")
 {
     this->id_type = id_type;
@@ -330,16 +300,7 @@ void Identifier::setIdentity(const string &id_type)
 {
     this->id_type = id_type;
 }
-Variable::Variable() : Identifier("VARIABLE")
-{
-    this->var_type = "";
-    this->data_type = "";
-}
-Variable::Variable(const string &var_type) : Identifier("VARIABLE")
-{
-    this->var_type = var_type;
-    this->data_type = "";
-}
+
 Variable::Variable(const string &var_name, const string &data_type) : Identifier(var_name, "VARIABLE")
 {
     this->data_type = data_type;
@@ -370,10 +331,6 @@ void Variable::setDataType(const string &data_type)
     this->data_type = data_type;
 }
 
-Array::Array(const string &arr_name) : Variable(arr_name, "", "ARRAY")
-{
-    this->arr_size = "0";
-}
 Array::Array(const string &arr_name, string arr_size) : Variable(arr_name, "", "ARRAY")
 {
     this->arr_size = arr_size;
@@ -392,13 +349,6 @@ string Array::getArraySize()
 void Array::setArraySize(string arr_size)
 {
     this->arr_size = arr_size;
-}
-
-Function::Function(const string &func_name) : Identifier(func_name, "FUNCTION")
-{
-    is_definition = false;
-    is_declaration = false;
-    this->ret_type = "";
 }
 Function::Function(const string &func_name, const string &ret_type) : Identifier(func_name, "FUNCTION")
 {

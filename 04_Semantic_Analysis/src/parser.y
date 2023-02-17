@@ -116,8 +116,6 @@ start 					: program
 							{
 								cout<<"Code compiled successfully"<<endl;
 							}
-							// parseout<<ParseTreeGenerator::getTree($$);
-							
 							sem_anlzr->setParseTreeRoot($$);
 							$$ = NULL;
 						}
@@ -153,15 +151,8 @@ unit 					: var_declaration
 							$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
 							
 						}
-						// | error {
-						// 	SymbolInfo *s = ParseTreeGenerator::createErrorNode(sem_anlzr->getLineCount());
-						// 	vector<SymbolInfo*> child = {s};
-						// 	$$ = ParseTreeGenerator::createNonTerminal(child,"unit");
-						// 	syntax_error("unit");
-						// }
 						;
-
-// No temporary variables     
+     
 func_declaration 		: 	type_specifier ID LPAREN parameter_list RPAREN SEMICOLON 
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
@@ -234,7 +225,6 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN
 						}
 						;				
 
-// No temporary variables
 parameter_list  		: parameter_list COMMA type_specifier ID
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
@@ -278,13 +268,12 @@ compound_statement 		: LCURL create_scope statements RCURL
 						}
 						;
 
-// No temporary variables
 create_scope			: 
 						{ 
 							sem_anlzr->startScope();
 						}
 
-// No temporary variables
+
 var_declaration 		: type_specifier declaration_list SEMICOLON 
 						{ 				
 							vector<SymbolInfo*> child = {$1,$2,$3};
@@ -346,7 +335,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");	
 							$$->addVariable($1->getSymbol());
 						}
-						| ID LSQUARE CONST_INT RSQUARE // handleArrayDeclaration({$1,$2,$3,$4})
+						| ID LSQUARE CONST_INT RSQUARE
 						{
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
 							$$ = ParseTreeGenerator::createDeclarationList(child,"declaration_list");
@@ -427,6 +416,7 @@ statement 				: var_declaration
 							// New rule
 							vector<SymbolInfo*> child = {$1,$2};
 							$$ = ParseTreeGenerator::createNonTerminal(child,"statement");
+							sem_anlzr->returnFunction(NULL);
 						}
 						;
 

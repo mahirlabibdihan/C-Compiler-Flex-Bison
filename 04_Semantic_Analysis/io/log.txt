@@ -1,42 +1,120 @@
-Line# 1: Token <FLOAT> Lexeme float found
-type_specifier : FLOAT 
-Line# 1: Token <ID> Lexeme f found
+Line# 1: Token <VOID> Lexeme void found
+type_specifier : VOID 
+Line# 1: Token <ID> Lexeme n found
 Line# 1: Token <LPAREN> Lexeme ( found
+Line# 1: Token <INT> Lexeme int found
+type_specifier : INT 
 Line# 1: Token <RPAREN> Lexeme ) found
-Line# 1: Token <LCURL> Lexeme { found
-Line# 3: Token <RCURL> Lexeme } found
+parameter_list : type_specifier 
+Line# 1: Token <SINGLE LINE COMMENT> Lexeme // Param name found
+Line# 2: Token <LCURL> Lexeme { found
+Line# 4: Token <RCURL> Lexeme } found
 compound_statement : LCURL RCURL 
 	ScopeTable# 2
 	ScopeTable# 1
-	4--> <f, FUNCTION, FLOAT> 
-func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+	1--> <n, FUNCTION, VOID> 
+func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition 
 program : unit 
-Line# 4: Token <INT> Lexeme int found
+Line# 5: Token <VOID> Lexeme void found
+type_specifier : VOID 
+Line# 5: Token <ID> Lexeme f found
+Line# 5: Token <LPAREN> Lexeme ( found
+Line# 5: Token <RPAREN> Lexeme ) found
+Line# 6: Token <LCURL> Lexeme { found
+Line# 7: Token <RETURN> Lexeme return found
+Line# 7: Token <CONST_INT> Lexeme 10 found
+factor : CONST_INT 
+unary_expression : factor 
+term : unary_expression 
+Line# 7: Token <SEMICOLON> Lexeme ; found
+simple_expression : term 
+rel_expression : simple_expression 
+logic_expression : rel_expression 
+expression : logic_expression 
+statement : RETURN expression SEMICOLON 
+statements : statement 
+Line# 7: Token <SINGLE LINE COMMENT> Lexeme // return type mismatch found
+Line# 8: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL 
+	ScopeTable# 3
+	ScopeTable# 1
+	1--> <n, FUNCTION, VOID> 
+	4--> <f, FUNCTION, VOID> 
+func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+unit : func_definition 
+program : program unit 
+Line# 9: Token <VOID> Lexeme void found
+type_specifier : VOID 
+Line# 9: Token <ID> Lexeme f found
+Line# 9: Token <LPAREN> Lexeme ( found
+Line# 9: Token <RPAREN> Lexeme ) found
+Line# 9: Token <SINGLE LINE COMMENT> Lexeme // Multiple definition found
+Line# 10: Token <LCURL> Lexeme { found
+Line# 11: Token <INT> Lexeme int found
 type_specifier : INT 
-Line# 4: Token <ID> Lexeme main found
-Line# 4: Token <LPAREN> Lexeme ( found
-Line# 4: Token <RPAREN> Lexeme ) found
-Line# 4: Token <LCURL> Lexeme { found
-Line# 5: Token <INT> Lexeme int found
+Line# 11: Token <ID> Lexeme e found
+Line# 11: Token <LPAREN> Lexeme ( found
+Line# 11: Token <RPAREN> Lexeme ) found
+Line# 12: Token <LCURL> Lexeme { found
+Line# 13: Token <SINGLE LINE COMMENT> Lexeme // Invalid function scoping found
+Line# 14: Token <RCURL> Lexeme } found
+compound_statement : LCURL RCURL 
+	ScopeTable# 5
+	ScopeTable# 4
+	3--> <e, FUNCTION, INT> 
+	ScopeTable# 1
+	1--> <n, FUNCTION, VOID> 
+	4--> <f, FUNCTION, VOID> 
+func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+statement : func_definition 
+statements : statement 
+Line# 15: Token <RCURL> Lexeme } found
+compound_statement : LCURL statements RCURL 
+	ScopeTable# 4
+	3--> <e, FUNCTION, INT> 
+	ScopeTable# 1
+	1--> <n, FUNCTION, VOID> 
+	4--> <f, FUNCTION, VOID> 
+func_definition : type_specifier ID LPAREN RPAREN compound_statement 
+unit : func_definition 
+program : program unit 
+Line# 16: Token <INT> Lexeme int found
 type_specifier : INT 
-Line# 5: Token <ID> Lexeme a found
-Line# 5: Token <SEMICOLON> Lexeme ; found
-declaration_list : ID 
+Line# 16: Token <ID> Lexeme main found
+Line# 16: Token <LPAREN> Lexeme ( found
+Line# 16: Token <RPAREN> Lexeme ) found
+Line# 17: Token <LCURL> Lexeme { found
+Line# 18: Token <INT> Lexeme int found
+type_specifier : INT 
+Line# 18: Token <ID> Lexeme a found
+Line# 18: Token <LSQUARE> Lexeme [ found
+Line# 18: Token <CONST_INT> Lexeme 10 found
+Line# 18: Token <RSQUARE> Lexeme ] found
+declaration_list : ID LSQUARE CONST_INT RSQUARE 
+Line# 18: Token <SEMICOLON> Lexeme ; found
 var_declaration : type_specifier declaration_list SEMICOLON 
 statement : var_declaration 
 statements : statement 
-Line# 6: Token <ID> Lexeme a found
-Line# 6: Token <ASSIGNOP> Lexeme = found
+Line# 19: Token <INT> Lexeme int found
+type_specifier : INT 
+Line# 19: Token <ID> Lexeme b found
+Line# 19: Token <COMMA> Lexeme , found
+declaration_list : ID 
+Line# 19: Token <ID> Lexeme b found
+Line# 19: Token <SEMICOLON> Lexeme ; found
+declaration_list : declaration_list COMMA ID 
+var_declaration : type_specifier declaration_list SEMICOLON 
+statement : var_declaration 
+statements : statements statement 
+Line# 20: Token <ID> Lexeme a found
+Line# 20: Token <ASSIGNOP> Lexeme = found
 variable : ID 
-Line# 6: Token <ID> Lexeme f found
-Line# 6: Token <LPAREN> Lexeme ( found
-Line# 6: Token <RPAREN> Lexeme ) found
-argument_list : 
-factor : ID LPAREN argument_list RPAREN 
+Line# 20: Token <CONST_INT> Lexeme 10 found
+factor : CONST_INT 
 unary_expression : factor 
 term : unary_expression 
-Line# 6: Token <SEMICOLON> Lexeme ; found
+Line# 20: Token <SEMICOLON> Lexeme ; found
 simple_expression : term 
 rel_expression : simple_expression 
 logic_expression : rel_expression 
@@ -44,16 +122,24 @@ expression : variable ASSIGNOP logic_expression
 expression_statement : expression SEMICOLON 
 statement : expression_statement 
 statements : statements statement 
-Line# 7: Token <RCURL> Lexeme } found
+Line# 20: Token <SINGLE LINE COMMENT> Lexeme // Assign to array  found
+Line# 21: Token <RETURN> Lexeme return found
+Line# 21: Token <SEMICOLON> Lexeme ; found
+statement : RETURN SEMICOLON 
+statements : statements statement 
+Line# 21: Token <SINGLE LINE COMMENT> Lexeme // return type mismatch found
+Line# 22: Token <RCURL> Lexeme } found
 compound_statement : LCURL statements RCURL 
-	ScopeTable# 3
-	10--> <a, INT> 
+	ScopeTable# 6
+	10--> <a, ARRAY, INT> 
+	11--> <b, INT> 
 	ScopeTable# 1
+	1--> <n, FUNCTION, VOID> 
 	2--> <main, FUNCTION, INT> 
-	4--> <f, FUNCTION, FLOAT> 
+	4--> <f, FUNCTION, VOID> 
 func_definition : type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition 
 program : program unit 
 start : program 
-Total Lines: 7
-Total Errors: 1
+Total Lines: 22
+Total Errors: 7

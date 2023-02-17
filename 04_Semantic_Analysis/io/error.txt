@@ -1,1 +1,7 @@
-Line# 6: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 2: Parameter's name not given in definition of function 'n'
+Line# 7: Return type mismatch with function-declaration in function 'f'
+Line# 10: Multiple definition of 'f'
+Line# 12: A function is defined inside function 'f'
+Line# 19: Multiple declaration of 'b'
+Line# 20: Invalid conversion from 'INT' to 'ARRAY_INT'
+Line# 21: Return type mismatch with function-declaration in function 'main'

@@ -1,0 +1,38 @@
+=> 3*a - 7
+=> term - factor
+=> factor * factor - factor
+
+=> 3*a
+    MOV AX, [BP+4] ; a = [BP+4]
+    MOV CX, AX
+    MOV AX, 3
+    CWD
+    MUL CX
+    PUSH AX
+
+    MOV AX, 7
+    MOV DX, AX
+
+    POP AX
+    SUB AX, DX
+    PUSH AX
+
+=> i + 2*j
+=> factor + term
+=> factor + factor * factor
+
+=> 2*j
+    MOV AX, j ; 2
+	MOV CX, AX ; *
+	MOV AX, 2 ; j
+	CWD
+	MUL CX
+	PUSH AX
+=> i + 2*j
+	POP AX
+	MOV DX, AX
+=> i 
+	MOV AX, i
+    
+	ADD AX, DX
+	PUSH AX

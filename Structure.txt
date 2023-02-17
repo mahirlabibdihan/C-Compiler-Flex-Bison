@@ -1,0 +1,57 @@
+						SymbolInfo
+							|
+							|
+		_____________________________________________________
+		|											|
+     NonTerminal 								 	Terminal
+     ______|______						___________________|__________________________________
+    |			  |	
+ Expression  Block							|			|		|		|		|		|
+		|						Identifier		Constant  Operator  Keyword  String	Special Symbol
+	   Factor					__________|_________
+	_____|_____				|				|
+						   Variable			Function
+					     _______|_____
+					     |			 |
+				     Primitive     Array(Declaration)
+			_____________|____________
+			|	   |		     |	 	 |
+		      int     float           char    void
+		    
+- Only Identifier will be inserted in SymbolTable
+	1. To check if an Identifier is declared
+	2. We can get all the details of that identifier by its name
+
+- Statement
+	1. Variable Declaration
+	2. Function Declaration
+	3. Function Definition
+	4. If Else Statement
+	5. For Loop
+	6. While Loop
+	7. Return Statement
+	8. Println Statement
+	9. Compound statement
+	10. Expression statement
+- Expression
+	1. Arithmetic
+		a) ADDOP ( + , - )
+		b) MULOP ( *, / , % )
+		c) INCOP ( ++ )
+		d) DECOP ( - - )
+	2. Relational ( <, <=, > , >= ,==,!= )
+	3. Logical ( &&, ||  )
+	5. Assignment ( = )
+	6. Unary
+	
+- Factor
+	1. Variable
+	2. Function Call
+	3. Parenthesize Expression
+	4. Constant
+	5. Inc, Dec operation
+	
+- List
+	1. Declaration
+	2. Argument
+	3. Parameter

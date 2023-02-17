@@ -1,26 +1,47 @@
 int f();
-int f(){
+int f();
+int f;
+int f[10];
+int f(int a);
+int f(int a)
+{
 
 }
 int f(){
 
 }
-int main(){
-	int a;
-	float a;
-	void f()
+int f(){
+
+}
+int v(int a)
+{
+	
+}
+int f()
+{
+	int a[10];
+	if(1)
 	{
-		int c()
-		{
-			
-		}
+		return 0.5;
+	}
+	else if(2)
+	{
+		return f;
+	}
+	else
+	{
+		return a;
 	}
 }
-
-int f(){
-
-}
 int main(){
+	int a,a;
 	float a;
-	a = f(); 
+	int a[10],c[10],c[15];
+	c[0] = 10;
+	c = 10;
+	c = c+10;
+	for(10;10;10)10;
+	while(10)10;
+	v(f);
+	return f;
 }

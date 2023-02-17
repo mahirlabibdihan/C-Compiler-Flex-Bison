@@ -1,1 +1,2 @@
-No string. No comment. So, each lexeme will occur in only one line.
+- Make getOffset member of class
+- Make isZero, getConstant static member of Expression 

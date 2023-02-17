@@ -1,16 +1,18 @@
-#!/bin/bash
-
-bison -d -y -v -Wno-yacc -Wnone 1905072_parser.y
+bison -Wyacc -d -y -Wcounterexamples -Wother -Wconflicts-sr  -Wno-yacc src/parser.y
+mv y.tab.c src/
+mv y.tab.h include/
 echo 'Generated the parser C file as well the header file'
-g++ -w -c -o parser.o y.tab.c
+g++ -w -c -o build/parser.o src/y.tab.c
 echo 'Generated the parser object file'
-flex -o scanner.c 1905072_scanner.l
+flex -o src/scanner.c src/scanner.l
 echo 'Generated the scanner C file'
-g++ -w -c -o scanner.o scanner.c
-# if the above command doesn't work try g++ -fpermissive -w -c -o l.o lex.yy.c
+g++ -w -c -o build/scanner.o src/scanner.c
 echo 'Generated the scanner object file'
-g++ 1905072_SymbolInfo.cpp 1905072_ScopeTable.cpp 1905072_SymbolTable.cpp 1905072_Helper.cpp 1905072_Logger.cpp 1905072_Tokenizer.cpp 1905072_Error_Handler.cpp 1905072_Semantic_Analyzer.cpp 1905072_Assembly_Generator.cpp 1905072_Token.cpp 1905072_Expression.cpp 1905072_main.cpp -c
-echo 'Generated the symbol table object files'
-g++ 1905072_SymbolInfo.o 1905072_ScopeTable.o 1905072_SymbolTable.o 1905072_Helper.o  1905072_Logger.o 1905072_Tokenizer.o 1905072_Error_Handler.o parser.o scanner.o 1905072_Semantic_Analyzer.o 1905072_Token.o 1905072_Assembly_Generator.o 1905072_Expression.o 1905072_main.o -lfl -o main.out
+g++ src/*.cpp -c
+mv *.o build/
+echo 'Generated the object files'
+g++ -g build/*.o -o bin/main.exe 
 echo 'All ready, running'
-./main.out input.txt && rm *.o
+./bin/main.exe io/input.txt
+rm build/*
+rm src/y.tab.c src/scanner.c include/y.tab.h

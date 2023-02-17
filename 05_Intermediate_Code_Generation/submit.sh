@@ -4,8 +4,9 @@
 rm upload/1905072 -r
 mkdir upload/1905072
 
-cp src/* upload/1905072/ -r
-cp include/* upload/1905072/ -r
+cp print.asm upload/1905072/ -r
+cp src/*.cpp src/*.l src/*.y upload/1905072/ -r
+cp include/*.hpp upload/1905072/ -r
 python3.9 rename.py
 
 cd upload

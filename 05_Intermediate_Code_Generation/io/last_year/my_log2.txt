@@ -205,4 +205,4 @@ unit : func_definition
 program : program unit 
 start : program 
 Total Lines: 15
-Total Errors: 6
+Total Errors: 7

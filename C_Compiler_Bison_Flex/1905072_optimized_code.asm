@@ -1,16 +1,23 @@
 		.MODEL SMALL
 		.STACK 100H
 		.DATA
+		a_1_1 DW ?
+		b_1_1 DW ?
 		.CODE
-		f PROC
-		PUSH BP
-		MOV BP, SP
-		POP BP
-		POP BX
-		PUSH 10
-		PUSH BX
-		RET
-		f ENDP
+		main PROC
+		MOV AX, @DATA
+		MOV DS, AX
+		MOV AX, [BP + 4]
+		MOV a_1_1, AX
+		MOV AX, 1
+		CMP AX, 0
+		JE L0
+		MOV AX, b_1_1
+		MOV a_1_1, AX
+		L0:
+		MOV AH, 4CH
+		INT 21H
+		main ENDP
 		PRINT_NUM PROC NEAR
 		        PUSH BP             ;Saving BP
 		        MOV BP, SP          ;BP points to the top of the stack

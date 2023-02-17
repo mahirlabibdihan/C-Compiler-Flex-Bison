@@ -100,18 +100,18 @@ void ScopeTable::print() const
                     if (cur_3->getIdentity() == "FUNCTION")
                     {
                         Function *cur_4 = (Function *)cur_3;
-                        logout << "<" << cur_4->getIdName() << ", " << cur_4->getIdentity() << ", " << cur_4->getReturnType() << "> ";
+                        logout << "<" << cur_4->getUniqueName() << ", " << cur_4->getIdentity() << ", " << cur_4->getReturnType() << "> ";
                     }
                     else if (cur_3->getIdentity() == "VARIABLE")
                     {
                         Variable *cur_4 = (Variable *)cur_3;
                         if (cur_4->getVarType() == "ARRAY")
                         {
-                            logout << "<" << cur_4->getIdName() << ", " << cur_4->getVarType() << ", " << cur_4->getDataType() << "> ";
+                            logout << "<" << cur_4->getUniqueName() << ", " << cur_4->getVarType() << ", " << cur_4->getDataType() << "> ";
                         }
                         else if (cur_4->getVarType() == "PRIMITIVE")
                         {
-                            logout << "<" << cur_4->getIdName() << ", " << cur_4->getDataType() << "> ";
+                            logout << "<" << cur_4->getUniqueName() << ", " << cur_4->getDataType() << "> ";
                         }
                     }
                 }

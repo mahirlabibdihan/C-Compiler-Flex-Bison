@@ -915,6 +915,14 @@ void AssemblyGenerator::popExpression(Expression *expr)
                     return;
                 }
             }
+            else if (id_call->getIdentity() == "FUNCTION_CALL")
+            {
+                FunctionCall *func_call = dynamic_cast<FunctionCall *>(id_call);
+                if (((Function *)func_call->getIdentifier())->getReturnType() == "VOID")
+                {
+                    return;
+                }
+            }
         }
     }
     asm_gen->print("POP AX");

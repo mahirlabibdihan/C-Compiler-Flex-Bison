@@ -1,26 +1,26 @@
-int f();
-int f(){
+a && b + c
 
-}
-int f(){
+a && b && c
 
-}
-int main(){
-	int a;
-	float a;
-	void f()
-	{
-		int c()
-		{
-			
-		}
-	}
-}
+AX 
 
-int f(){
+variable declaration in compound statement
+How to clear them from stack? 
+- For function calculate number of var declaration. Then ADD SUB, count*2
+- But what if variable was declared after return 
 
-}
-int main(){
-	float a;
-	a = f(); 
-}
+- Var declaration problems
+    - Declaration inside compound statement
+    - Declaration after return statement
+
+CompoundStatement
+function return label - test5i
+Only ine return statement in function (at end)
+
+- For loop increment label
+- For loop body next label 
+
+- true-false label in boolean expression 
+
+PUSH 255
+POP AX

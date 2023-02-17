@@ -95,7 +95,14 @@ void SemanticAnalyzer::returnFunction(Expression *ret)
 {
     if (!functions.empty())
     {
-        if (ret->getDataType() != "NULL" && ret->getDataType() != functions.top()->getReturnType())
+        if (ret == NULL)
+        {
+            if (functions.top()->getReturnType() != "VOID")
+            {
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), functions.top()->getSymbol()) << std::endl;
+            }
+        }
+        else if (ret->getDataType() != "NULL" && ret->getDataType() != functions.top()->getReturnType())
         {
             errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::RETURN_TYPE_MISMATCH, lexer->getLineCount(), functions.top()->getSymbol()) << std::endl;
         }
@@ -442,7 +449,7 @@ string SemanticAnalyzer::assignOp(Expression *left, Expression *right)
     {
         if (left->getDataType() == "VOID" || right->getDataType() == "VOID")
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator='") << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount()) << std::endl;
             return "NULL";
         }
         else
@@ -475,7 +482,7 @@ string SemanticAnalyzer::logicOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "VOID" || right->getDataType() == "VOID")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'") << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount()) << std::endl;
             }
             else
             {
@@ -504,7 +511,7 @@ string SemanticAnalyzer::relOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "VOID" || right->getDataType() == "VOID")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'") << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount()) << std::endl;
             }
             else
             {
@@ -533,7 +540,7 @@ string SemanticAnalyzer::addOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "VOID" || right->getDataType() == "VOID")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'") << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount()) << std::endl;
             }
             else
             {
@@ -556,14 +563,14 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
     {
         if (right->getExpression() == "0")
         {
-            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, lexer->getLineCount(), right->getExpression() + "%" + right->getExpression()) << std::endl;
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, lexer->getLineCount()) << std::endl;
             return "NULL";
         }
         else
         {
             if (type != "INT")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NONINT_MOD, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'") << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::NONINT_MOD, lexer->getLineCount()) << std::endl;
                 return "NULL";
             }
             else
@@ -578,7 +585,7 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
         {
             if (op == "/" && right->getExpression() == "0")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, lexer->getLineCount(), right->getExpression() + "%" + right->getExpression()) << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::MOD_BY_ZERO, lexer->getLineCount()) << std::endl;
                 return "NULL";
             }
             return type;
@@ -587,7 +594,7 @@ string SemanticAnalyzer::mulOp(Expression *left, string op, Expression *right)
         {
             if (left->getDataType() == "VOID" || right->getDataType() == "VOID")
             {
-                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount(), "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator" + op + "'") << std::endl;
+                errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_FUNCTION_EXP, lexer->getLineCount()) << std::endl;
             }
             else
             {

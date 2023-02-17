@@ -1,59 +1,401 @@
-Line# 1: Token <FLOAT> Lexeme float found
-type_specifier : FLOAT 
-Line# 1: Token <ID> Lexeme f found
+Line# 1: Token <VOID> Lexeme void found
+Line# 1: Token <ID> Lexeme show found
 Line# 1: Token <LPAREN> Lexeme ( found
+Line# 1: Token <INT> Lexeme int found
+Line# 1: Token <ID> Lexeme n found
 Line# 1: Token <RPAREN> Lexeme ) found
-Line# 1: Token <LCURL> Lexeme { found
-Line# 3: Token <RCURL> Lexeme } found
-compound_statement : LCURL RCURL 
-	ScopeTable# 2
-	ScopeTable# 1
-	4--> <f, FUNCTION, FLOAT> 
-func_definition : type_specifier ID LPAREN RPAREN compound_statement 
-unit : func_definition 
-program : unit 
-Line# 4: Token <INT> Lexeme int found
-type_specifier : INT 
-Line# 4: Token <ID> Lexeme main found
-Line# 4: Token <LPAREN> Lexeme ( found
-Line# 4: Token <RPAREN> Lexeme ) found
-Line# 4: Token <LCURL> Lexeme { found
+Line# 2: Token <LCURL> Lexeme { found
+Line# 3: Token <PRINTLN> Lexeme println found
+Line# 3: Token <LPAREN> Lexeme ( found
+Line# 3: Token <ID> Lexeme n found
+Line# 3: Token <RPAREN> Lexeme ) found
+Line# 3: Token <SEMICOLON> Lexeme ; found
+Line# 4: Token <RCURL> Lexeme } found
 Line# 5: Token <INT> Lexeme int found
-type_specifier : INT 
-Line# 5: Token <ID> Lexeme a found
+Line# 5: Token <ID> Lexeme cnt found
 Line# 5: Token <SEMICOLON> Lexeme ; found
-declaration_list : ID 
-var_declaration : type_specifier declaration_list SEMICOLON 
-statement : var_declaration 
-statements : statement 
-Line# 6: Token <ID> Lexeme a found
-Line# 6: Token <ASSIGNOP> Lexeme = found
-variable : ID 
-Line# 6: Token <ID> Lexeme f found
+Line# 6: Token <INT> Lexeme int found
+Line# 6: Token <ID> Lexeme check found
 Line# 6: Token <LPAREN> Lexeme ( found
 Line# 6: Token <RPAREN> Lexeme ) found
-argument_list : 
-factor : ID LPAREN argument_list RPAREN 
-unary_expression : factor 
-term : unary_expression 
-Line# 6: Token <SEMICOLON> Lexeme ; found
-simple_expression : term 
-rel_expression : simple_expression 
-logic_expression : rel_expression 
-expression : variable ASSIGNOP logic_expression 
-expression_statement : expression SEMICOLON 
-statement : expression_statement 
-statements : statements statement 
-Line# 7: Token <RCURL> Lexeme } found
-compound_statement : LCURL statements RCURL 
+Line# 7: Token <LCURL> Lexeme { found
+Line# 8: Token <ID> Lexeme cnt found
+Line# 8: Token <INCOP> Lexeme ++ found
+Line# 8: Token <SEMICOLON> Lexeme ; found
+Line# 9: Token <RETURN> Lexeme return found
+Line# 9: Token <ID> Lexeme cnt found
+Line# 9: Token <SEMICOLON> Lexeme ; found
+Line# 10: Token <RCURL> Lexeme } found
+Line# 12: Token <INT> Lexeme int found
+Line# 12: Token <ID> Lexeme factorial found
+Line# 12: Token <LPAREN> Lexeme ( found
+Line# 12: Token <INT> Lexeme int found
+Line# 12: Token <ID> Lexeme n found
+Line# 12: Token <RPAREN> Lexeme ) found
+Line# 13: Token <LCURL> Lexeme { found
+Line# 14: Token <IF> Lexeme if found
+Line# 14: Token <LPAREN> Lexeme ( found
+Line# 14: Token <ID> Lexeme n found
+Line# 14: Token <RELOP> Lexeme == found
+Line# 14: Token <CONST_INT> Lexeme 0 found
+Line# 14: Token <RPAREN> Lexeme ) found
+Line# 15: Token <LCURL> Lexeme { found
+Line# 16: Token <RETURN> Lexeme return found
+Line# 16: Token <CONST_INT> Lexeme 1 found
+Line# 16: Token <SEMICOLON> Lexeme ; found
+Line# 17: Token <RCURL> Lexeme } found
+Line# 18: Token <ELSE> Lexeme else found
+Line# 19: Token <LCURL> Lexeme { found
+Line# 20: Token <RETURN> Lexeme return found
+Line# 20: Token <ID> Lexeme n found
+Line# 20: Token <MULOP> Lexeme * found
+Line# 20: Token <ID> Lexeme factorial found
+Line# 20: Token <LPAREN> Lexeme ( found
+Line# 20: Token <ID> Lexeme n found
+Line# 20: Token <ADDOP> Lexeme - found
+Line# 20: Token <CONST_INT> Lexeme 1 found
+Line# 20: Token <RPAREN> Lexeme ) found
+Line# 20: Token <SEMICOLON> Lexeme ; found
+Line# 21: Token <RCURL> Lexeme } found
+Line# 22: Token <RCURL> Lexeme } found
+Line# 24: Token <VOID> Lexeme void found
+Line# 24: Token <ID> Lexeme grade found
+Line# 24: Token <LPAREN> Lexeme ( found
+Line# 24: Token <INT> Lexeme int found
+Line# 24: Token <ID> Lexeme n found
+Line# 24: Token <RPAREN> Lexeme ) found
+Line# 25: Token <LCURL> Lexeme { found
+Line# 26: Token <IF> Lexeme if found
+Line# 26: Token <LPAREN> Lexeme ( found
+Line# 26: Token <ID> Lexeme n found
+Line# 26: Token <RELOP> Lexeme < found
+Line# 26: Token <CONST_INT> Lexeme 0 found
+Line# 26: Token <LOGICOP> Lexeme || found
+Line# 26: Token <ID> Lexeme n found
+Line# 26: Token <RELOP> Lexeme > found
+Line# 26: Token <CONST_INT> Lexeme 100 found
+Line# 26: Token <RPAREN> Lexeme ) found
+Line# 27: Token <LCURL> Lexeme { found
+Line# 28: Token <ID> Lexeme show found
+Line# 28: Token <LPAREN> Lexeme ( found
+Line# 28: Token <ADDOP> Lexeme - found
+Line# 28: Token <CONST_INT> Lexeme 1 found
+Line# 28: Token <RPAREN> Lexeme ) found
+Line# 28: Token <SEMICOLON> Lexeme ; found
+Line# 29: Token <RCURL> Lexeme } found
+Line# 30: Token <ELSE> Lexeme else found
+Line# 30: Token <IF> Lexeme if found
+Line# 30: Token <LPAREN> Lexeme ( found
+Line# 30: Token <ID> Lexeme n found
+Line# 30: Token <RELOP> Lexeme >= found
+Line# 30: Token <CONST_INT> Lexeme 80 found
+Line# 30: Token <RPAREN> Lexeme ) found
+Line# 31: Token <LCURL> Lexeme { found
+Line# 32: Token <ID> Lexeme show found
+Line# 32: Token <LPAREN> Lexeme ( found
+Line# 32: Token <CONST_INT> Lexeme 80 found
+Line# 32: Token <RPAREN> Lexeme ) found
+Line# 32: Token <SEMICOLON> Lexeme ; found
+Line# 33: Token <RCURL> Lexeme } found
+Line# 34: Token <ELSE> Lexeme else found
+Line# 34: Token <IF> Lexeme if found
+Line# 34: Token <LPAREN> Lexeme ( found
+Line# 34: Token <ID> Lexeme n found
+Line# 34: Token <RELOP> Lexeme >= found
+Line# 34: Token <CONST_INT> Lexeme 70 found
+Line# 34: Token <LOGICOP> Lexeme && found
+Line# 34: Token <ID> Lexeme n found
+Line# 34: Token <RELOP> Lexeme < found
+Line# 34: Token <CONST_INT> Lexeme 80 found
+Line# 34: Token <RPAREN> Lexeme ) found
+Line# 35: Token <LCURL> Lexeme { found
+Line# 36: Token <ID> Lexeme show found
+Line# 36: Token <LPAREN> Lexeme ( found
+Line# 36: Token <CONST_INT> Lexeme 70 found
+Line# 36: Token <RPAREN> Lexeme ) found
+Line# 36: Token <SEMICOLON> Lexeme ; found
+Line# 37: Token <RCURL> Lexeme } found
+Line# 38: Token <ELSE> Lexeme else found
+Line# 38: Token <IF> Lexeme if found
+Line# 38: Token <LPAREN> Lexeme ( found
+Line# 38: Token <ID> Lexeme n found
+Line# 38: Token <RELOP> Lexeme >= found
+Line# 38: Token <CONST_INT> Lexeme 60 found
+Line# 38: Token <LOGICOP> Lexeme && found
+Line# 38: Token <ID> Lexeme n found
+Line# 38: Token <RELOP> Lexeme < found
+Line# 38: Token <CONST_INT> Lexeme 70 found
+Line# 38: Token <RPAREN> Lexeme ) found
+Line# 39: Token <LCURL> Lexeme { found
+Line# 40: Token <ID> Lexeme show found
+Line# 40: Token <LPAREN> Lexeme ( found
+Line# 40: Token <CONST_INT> Lexeme 60 found
+Line# 40: Token <RPAREN> Lexeme ) found
+Line# 40: Token <SEMICOLON> Lexeme ; found
+Line# 41: Token <RCURL> Lexeme } found
+Line# 42: Token <ELSE> Lexeme else found
+Line# 42: Token <IF> Lexeme if found
+Line# 42: Token <LPAREN> Lexeme ( found
+Line# 42: Token <ID> Lexeme n found
+Line# 42: Token <RELOP> Lexeme >= found
+Line# 42: Token <CONST_INT> Lexeme 50 found
+Line# 42: Token <LOGICOP> Lexeme && found
+Line# 42: Token <ID> Lexeme n found
+Line# 42: Token <RELOP> Lexeme < found
+Line# 42: Token <CONST_INT> Lexeme 60 found
+Line# 42: Token <RPAREN> Lexeme ) found
+Line# 43: Token <LCURL> Lexeme { found
+Line# 44: Token <ID> Lexeme show found
+Line# 44: Token <LPAREN> Lexeme ( found
+Line# 44: Token <CONST_INT> Lexeme 50 found
+Line# 44: Token <RPAREN> Lexeme ) found
+Line# 44: Token <SEMICOLON> Lexeme ; found
+Line# 45: Token <RCURL> Lexeme } found
+Line# 46: Token <ELSE> Lexeme else found
+Line# 46: Token <IF> Lexeme if found
+Line# 46: Token <LPAREN> Lexeme ( found
+Line# 46: Token <ID> Lexeme n found
+Line# 46: Token <RELOP> Lexeme < found
+Line# 46: Token <CONST_INT> Lexeme 50 found
+Line# 46: Token <RPAREN> Lexeme ) found
+Line# 47: Token <LCURL> Lexeme { found
+Line# 48: Token <ID> Lexeme show found
+Line# 48: Token <LPAREN> Lexeme ( found
+Line# 48: Token <ADDOP> Lexeme - found
+Line# 48: Token <CONST_INT> Lexeme 100 found
+Line# 48: Token <RPAREN> Lexeme ) found
+Line# 48: Token <SEMICOLON> Lexeme ; found
+Line# 49: Token <RCURL> Lexeme } found
+Line# 50: Token <RCURL> Lexeme } found
+Line# 52: Token <INT> Lexeme int found
+Line# 52: Token <ID> Lexeme main found
+Line# 52: Token <LPAREN> Lexeme ( found
+Line# 52: Token <RPAREN> Lexeme ) found
+Line# 52: Token <LCURL> Lexeme { found
+Line# 53: Token <ID> Lexeme grade found
+Line# 53: Token <LPAREN> Lexeme ( found
+Line# 53: Token <CONST_INT> Lexeme 85 found
+Line# 53: Token <RPAREN> Lexeme ) found
+Line# 53: Token <SEMICOLON> Lexeme ; found
+Line# 54: Token <ID> Lexeme grade found
+Line# 54: Token <LPAREN> Lexeme ( found
+Line# 54: Token <CONST_INT> Lexeme 75 found
+Line# 54: Token <RPAREN> Lexeme ) found
+Line# 54: Token <SEMICOLON> Lexeme ; found
+Line# 55: Token <ID> Lexeme grade found
+Line# 55: Token <LPAREN> Lexeme ( found
+Line# 55: Token <CONST_INT> Lexeme 80 found
+Line# 55: Token <RPAREN> Lexeme ) found
+Line# 55: Token <SEMICOLON> Lexeme ; found
+Line# 56: Token <ID> Lexeme grade found
+Line# 56: Token <LPAREN> Lexeme ( found
+Line# 56: Token <CONST_INT> Lexeme 69 found
+Line# 56: Token <RPAREN> Lexeme ) found
+Line# 56: Token <SEMICOLON> Lexeme ; found
+Line# 57: Token <ID> Lexeme grade found
+Line# 57: Token <LPAREN> Lexeme ( found
+Line# 57: Token <CONST_INT> Lexeme 32 found
+Line# 57: Token <RPAREN> Lexeme ) found
+Line# 57: Token <SEMICOLON> Lexeme ; found
+Line# 58: Token <ID> Lexeme grade found
+Line# 58: Token <LPAREN> Lexeme ( found
+Line# 58: Token <CONST_INT> Lexeme 49 found
+Line# 58: Token <RPAREN> Lexeme ) found
+Line# 58: Token <SEMICOLON> Lexeme ; found
+Line# 59: Token <ID> Lexeme grade found
+Line# 59: Token <LPAREN> Lexeme ( found
+Line# 59: Token <CONST_INT> Lexeme 50 found
+Line# 59: Token <RPAREN> Lexeme ) found
+Line# 59: Token <SEMICOLON> Lexeme ; found
+Line# 60: Token <ID> Lexeme grade found
+Line# 60: Token <LPAREN> Lexeme ( found
+Line# 60: Token <CONST_INT> Lexeme 71 found
+Line# 60: Token <RPAREN> Lexeme ) found
+Line# 60: Token <SEMICOLON> Lexeme ; found
+Line# 61: Token <ID> Lexeme grade found
+Line# 61: Token <LPAREN> Lexeme ( found
+Line# 61: Token <CONST_INT> Lexeme 51 found
+Line# 61: Token <RPAREN> Lexeme ) found
+Line# 61: Token <SEMICOLON> Lexeme ; found
+Line# 62: Token <ID> Lexeme grade found
+Line# 62: Token <LPAREN> Lexeme ( found
+Line# 62: Token <ADDOP> Lexeme - found
+Line# 62: Token <CONST_INT> Lexeme 95 found
+Line# 62: Token <RPAREN> Lexeme ) found
+Line# 62: Token <SEMICOLON> Lexeme ; found
+Line# 63: Token <ID> Lexeme grade found
+Line# 63: Token <LPAREN> Lexeme ( found
+Line# 63: Token <CONST_INT> Lexeme 200 found
+Line# 63: Token <RPAREN> Lexeme ) found
+Line# 63: Token <SEMICOLON> Lexeme ; found
+Line# 64: Token <ID> Lexeme show found
+Line# 64: Token <LPAREN> Lexeme ( found
+Line# 64: Token <ID> Lexeme factorial found
+Line# 64: Token <LPAREN> Lexeme ( found
+Line# 64: Token <CONST_INT> Lexeme 5 found
+Line# 64: Token <RPAREN> Lexeme ) found
+Line# 64: Token <RPAREN> Lexeme ) found
+Line# 64: Token <SEMICOLON> Lexeme ; found
+Line# 65: Token <ID> Lexeme show found
+Line# 65: Token <LPAREN> Lexeme ( found
+Line# 65: Token <ID> Lexeme factorial found
+Line# 65: Token <LPAREN> Lexeme ( found
+Line# 65: Token <CONST_INT> Lexeme 6 found
+Line# 65: Token <RPAREN> Lexeme ) found
+Line# 65: Token <RPAREN> Lexeme ) found
+Line# 65: Token <SEMICOLON> Lexeme ; found
+Line# 66: Token <RETURN> Lexeme return found
+Line# 66: Token <CONST_INT> Lexeme 0 found
+Line# 66: Token <SEMICOLON> Lexeme ; found
+Line# 67: Token <RCURL> Lexeme } found
+Total Lines: 67
+Total Errors: 0
 	ScopeTable# 3
-	10--> <a, INT> 
+	ScopeTable# 2
+	1--> <n, INT> 
 	ScopeTable# 1
-	2--> <main, FUNCTION, INT> 
-	4--> <f, FUNCTION, FLOAT> 
-func_definition : type_specifier ID LPAREN RPAREN compound_statement 
-unit : func_definition 
-program : program unit 
-start : program 
-Total Lines: 7
-Total Errors: 1
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 2
+	1--> <n, INT> 
+	ScopeTable# 1
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 5
+	ScopeTable# 4
+	ScopeTable# 1
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 4
+	ScopeTable# 1
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 8
+	ScopeTable# 7
+	ScopeTable# 6
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 9
+	ScopeTable# 7
+	ScopeTable# 6
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 7
+	ScopeTable# 6
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 6
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 12
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 13
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 14
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 15
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 16
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 17
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 11
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 10
+	1--> <n, INT> 
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 19
+	ScopeTable# 18
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	2--> <main5, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 
+	ScopeTable# 18
+	ScopeTable# 1
+	1--> <factorial3, FUNCTION, INT> 
+	2--> <main5, FUNCTION, INT> 
+	3--> <grade4, FUNCTION, VOID> 
+	6--> <check2, FUNCTION, INT> 
+	7--> <cnt0, INT> 
+	11--> <show1, FUNCTION, VOID> 

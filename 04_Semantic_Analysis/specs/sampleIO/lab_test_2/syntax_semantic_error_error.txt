@@ -1,0 +1,19 @@
+Line# 14: Syntax error at expression of expression statement
+Line# 15: Syntax error at expression of expression statement
+Line# 17: Operands of modulus must be integers 
+Line# 18: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 20: Array subscript is not an integer
+Line# 24: Conflicting types for'i'
+Line# 27: Undeclared variable 'j'
+Line# 30: Syntax error at expression of expression statement
+Line# 33: Syntax error at expression of expression statement
+Line# 35: Syntax error at expression of expression statement
+Line# 44: Too few arguments to function 'mul_float'
+Line# 45: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 47: Type mismatch for argument 1 of 'add_int'
+Line# 50: Void cannot be used in expression 
+Line# 55: Conflicting types for 'add_int'
+Line# 64: Undeclared function 'print'
+Line# 65: Undeclared function 'print'
+Line# 66: Undeclared function 'print'
+Line# 67: Undeclared function 'print'

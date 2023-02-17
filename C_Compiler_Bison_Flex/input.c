@@ -1,4 +1,8 @@
-int main()
+int main(int a)
 {
-    f();
+    int b;
+    if (1)
+    {
+        a = b;
+    }
 }

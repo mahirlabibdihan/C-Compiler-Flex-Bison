@@ -3,7 +3,7 @@
  * Last modified: January 18, 2023
  */
 #include "../include/SymbolTable.hpp"
-
+#include <iostream>
 SymbolTable::SymbolTable(int n)
 {
     this->scope_count = 1;
@@ -88,6 +88,7 @@ bool SymbolTable::erase(const std::string &name)
 SymbolInfo *SymbolTable::find(const std::string &name) const
 {
     ScopeTable *curr = current_scope;
+
     while (curr != nullptr)
     {
         SymbolInfo *symbol = curr->find(name);

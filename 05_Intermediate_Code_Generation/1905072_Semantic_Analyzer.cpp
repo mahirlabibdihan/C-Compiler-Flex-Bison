@@ -325,7 +325,6 @@ string SemanticAnalyzer::assignOp(Variable *left, Expression *right)
     // cout << left << endl;
     if (!checkAssignment(left->getDataType(), right->getDataType()))
     {
-        cout << "Here2" << endl;
         if (left->getDataType() == "void" || right->getDataType() == "void")
         {
             handleError(INVALID_OPERAND, line_count, "of types '" + left->getDataType() + "' and '" + right->getDataType() + "' to 'operator='");
@@ -339,7 +338,6 @@ string SemanticAnalyzer::assignOp(Variable *left, Expression *right)
     }
     else
     {
-        cout << "HERE" << endl;
         asm_gen->assignOp(left, right);
         return left->getDataType();
     }

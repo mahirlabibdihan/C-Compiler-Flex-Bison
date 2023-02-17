@@ -1,0 +1,3 @@
+Line# 5: Syntax error at parameter list of function definition
+Line# 10: Syntax error at declaration list of variable declaration
+Line# 12: Syntax error at expression of expression statement

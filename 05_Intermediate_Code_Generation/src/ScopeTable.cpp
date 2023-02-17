@@ -25,7 +25,10 @@ ScopeTable::~ScopeTable()
         while (curr != nullptr)
         {
             SymbolInfo *tmp = curr->getNext();
-            delete curr;
+            // delete curr;
+            curr->setNext(nullptr);
+            curr = nullptr;
+            //
             curr = tmp;
         }
     }

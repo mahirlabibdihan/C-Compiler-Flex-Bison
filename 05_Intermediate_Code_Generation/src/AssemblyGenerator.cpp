@@ -292,7 +292,7 @@ void AssemblyGenerator::assignVariable(VariableCall *var_call)
     {
         ArrayCall *arr_call = (ArrayCall *)var_call;
         arr_call->getIndex()->toAssembly();
-        print("POP BX");
+        assignRegister(arr_call->getIndex(), "BX");
         print("SHL BX, 1");
         print("PUSH BX");
     }
@@ -394,7 +394,7 @@ void ArrayCall::toAssembly()
 {
     asm_gen->comment(this->getCode());
     idx->toAssembly();
-    asm_gen->print("POP BX");
+    asm_gen->assignRegister(idx, "BX");
     asm_gen->print("SHL BX, 1");
     Array *arr = (Array *)id;
     if (arr->isGlobal())
@@ -778,7 +778,7 @@ void AssignOp::toAssembly()
             asm_gen->print("MOV SI, BX");
             asm_gen->print("SUB SI, " + offset);
             asm_gen->print("NEG SI");
-            asm_gen->print("MOV [BP+SI], AX");
+            asm_gen->print("MOV WORD PTR [BP+SI], AX");
         }
     }
     else
@@ -790,7 +790,7 @@ void AssignOp::toAssembly()
         else
         {
             string offset = getOffset(left->getOffset());
-            asm_gen->print("MOV [BP" + offset + "], AX");
+            asm_gen->print("MOV WORD PTR [BP" + offset + "], AX");
         }
     }
     asm_gen->print("PUSH AX");

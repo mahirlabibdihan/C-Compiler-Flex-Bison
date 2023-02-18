@@ -78,16 +78,6 @@ protected:
     std::string ast_type;
 
 public:
-    enum ASTNodeType
-    {
-        NONTERMINAL,
-        TERMINAL,
-        PROGRAM,
-        UNIT,
-        LIST,
-        EXPRESSION,
-        STATEMENT
-    };
     ASTNode(const string &ast_type, const string &name = "", const string &type = "");
     virtual ~ASTNode();
     const string &getASTType();
@@ -213,7 +203,7 @@ public:
 
     static bool isVariableCall(Expression *);
     static bool isArrayCall(Expression *);
-    static bool isConstantCall(Expression *);
+    static bool isConstant(Expression *);
     static int getConstant(Expression *);
     static string getVariable(VariableCall *);
 };

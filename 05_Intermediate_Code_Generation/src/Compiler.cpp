@@ -2,7 +2,7 @@
 #include "../include/ASTGenerator.hpp"
 #include "../include/Optimizer.hpp"
 #include <iostream>
-Compiler::Compiler(std::function<Program *(FILE *)> runParser, LexicalAnalyzer *lexer, SemanticAnalyzer *sem_anlzr, ErrorHandler *error_hndlr, std::ofstream &log, std::ofstream &parse) : logout(log), parseout(parse)
+Compiler::Compiler(std::function<Program *(FILE *)> runParser, LexicalAnalyzer *lexer, SemanticAnalyzer *sem_anlzr, ErrorHandler *error_hndlr, std::ofstream &log, std::ofstream &parse) : logout(log), astout(parse)
 {
     this->lexer = lexer;
     this->sem_anlzr = sem_anlzr;
@@ -30,12 +30,12 @@ int Compiler::compile(const string &code_file)
     {
         Program *prog = ast_root;
 
-        logout << "Total Lines: " << lexer->getLineCount() << std::endl;
-        logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
-
-        parseout << ASTGenerator::getAST(prog) << std::endl;
+        astout << ASTGenerator::getAST(prog) << std::endl;
         prog->checkSemantics();
         prog->toCode();
+
+        logout << "Total Lines: " << lexer->getLineCount() << std::endl;
+        logout << "Total Errors: " << lexer->getErrorCount() << std::endl;
         if (error_hndlr->getErrorCount())
         {
             std::cout << "Code compiled with errors" << std::endl;

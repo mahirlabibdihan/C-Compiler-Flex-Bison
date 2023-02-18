@@ -12,7 +12,7 @@
 
 extern std::ofstream asmout;
 extern std::ofstream codeout;
-extern std::ofstream parseout;
+extern std::ofstream astout;
 extern std::ofstream errorout;
 extern AssemblyGenerator *asm_gen;
 extern SemanticAnalyzer *sem_anlzr;
@@ -288,6 +288,26 @@ string Expression::getVariable(VariableCall *var_call)
     }
     return nullptr;
 }
+
+bool Expression::isConstant(Expression *expr)
+{
+    if (expr->getExpType() == "CALL_EXPRESSION")
+    {
+        CallExpression *call_expr = dynamic_cast<CallExpression *>(expr);
+        if (call_expr->getCallType() == "CONSTANT_CALL")
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+int Expression::getConstant(Expression *expr)
+{
+    ConstantCall *const_call = dynamic_cast<ConstantCall *>(expr);
+    return stoi(const_call->getLiteral());
+}
+
 ArrayCall::~ArrayCall()
 {
 }

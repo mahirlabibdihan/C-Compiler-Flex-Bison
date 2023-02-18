@@ -14,11 +14,11 @@ class Compiler
     LexicalAnalyzer *lexer;
     ErrorHandler *error_hndlr;
     std::ofstream &logout;
-    std::ofstream &parseout;
+    std::ofstream &astout;
     SemanticAnalyzer *sem_anlzr;
 
 public:
-    Compiler(std::function<Program *(FILE *)>, LexicalAnalyzer *lexer, SemanticAnalyzer *sem_anlzr, ErrorHandler *error_hndlr, std::ofstream &logout, std::ofstream &parseout);
+    Compiler(std::function<Program *(FILE *)>, LexicalAnalyzer *lexer, SemanticAnalyzer *sem_anlzr, ErrorHandler *error_hndlr, std::ofstream &logout, std::ofstream &astout);
     Program *getASTRoot();
     void setASTRoot(Program *);
     int compile(const string &code_file);

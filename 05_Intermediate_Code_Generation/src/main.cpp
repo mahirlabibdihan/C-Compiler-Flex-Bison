@@ -22,7 +22,7 @@
 #include "../include/CodeGenerator.hpp"
 #include "../include/Compiler.hpp"
 // For file input output
-std::ofstream logout, tokenout, errorout, parseout, codeout, asmout, optout;
+std::ofstream logout, tokenout, errorout, astout, codeout, asmout, optout;
 CodeGenerator *code_gen;
 LexicalAnalyzer *lexer;
 SemanticAnalyzer *sem_anlzr;
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     logout.open("io/log.txt");
     tokenout.open("io/token.txt");
     errorout.open("io/error.txt");
-    parseout.open("io/ast.txt");
+    astout.open("io/ast.txt");
     codeout.open("io/code.c");
     asmout.open("io/code.asm");
 
@@ -55,14 +55,14 @@ int main(int argc, char *argv[])
     syn_anlzr = new SyntaxAnalyzer(lexer, error_hndlr, logout, errorout);
     asm_gen = new AssemblyGenerator(asmout);
     code_gen = new CodeGenerator(codeout);
-    compiler = new Compiler(runParser, lexer, sem_anlzr, error_hndlr, logout, parseout);
+    compiler = new Compiler(runParser, lexer, sem_anlzr, error_hndlr, logout, astout);
 
     compiler->compile(argv[1]);
 
     asmout.close();
     codeout.close();
     logout.close();
-    parseout.close();
+    astout.close();
     errorout.close();
     tokenout.close();
 

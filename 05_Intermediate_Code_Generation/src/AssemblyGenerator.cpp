@@ -558,7 +558,7 @@ void AddOp::toAssembly()
     string opr = (op_symbol == "+" ? "ADD" : "SUB");
 
     left_opr->toAssembly();
-    if (asm_gen->isZero(right_opr))
+    if (Expression::isConstant(right_opr) && Expression::getConstant(right_opr) == 0)
     {
         asm_gen->comment("Skipping " + op_symbol + ", since right operand is 0");
         asm_gen->pushExpression(left_opr);
@@ -665,7 +665,7 @@ void MulOp::toAssembly()
     }
     string op = op_symbol;
 
-    if (asm_gen->isZero(right_opr))
+    if (Expression::isConstant(right_opr) && Expression::getConstant(right_opr) == 0)
     {
         asm_gen->comment("Skipping " + op + ", since right operand is 0");
         asm_gen->print("PUSH 0");
@@ -778,7 +778,7 @@ void AssignOp::toAssembly()
             asm_gen->print("MOV SI, BX");
             asm_gen->print("SUB SI, " + offset);
             asm_gen->print("NEG SI");
-            asm_gen->print("MOV WORD PTR [BP+SI], AX");
+            asm_gen->print("MOV [BP+SI], AX");
         }
     }
     else
@@ -790,7 +790,7 @@ void AssignOp::toAssembly()
         else
         {
             string offset = getOffset(left->getOffset());
-            asm_gen->print("MOV WORD PTR [BP" + offset + "], AX");
+            asm_gen->print("MOV [BP" + offset + "], AX");
         }
     }
     asm_gen->print("PUSH AX");

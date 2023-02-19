@@ -175,7 +175,7 @@ string PrintStatement::getCode()
 
 string ReturnStatement::getCode()
 {
-    return "return " + expr->getCode() + ";";
+    return "return " + (expr != NULL ? expr->getCode() : "") + ";";
 }
 
 string ExpressionStatement::getCode()

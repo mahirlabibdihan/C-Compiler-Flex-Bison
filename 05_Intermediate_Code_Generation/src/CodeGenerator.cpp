@@ -215,7 +215,8 @@ void PrintStatement::toCode()
 void ReturnStatement::toCode()
 {
     code_gen->print("return ");
-    expr->toCode();
+    if (expr != NULL)
+        expr->toCode();
     code_gen->println(";");
 }
 

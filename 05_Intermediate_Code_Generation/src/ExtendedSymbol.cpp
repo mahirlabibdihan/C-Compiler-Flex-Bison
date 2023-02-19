@@ -1050,12 +1050,12 @@ void FunctionDefinition::checkSemantics()
     }
 
     sem_anlzr->checkFunctionDefinition(this);
-    sem_anlzr->startScope();
+    // sem_anlzr->startScope();
     sem_anlzr->functions.push(this);
     sem_anlzr->declareFunctionParams(params);
     body->checkSemantics();
     sem_anlzr->functions.pop();
-    sem_anlzr->endScope();
+    // sem_anlzr->endScope();
 }
 
 // Expression

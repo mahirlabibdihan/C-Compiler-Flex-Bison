@@ -870,10 +870,13 @@ void PrintStatement::toAssembly()
 void ReturnStatement::toAssembly()
 {
     asm_gen->comment(this->getCode(), this->start_line);
-    expr->toAssembly();
-    asm_gen->assignRegister(this->getExpression(), "AX");
+
+    if (expr != NULL)
+        expr->toAssembly();
+
     if (asm_gen->curr_func->getReturnType() != "VOID" && asm_gen->curr_func->getFunctionName() != "main")
     {
+        asm_gen->assignRegister(this->getExpression(), "AX");
         asm_gen->print("MOV [BP+" + std::to_string(2 * asm_gen->curr_func->getParams().size() + 4) + "], AX");
     }
     asm_gen->print("JMP " + asm_gen->curr_func->getReturnLabel());

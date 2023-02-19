@@ -618,6 +618,7 @@ void SemanticAnalyzer::analyzeCompoundStatement(CompoundStatement *compound)
 {
     vector<Statement *> stmt_list = compound->getStatements();
     vector<VariableDeclaration *> var_decs = compound->getVariableDeclarations();
+
     for (VariableDeclaration *var_dec : var_decs)
     {
         declareVariables(var_dec);
@@ -742,7 +743,7 @@ void SemanticAnalyzer::declareVariable(Variable *var)
     string var_name = var->getIdName();
 
     // Variable *new_var = new Variable(var_name, data_type);
-
+    table->printAllScope();
     if (!table->insert(var)) // Already present in current scope
     {
         Identifier *old_id = (Identifier *)table->find(var_name);
@@ -917,6 +918,11 @@ void SemanticAnalyzer::declareFunctionParams(vector<Variable *> params)
         string param_name = p->getIdName();
         if (param_name == "blank")
             continue;
+        if (p->getDataType() == "VOID")
+        {
+            errorout << error_hndlr->handleSemanticError(ErrorHandler::SemanticError::VOID_VARIABLE, p->getStartLine(), p->getIdName()) << std::endl;
+            return;
+        }
         // Variable *var = new Variable(param_name, i->getDataType());
         if (!table->insert(p))
         {
@@ -943,10 +949,10 @@ void SemanticAnalyzer::defineFunction(FunctionDefinition *func_def)
 
     checkFunctionDefinition(func_def);
 
-    this->startScope();
+    // this->startScope();
     functions.push(func_def);
     declareFunctionParams(params);
     analyzeCompoundStatement(func_def->getBody());
     functions.pop();
-    this->endScope();
+    // this->endScope();
 }

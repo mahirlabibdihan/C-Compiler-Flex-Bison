@@ -949,10 +949,10 @@ void SemanticAnalyzer::defineFunction(FunctionDefinition *func_def)
 
     checkFunctionDefinition(func_def);
 
-    // this->startScope();
+    this->startScope();
     functions.push(func_def);
     declareFunctionParams(params);
     analyzeCompoundStatement(func_def->getBody());
     functions.pop();
-    // this->endScope();
+    this->endScope();
 }

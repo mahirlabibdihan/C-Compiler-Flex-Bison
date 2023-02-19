@@ -643,9 +643,15 @@ unary_expression 		: ADDOP unary_expression
 						}  
 						| NOT unary_expression 
 						{
-							$$ = new NotOp($2);
-
 							vector<SymbolInfo*> child = {$1,$2};
+
+							if($2->getExpType()!="BINARY_BOOLEAN" && $2->getExpType()!="UNARY_BOOLEAN")
+							{
+								$2 = new RelOp($2,new IntegerCall("0"), "!=");
+							}
+
+							$$ = new NotOp($2);
+							
 							// $$->setSymbol(Util::formatCode(child));				
 							syn_anlzr->setChildren($$, child, "unary_expression");
 						}

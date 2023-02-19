@@ -259,7 +259,7 @@ void Optimizer::peephole(vector<string> &lines)
 
     if (portions2[0] == "ADD")
     {
-        if (portions0[2] == portions1[2])
+        if (portions0[0] == "MOV" && portions1[0] == "MOV" && portions0[2] == portions1[2])
         {
             lines[0] = "; " + lines[0];
             lines[2] = portions2[0] + " AX, AX";
@@ -271,9 +271,10 @@ void Optimizer::peephole(vector<string> &lines)
         print(lines[0]);
         return;
     }
+
     if (portions3[0] == "IMUL")
     {
-        if (portions0[2] == portions1[2])
+        if (portions0[0] == "MOV" && portions1[0] == "MOV" && portions0[2] == portions1[2])
         {
             lines[0] = "; " + lines[0];
             lines[3] = portions3[0] + " AX";

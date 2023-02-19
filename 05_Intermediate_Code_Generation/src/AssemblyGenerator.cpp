@@ -132,89 +132,81 @@ void AssemblyGenerator::comment(const string &msg, int line)
     comment("Line no: " + to_string(line) + " => " + msg);
 }
 
-void AssemblyGenerator::evaluateCondition(BooleanExpression *expr)
+void AssemblyGenerator::jumpBoolean(BooleanExpression *expr)
 {
     if (expr != NULL)
     {
         string type = expr->getBoolType();
         if (type == "LOGICOP")
         {
-            evaluateLogicOp(dynamic_cast<LogicOp *>(expr));
+            jumpLogicOp(dynamic_cast<LogicOp *>(expr));
         }
         else if (type == "RELOP")
         {
-            evaluateRelOp(dynamic_cast<RelOp *>(expr));
+            jumpRelOp(dynamic_cast<RelOp *>(expr));
         }
         else if (type == "NOTOP")
         {
-            evaluateNotOp(dynamic_cast<NotOp *>(expr));
+            jumpNotOp(dynamic_cast<NotOp *>(expr));
         }
     }
 }
 
-void AssemblyGenerator::evaluateAndOp(LogicOp *expr)
-{
-    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
-    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
-    // left->setTrueLabel(newLabel()); // Optimized
-    left->setFalseLabel(expr->getFalseLabel());
-    right->setTrueLabel(expr->getTrueLabel());
-    right->setFalseLabel(expr->getFalseLabel());
-
-    expr->getLeftOpr()->toAssembly();
-    print("POP AX");
-    print("CMP AX, 0");
-    // print("JNE " + left->getTrueLabel());
-    // print("JMP " + left->getFalseLabel()); // False
-    // printLabel(left->getTrueLabel());
-    // Optimized
-    print("JE " + left->getFalseLabel());
-    expr->getRightOpr()->toAssembly();
-    print("POP AX");
-
-    print("CMP AX, 0");
-    print("JNE " + right->getTrueLabel());  // True
-    print("JMP " + right->getFalseLabel()); // False
-}
-
-void AssemblyGenerator::evaluateOrOp(LogicOp *expr)
-{
-    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
-    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
-
-    left->setTrueLabel(expr->getTrueLabel());
-    // left->setFalseLabel(newLabel()); // Optimized
-    right->setTrueLabel(expr->getTrueLabel());
-    right->setFalseLabel(expr->getFalseLabel());
-
-    expr->getLeftOpr()->toAssembly();
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JNE " + left->getTrueLabel());
-    // print("JMP " + left->getFalseLabel()); // False
-    // printLabel(left->getFalseLabel());
-    // Optimized
-
-    expr->getRightOpr()->toAssembly();
-    print("POP AX");
-    print("CMP AX, 0");
-    print("JNE " + right->getTrueLabel());  // True
-    print("JMP " + right->getFalseLabel()); // False
-}
-void AssemblyGenerator::evaluateLogicOp(LogicOp *expr)
+void AssemblyGenerator::jumpLogicOp(LogicOp *expr)
 {
     std::string op = expr->getOperator();
 
     if (op == "&&")
     {
-        evaluateAndOp(expr);
+        jumpAndOp(expr);
     }
     else if (op == "||")
     {
-        evaluateOrOp(expr);
+        jumpOrOp(expr);
     }
 }
-void AssemblyGenerator::evaluateRelOp(RelOp *expr)
+
+void AssemblyGenerator::jumpAndOp(LogicOp *expr)
+{
+    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
+    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
+
+    left->setTrueLabel(newLabel());
+    left->setFalseLabel(expr->getFalseLabel());
+    right->setTrueLabel(expr->getTrueLabel());
+    right->setFalseLabel(expr->getFalseLabel());
+
+    jumpBoolean(left);
+    printLabel(left->getTrueLabel());
+    jumpBoolean(right);
+}
+
+void AssemblyGenerator::jumpOrOp(LogicOp *expr)
+{
+    BooleanExpression *left = dynamic_cast<BooleanExpression *>(expr->getLeftOpr());
+    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getRightOpr());
+
+    left->setTrueLabel(expr->getTrueLabel());
+    left->setFalseLabel(newLabel());
+    right->setTrueLabel(expr->getTrueLabel());
+    right->setFalseLabel(expr->getFalseLabel());
+
+    jumpBoolean(left);
+    printLabel(left->getFalseLabel());
+    jumpBoolean(right);
+}
+
+void AssemblyGenerator::jumpNotOp(NotOp *expr)
+{
+    BooleanExpression *right = dynamic_cast<BooleanExpression *>(expr->getOperand());
+
+    right->setTrueLabel(expr->getFalseLabel());
+    right->setFalseLabel(expr->getTrueLabel());
+
+    jumpBoolean(right);
+}
+
+void AssemblyGenerator::jumpRelOp(RelOp *expr)
 {
     expr->getLeftOpr()->toAssembly();
     expr->getRightOpr()->toAssembly();
@@ -228,15 +220,6 @@ void AssemblyGenerator::evaluateRelOp(RelOp *expr)
 
     print(op + " " + expr->getTrueLabel());
     print("JMP " + expr->getFalseLabel());
-}
-void AssemblyGenerator::evaluateNotOp(NotOp *expr)
-{
-    expr->getOperand()->toAssembly();
-    // print("POP AX");
-    asm_gen->assignRegister(expr->getOperand(), "AX");
-    print("CMP AX, 0");
-    print("JNE " + expr->getFalseLabel());
-    print("JMP " + expr->getTrueLabel());
 }
 
 string getOffset(int offset)
@@ -406,8 +389,9 @@ void ArrayCall::toAssembly()
         // Offset is negative for local variables
         // index - (-offset)
         // BP - (index+offset)
+        string offset = std::to_string(arr->getOffset());
         asm_gen->print("MOV SI, BX");
-        asm_gen->print("SUB SI, " + std::to_string(arr->getOffset()));
+        asm_gen->print("SUB SI, " + offset);
         asm_gen->print("NEG SI");
         asm_gen->print("MOV AX, [BP+SI]");
     }
@@ -808,7 +792,7 @@ void IfStatement::toAssembly()
 
     asm_gen->comment("If Statement", this->start_line);
     asm_gen->comment(condition->getCode());
-    asm_gen->evaluateCondition(condition);
+    asm_gen->jumpBoolean(condition);
     asm_gen->printLabel(true_label);
     if_body->toAssembly();
 }
@@ -824,7 +808,7 @@ void IfElseStatement::toAssembly()
 
     asm_gen->comment("If-Else Statement", this->start_line);
     asm_gen->comment(condition->getCode());
-    asm_gen->evaluateCondition(condition);
+    asm_gen->jumpBoolean(condition);
     asm_gen->printLabel(true_label);
     if_body->toAssembly();
     asm_gen->print("JMP " + this->getNextLabel());
@@ -847,7 +831,7 @@ void ForLoop::toAssembly()
     initialize->toAssembly();
     asm_gen->printLabel(start_label);
     asm_gen->comment(condition->getCode());
-    asm_gen->evaluateCondition(condition);
+    asm_gen->jumpBoolean(condition);
     asm_gen->printLabel(incdec_label);
     asm_gen->comment(inc_dec->getCode());
     inc_dec->toAssembly();
@@ -869,7 +853,7 @@ void WhileLoop::toAssembly()
     asm_gen->comment("While Loop", this->start_line);
     asm_gen->printLabel(start_label);
     asm_gen->comment(condition->getCode());
-    asm_gen->evaluateCondition(condition);
+    asm_gen->jumpBoolean(condition);
     asm_gen->printLabel(true_label);
     body->toAssembly();
     asm_gen->print("JMP " + start_label);

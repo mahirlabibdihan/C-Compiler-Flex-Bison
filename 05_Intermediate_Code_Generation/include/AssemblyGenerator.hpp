@@ -33,12 +33,12 @@ public:
     void comment(const string &msg, int line);
 
     // Short Circuit
-    void evaluateCondition(BooleanExpression *expr);
-    void evaluateLogicOp(LogicOp *expr);
-    void evaluateRelOp(RelOp *expr);
-    void evaluateNotOp(NotOp *expr);
-    void evaluateAndOp(LogicOp *expr);
-    void evaluateOrOp(LogicOp *expr);
+    void jumpBoolean(BooleanExpression *expr);
+    void jumpLogicOp(LogicOp *expr);
+    void jumpRelOp(RelOp *expr);
+    void jumpNotOp(NotOp *expr);
+    void jumpAndOp(LogicOp *expr);
+    void jumpOrOp(LogicOp *expr);
 
     void incdecOp(VariableCall *expr, std::string op);
 

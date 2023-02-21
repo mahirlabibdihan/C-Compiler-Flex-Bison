@@ -664,7 +664,7 @@ void MulOp::toAssembly()
         asm_gen->pushExpression(left_opr);
         return;
     }
-    if (asm_gen->isConstant(right_opr) && asm_gen->getConstant(right_opr) == "2" && (op == "*"))
+    if (Expression::isVariableCall(left_opr) && asm_gen->isConstant(right_opr) && asm_gen->getConstant(right_opr) == "2" && (op == "*"))
     {
         (new AddOp(this->getLeftOpr(), this->getLeftOpr(), "+"))->toAssembly();
         return;

@@ -130,11 +130,11 @@ void UAddOp::toCode()
 
 void BinaryExpression::toCode()
 {
-    code_gen->print("(");
+    // code_gen->print("(");
     left_opr->toCode();
     code_gen->print(op_symbol);
     right_opr->toCode();
-    code_gen->print(")");
+    // code_gen->print(")");
 }
 
 void FunctionCall::toCode()
@@ -188,9 +188,11 @@ void IfElseStatement::toCode()
 void ForLoop::toCode()
 {
     code_gen->print("for(");
-    initialize->toCode();
+    if (initialize != NULL)
+        initialize->toCode();
     code_gen->print(";");
-    condition->toCode();
+    if (condition != NULL)
+        condition->toCode();
     code_gen->print(";");
     inc_dec->toCode();
     code_gen->print(")");
@@ -222,8 +224,11 @@ void ReturnStatement::toCode()
 
 void ExpressionStatement::toCode()
 {
-    expr->toCode();
-    code_gen->println(";");
+    if (expr != NULL)
+    {
+        expr->toCode();
+        code_gen->println(";");
+    }
 }
 void CompoundStatement::toCode()
 {

@@ -468,9 +468,9 @@ statement 				: var_declaration
 							// $$->setSymbol(Util::formatCode(child));				
 							syn_anlzr->setChildren($$, child, "statement");
 						}
-						| PRINTLN LPAREN ID RPAREN SEMICOLON 
+						| PRINTLN LPAREN variable RPAREN SEMICOLON 
 						{
-							$$ = new PrintStatement(new VariableCall($3->getSymbol()));
+							$$ = new PrintStatement($3);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
 							// $$->setSymbol(Util::formatCode(child));				

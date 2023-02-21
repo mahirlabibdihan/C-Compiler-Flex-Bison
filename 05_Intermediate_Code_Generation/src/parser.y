@@ -337,6 +337,12 @@ statements 				: statement
 									VariableDeclaration *var_decl = dynamic_cast<VariableDeclaration *>($1);
 									$$->addVariableDeclaration(var_decl);
 								}
+								else if($1->getStatementType() == "EXPRESSION_STATEMENT") {
+									ExpressionStatement *expr = dynamic_cast<ExpressionStatement *>($1);
+									if (expr->getExpression() != NULL){
+										$$->addStatement($1);
+									}
+								}
 								else {
 									$$->addStatement($1);
 								}	
@@ -352,6 +358,12 @@ statements 				: statement
 								if($2->getStatementType() == "VARIABLE_DECLARATION"){
 									VariableDeclaration *var_decl = dynamic_cast<VariableDeclaration *>($2);
 									$$->addVariableDeclaration(var_decl);
+								}
+								else if($2->getStatementType() == "EXPRESSION_STATEMENT") {
+									ExpressionStatement *expr = dynamic_cast<ExpressionStatement *>($2);
+									if (expr->getExpression() != NULL){
+										$$->addStatement($2);
+									}
 								}
 								else {
 									$$->addStatement($2);
@@ -411,13 +423,12 @@ statement 				: var_declaration
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6,$7};
 
 							Expression *cond =  $4->getExpression();
-							if(cond->getExpType()!="BINARY_BOOLEAN" && cond->getExpType()!="UNARY_BOOLEAN")
+							if(cond!=NULL && cond->getExpType()!="BINARY_BOOLEAN" && cond->getExpType()!="UNARY_BOOLEAN")
 							{
 								cond = new RelOp(cond, new IntegerCall("0"), "!=");
 							}
 
 							$$ = new ForLoop($3->getExpression(), cond, $5, $7);
-
 							// $$->setSymbol(Util::formatCode(child));				
 							syn_anlzr->setChildren($$, child, "statement");
 						}
@@ -495,7 +506,7 @@ statement 				: var_declaration
 
 expression_statement 	: SEMICOLON
 						{
-							$$ = NULL;
+							$$ = new ExpressionStatement(NULL);;
 							delete $1;
 						}	
 						| expression SEMICOLON // $$ = $1;

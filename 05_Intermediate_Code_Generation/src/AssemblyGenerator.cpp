@@ -650,7 +650,7 @@ void MulOp::toAssembly()
     }
     string op = op_symbol;
 
-    if (Expression::isConstant(right_opr) && Expression::getConstant(right_opr) == 0)
+    if (Expression::isConstant(right_opr) && Expression::getConstant(right_opr) == 0 && (op == "*"))
     {
         asm_gen->comment("Skipping " + op + ", since right operand is 0");
         asm_gen->print("PUSH 0");
@@ -924,9 +924,12 @@ void AssemblyGenerator::popExpression(Expression *expr)
 }
 void ExpressionStatement::toAssembly()
 {
-    asm_gen->comment(this->getCode(), this->start_line);
-    expr->toAssembly();
-    asm_gen->popExpression(this->expr);
+    if (expr != NULL)
+    {
+        asm_gen->comment(this->getCode(), this->start_line);
+        expr->toAssembly();
+        asm_gen->popExpression(this->expr);
+    }
 }
 void CompoundStatement::toAssembly()
 {

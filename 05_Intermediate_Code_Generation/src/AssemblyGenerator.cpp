@@ -531,6 +531,7 @@ void AssemblyGenerator::assignRegister(Expression *expr, string dst_reg)
 }
 void AddOp::toAssembly()
 {
+    // asm_gen->comment(this->getCode());
     if (Expression::isVariableCall(this->getLeftOpr()) && Expression::isVariableCall(this->getRightOpr()) && this->getOperator() == "-")
     {
         if (Expression::getVariable(dynamic_cast<VariableCall *>(this->getLeftOpr())) == Expression::getVariable(dynamic_cast<VariableCall *>(this->getRightOpr())))
@@ -663,7 +664,7 @@ void MulOp::toAssembly()
         asm_gen->pushExpression(left_opr);
         return;
     }
-    if (asm_gen->isConstant(right_opr) && asm_gen->getConstant(right_opr) == "2")
+    if (asm_gen->isConstant(right_opr) && asm_gen->getConstant(right_opr) == "2" && (op == "*"))
     {
         (new AddOp(this->getLeftOpr(), this->getLeftOpr(), "+"))->toAssembly();
         return;
@@ -822,23 +823,30 @@ void ForLoop::toAssembly()
     std::string false_label = this->getNextLabel();
     std::string incdec_label = asm_gen->newLabel();
 
-    condition->setTrueLabel(true_label);
-    condition->setFalseLabel(false_label);
     body->setNextLabel(incdec_label);
 
     asm_gen->comment("For Loop", this->start_line);
-    asm_gen->comment(initialize->getCode());
-    initialize->toAssembly();
+    if (initialize != NULL)
+    {
+        asm_gen->comment(initialize->getCode());
+        initialize->toAssembly();
+    }
     asm_gen->printLabel(start_label);
-    asm_gen->comment(condition->getCode());
-    asm_gen->jumpBoolean(condition);
+    if (condition != NULL)
+    {
+        condition->setTrueLabel(true_label);
+        condition->setFalseLabel(false_label);
+        asm_gen->comment(condition->getCode());
+        asm_gen->jumpBoolean(condition);
+    }
+    asm_gen->printLabel(true_label);
+    body->toAssembly();
+    // asm_gen->print("JMP " + incdec_label);
+
     asm_gen->printLabel(incdec_label);
     asm_gen->comment(inc_dec->getCode());
     inc_dec->toAssembly();
     asm_gen->print("JMP " + start_label);
-    asm_gen->printLabel(true_label);
-    body->toAssembly();
-    asm_gen->print("JMP " + incdec_label);
 }
 void WhileLoop::toAssembly()
 {

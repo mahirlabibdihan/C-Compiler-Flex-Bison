@@ -1,7 +1,0 @@
-Line# 6: Conflicting types for 'c'
-Line# 7: Array subscript is not an integer
-Line# 8: Warning: possible loss of data in assignment of FLOAT to INT
-Line# 9: Operands of modulus must be integers
-Line# 10: Invalid conversion from 'INT' to 'ARRAY_INT'
-Line# 11: Type mismatch for argument 1 of 'func'
-Line# 12: Undeclared variable 'b'

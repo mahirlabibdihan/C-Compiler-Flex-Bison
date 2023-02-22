@@ -80,7 +80,7 @@ void AssemblyGenerator::returnFunction()
     }
     else
     {
-        print("MOV AX, 4CH");
+        print("MOV AH, 4CH");
         print("INT 21H");
     }
 }

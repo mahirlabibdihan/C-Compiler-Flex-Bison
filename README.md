@@ -6,9 +6,15 @@ Assembler: `source.asm` &rarr; `source.exe`
 
 ## Demo
 
+https://user-images.githubusercontent.com/62663759/220677637-45c0c1f6-6a7d-403d-a189-6154b872da3e.mp4
+
+
+<!-- 
 <video width="900">
   <source src="demo.mp4" type="video/mp4">
 </video>
+ -->
+ 
 ## Compiler basics
 
 - **Pattern:** Regex describing all the lexemes that can represent a particular token in source language

@@ -4,6 +4,11 @@ Preprocessor: `source.c` &rarr; `source.i`
 **Compiler: `source.i` &rarr; `source.asm`**
 Assembler: `source.asm` &rarr; `source.exe`
 
+## Demo
+
+<video width="900">
+  <source src="demo.mp4" type="video/mp4">
+</video>
 ## Compiler basics
 
 - **Pattern:** Regex describing all the lexemes that can represent a particular token in source language

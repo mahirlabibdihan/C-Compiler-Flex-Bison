@@ -3,7 +3,9 @@
 Preprocessor: `source.c` &rarr; `source.i`
 **Compiler: `source.i` &rarr; `source.asm`**
 Assembler: `source.asm` &rarr; `source.exe`
+
 ## Compiler basics
+
 - **Pattern:** Regex describing all the lexemes that can represent a particular token in source language
 - **Lexeme:** Sequence of characters in the source program that matches the pattern for a token
 - **Token:** Terminal symbols of the source language
@@ -18,6 +20,7 @@ Assembler: `source.asm` &rarr; `source.exe`
 - Limited syntax error recovery -->
 
 ## AST Nodes
+
 <img align="center" alt="Mahir Labib Dihan's LinkdeIn"  src="AST_Node.png" />
 
 ## Classes
@@ -40,21 +43,16 @@ Assembler: `source.asm` &rarr; `source.exe`
 - **CodeGenerator:** AST to C converter
 <!-- ## Variants of symbols
 - Terminal
-	- Identifier
-		- Variable
-    		- Array
-     	- Function
-- NonTerminal
-  	- Expression
-    	- ArrayCall
-  	- List
-     	- ParameterList
-     	- ArgumentList
-     	- DeclarationList
-  	- Block
-     	- if
-     	- if-else
-     	- for
-     	- while -->
+  - Identifier
+    - Variable - Array
+      - Function
+- NonTerminal - Expression - ArrayCall - List - ParameterList - ArgumentList - DeclarationList - Block - if - if-else - for - while -->
+
 ## Workflow
+
 <img align="center" alt="Mahir Labib Dihan's LinkdeIn"  src="Workflow.png" />
+
+## Tools
+
+- flex 2.6.4
+- bison 3.8.2

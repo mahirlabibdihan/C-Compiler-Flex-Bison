@@ -1,52 +1,21 @@
-int cnt;
-void show(int n){
-	println(n);
-}
-int check(){
-	cnt++;
-	return cnt;
-}
-int factorial(int n){
-	if((n==0)){
-		return 1;
-	}
-	else {
-		return (n*factorial((n-1)));
-	}
-}
-void grade(int n){
-	if(((n<0)||(n>100))){
-		show(-1);
-	}
-	else if((n>=80)){
-		show(80);
-	}
-	else if(((n>=70)&&(n<80))){
-		show(70);
-	}
-	else if(((n>=60)&&(n<70))){
-		show(60);
-	}
-	else if(((n>=50)&&(n<60))){
-		show(50);
-	}
-	else if((n<50)){
-		show(-100);
-	}
-}
+int w[10];
 int main(){
-	grade(85);
-	grade(75);
-	grade(80);
-	grade(69);
-	grade(32);
-	grade(49);
-	grade(50);
-	grade(71);
-	grade(51);
-	grade(-95);
-	grade(200);
-	show(factorial(5));
-	show(factorial(6));
+	int i,x[10];
+	w[0]=-2;
+	x[0]=w[0];
+	i=x[0];
+	println(i);
+	x[1]=w[0]++;
+	i=x[1];
+	println(i);
+	i=w[0];
+	println(i);
+	i=i+0;
+	i=i-0;
+	i=i*1;
+	println(i);
+	if(i>0&&i<10||i<0&&i>-10)i=100;
+	else i=200;
+	println(i);
 	return 0;
 }

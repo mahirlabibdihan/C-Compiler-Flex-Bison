@@ -1,2 +1,0 @@
-- Make getOffset member of class
-- Make isZero, getConstant static member of Expression 

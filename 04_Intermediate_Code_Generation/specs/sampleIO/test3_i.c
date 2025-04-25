@@ -1,31 +1,35 @@
-int main(){
- 
-	int i,j,k,ll;
- 
-	for(i=0;i<6;i++){
+int main()
+{
+
+	int i, j, k, ll;
+
+	for (i = 0; i < 6; i++)
+	{
+		int k;
 		println(i);
 	}
- 
+
 	k = 4;
 	ll = 6;
-	while(k>0){
+	while (k > 0)
+	{
 		ll = ll + 3;
 		k--;
 	}
- 
+
 	println(ll);
 	println(k);
-	
+
 	k = 4;
 	ll = 6;
-	
-	while(k--){
+
+	while (k--)
+	{
 		ll = ll + 3;
 	}
- 
+
 	println(ll);
 	println(k);
- 
- 
+
 	return 0;
 }

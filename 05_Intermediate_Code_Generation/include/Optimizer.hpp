@@ -20,6 +20,7 @@ public:
     void comment(string code);
     bool isFunctionStart(string line);
     bool isFunctionEnd(string line);
+    void removeLabel(string in_file, string out_file);
 };
 #endif
 

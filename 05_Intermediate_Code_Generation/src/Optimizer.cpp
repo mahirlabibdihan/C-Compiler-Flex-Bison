@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <map>
 #include <string>
 using namespace std;
 
@@ -294,6 +295,51 @@ void Optimizer::peephole(vector<string> &lines)
     }
 }
 
+void Optimizer::removeLabel(string in_file, string out_file)
+{
+    asmin.open(in_file);
+    asmout.open("io/tmp.asm");
+
+    map<string, bool> is_used;
+    string line;
+
+    while (std::getline(asmin, line))
+    {
+        _print(line);
+        if (line == ".CODE")
+        {
+            break;
+        }
+    }
+
+    while (std::getline(asmin, line))
+    {
+        if (isFunctionStart(line))
+        {
+            _print(line);
+            while (std::getline(asmin, line))
+            {
+                line = removeIndent(line);
+                if (isFunctionEnd(line))
+                {
+                    _print(line);
+                    break;
+                }
+                if (line[0] == ';')
+                {
+                    // print(line);
+                    continue;
+                }
+            }
+        }
+        else
+        {
+            _print(line);
+        }
+    }
+    asmin.close();
+    asmout.close();
+}
 void Optimizer::optimize(string in_file, string out_file)
 {
     asmin.open(in_file);

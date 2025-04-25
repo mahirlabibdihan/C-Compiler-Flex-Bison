@@ -1,7 +1,0 @@
-float f(){
-
-}
-int main(){
-	int a;
-	a = f(); 
-}

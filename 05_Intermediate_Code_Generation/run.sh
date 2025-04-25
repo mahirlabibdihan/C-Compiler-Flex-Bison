@@ -13,6 +13,6 @@ mv *.o build/
 echo 'Generated the object files'
 g++ -g build/*.o -o bin/main.exe 
 echo 'All ready, running'
-./bin/main.exe io/input.txt
+./bin/main.exe io/input.c
 rm build/*
 rm src/y.tab.c src/scanner.c include/y.tab.h

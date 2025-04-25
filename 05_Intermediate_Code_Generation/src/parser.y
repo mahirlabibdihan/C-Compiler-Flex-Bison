@@ -72,7 +72,7 @@ start 					: program
 							$$ = $1;
 							
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "start");
 
 							syn_anlzr->setASTRoot($$);
@@ -87,7 +87,7 @@ program 				: program  unit
 							$$->addUnit($2);	
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "program");	
 						}
 						|  unit
@@ -96,7 +96,7 @@ program 				: program  unit
 							$$->addUnit($1);
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "program");
 						}
 						;
@@ -107,7 +107,7 @@ unit 					: var_declaration
 							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unit");
 						}
 						| func_declaration
@@ -116,7 +116,7 @@ unit 					: var_declaration
 							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unit");
 						}
 						| func_definition
@@ -125,7 +125,7 @@ unit 					: var_declaration
 							if($$ != NULL) $$->setNonTerminalType("UNIT");
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unit");	
 						}
 						;
@@ -135,7 +135,7 @@ func_declaration 		: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON //
 							$$ = new FunctionDeclaration($2->getSymbol(), $1->getType(), $4->getParams());
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren((Unit*)$$, child, "func_declaration");
 						}
 						| type_specifier ID LPAREN parameter_list error RPAREN SEMICOLON
@@ -149,7 +149,7 @@ func_declaration 		: type_specifier ID LPAREN parameter_list RPAREN SEMICOLON //
 							$$ = new FunctionDeclaration($2->getSymbol(), $1->getType(), {});
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren((Unit*)$$, child, "func_declaration"); 
 						}
 						;
@@ -160,7 +160,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_stat
 							$$ = new FunctionDefinition($2->getSymbol(),$1->getType(), $4->getParams(), $6);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren((Unit*)$$, child, "func_definition");
 						}
 						| type_specifier ID LPAREN parameter_list error RPAREN compound_statement
@@ -175,7 +175,7 @@ func_definition 		: type_specifier ID LPAREN parameter_list RPAREN compound_stat
 							$$ = new FunctionDefinition($2->getSymbol(), $1->getType(), {}, $5);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren((Unit*)$$, child, "func_definition");
 						}
 						;				
@@ -189,7 +189,7 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							// $$->addParam($3->getType(),$4->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "parameter_list");
 						}
 						| parameter_list COMMA type_specifier 
@@ -201,7 +201,7 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							// $$->addParam($3->getType());
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "parameter_list");	
 						}
 						| type_specifier ID 
@@ -213,7 +213,7 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							// $$->addParam($1->getType(),$2->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "parameter_list");
 						}
 						| type_specifier
@@ -225,7 +225,7 @@ parameter_list  		: parameter_list COMMA type_specifier ID
 							// $$->addParam($1->getType());
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "parameter_list");
 						}
 						;
@@ -235,7 +235,7 @@ compound_statement 		: LCURL statements RCURL
 							$$ = $2;
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "compound_statement");
 						}
 						| LCURL RCURL
@@ -243,7 +243,7 @@ compound_statement 		: LCURL statements RCURL
 							$$ = new CompoundStatement();
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "compound_statement");
 						}
 						;
@@ -253,7 +253,7 @@ var_declaration 		: type_specifier declaration_list SEMICOLON
 							$$ = new VariableDeclaration($1->getType(), $2->getDeclarations());
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren((Unit*)$$, child, "var_declaration");							
 						}
 						| type_specifier declaration_list error SEMICOLON 
@@ -270,7 +270,7 @@ type_specifier			: INT
 							$$ = $1;
 							
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "type_specifier");	
 						}
 						| FLOAT
@@ -278,7 +278,7 @@ type_specifier			: INT
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "type_specifier");
 						}
 						| VOID
@@ -286,7 +286,7 @@ type_specifier			: INT
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "type_specifier");				
 						}
 						;
@@ -297,7 +297,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$->addVariable($3->getSymbol());
 							
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "declaration_list");							
 						}
 						| declaration_list COMMA ID LSQUARE CONST_INT RSQUARE
@@ -306,7 +306,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$->addArray($3->getSymbol(),$5->getSymbol());	
 							
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5,$6};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "declaration_list");								
 						}
 						| ID
@@ -315,7 +315,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$->addVariable($1->getSymbol());	
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "declaration_list");
 						}
 						| ID LSQUARE CONST_INT RSQUARE
@@ -324,7 +324,7 @@ declaration_list 		: declaration_list COMMA ID
 							$$->addArray($1->getSymbol(),$3->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "declaration_list");
 						}
 						;
@@ -348,7 +348,7 @@ statements 				: statement
 								}	
 							}
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statements");
 						}
 						| statements statement
@@ -371,7 +371,7 @@ statements 				: statement
 							}
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statements");
 						}
 						;
@@ -381,7 +381,7 @@ statement 				: var_declaration
 							$$ = $1;
 							$$->setNonTerminalType("STATEMENT");
 							vector<SymbolInfo*> child = {(Statement*)$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| func_definition
@@ -390,7 +390,7 @@ statement 				: var_declaration
 							$$->setNonTerminalType("STATEMENT");
 
 							vector<SymbolInfo*> child = {(Statement*)$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| func_declaration
@@ -399,7 +399,7 @@ statement 				: var_declaration
 							$$->setNonTerminalType("STATEMENT");
 
 							vector<SymbolInfo*> child = {(Statement*)$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");	
 						}
 						| expression_statement
@@ -407,7 +407,7 @@ statement 				: var_declaration
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| compound_statement
@@ -415,7 +415,7 @@ statement 				: var_declaration
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| FOR LPAREN expression_statement expression_statement expression RPAREN statement
@@ -429,7 +429,7 @@ statement 				: var_declaration
 							}
 
 							$$ = new ForLoop($3->getExpression(), cond, $5, $7);
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| IF LPAREN expression RPAREN statement %prec THEN
@@ -445,7 +445,7 @@ statement 				: var_declaration
 							$$ = new IfStatement(cond, $5);
 
 							
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}		
 						| IF LPAREN expression RPAREN statement ELSE statement
@@ -461,7 +461,7 @@ statement 				: var_declaration
 							$$ = new IfElseStatement(cond, $5, $7);
 
 							
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| WHILE LPAREN expression RPAREN statement
@@ -476,7 +476,7 @@ statement 				: var_declaration
 
 							$$ = new WhileLoop(cond, $5);
 										
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| PRINTLN LPAREN variable RPAREN SEMICOLON 
@@ -484,7 +484,7 @@ statement 				: var_declaration
 							$$ = new PrintStatement($3);
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4,$5};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| RETURN expression SEMICOLON
@@ -492,14 +492,14 @@ statement 				: var_declaration
 							$$ = new ReturnStatement($2);
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						| RETURN SEMICOLON {
 							$$ = new ReturnStatement(NULL);
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "statement");
 						}
 						;
@@ -514,7 +514,7 @@ expression_statement 	: SEMICOLON
 							$$ = new ExpressionStatement($1);
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "expression_statement");
 						}
 						| error SEMICOLON {
@@ -530,7 +530,7 @@ variable 				: ID
 							$$ = new VariableCall($1->getSymbol());
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "variable");
 						}
 						| ID LSQUARE expression RSQUARE
@@ -538,7 +538,7 @@ variable 				: ID
 							$$ = new ArrayCall($1->getSymbol(),$3);		
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "variable");		
 						}
 						;
@@ -548,7 +548,7 @@ variable 				: ID
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "expression");
 						}
 						| variable ASSIGNOP logic_expression
@@ -556,7 +556,7 @@ variable 				: ID
 							$$ = new AssignOp($1,$3);
 
 							vector<SymbolInfo*> child = {$1,$2,$3};						
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "expression");
 						}
 						;
@@ -566,7 +566,7 @@ logic_expression 		: rel_expression
 							$$ = $1;
 							
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "logic_expression");
 						}
 						| rel_expression LOGICOP rel_expression
@@ -585,7 +585,7 @@ logic_expression 		: rel_expression
 							
 							$$ = new LogicOp($1,$3,$2->getSymbol());
 					
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "logic_expression");
 						}
 						;
@@ -595,7 +595,7 @@ rel_expression			: simple_expression
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "rel_expression");
 						}
 						| simple_expression RELOP simple_expression
@@ -603,7 +603,7 @@ rel_expression			: simple_expression
 							$$ = new RelOp($1,$3,$2->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "rel_expression");
 						}
 						;
@@ -613,7 +613,7 @@ simple_expression 		: term
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "simple_expression");
 						}
 						| simple_expression ADDOP term
@@ -621,7 +621,7 @@ simple_expression 		: term
 							$$ = new AddOp($1,$3,$2->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "simple_expression");
 						}
 						;
@@ -631,7 +631,7 @@ term 					: unary_expression
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "term");
 						}
 						| term MULOP unary_expression
@@ -639,7 +639,7 @@ term 					: unary_expression
 							$$ = new MulOp($1,$3,$2->getSymbol());	
 							
 							vector<SymbolInfo*> child = {$1,$2,$3};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "term");					
 						}
 						;
@@ -649,7 +649,7 @@ unary_expression 		: ADDOP unary_expression
 							$$ = new UAddOp($2,$1->getSymbol());
 
 							vector<SymbolInfo*> child = {$1,$2};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unary_expression");
 						}  
 						| NOT unary_expression 
@@ -663,7 +663,7 @@ unary_expression 		: ADDOP unary_expression
 
 							$$ = new NotOp($2);
 							
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unary_expression");
 						}
 						| factor 
@@ -671,7 +671,7 @@ unary_expression 		: ADDOP unary_expression
 							$$ = $1;
 
 							vector<SymbolInfo*> child = {$1};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "unary_expression");
 						}
 						;
@@ -681,7 +681,7 @@ factor					: variable
 							$$ = $1;
 							
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");
 						}
 						| ID LPAREN argument_list RPAREN
@@ -689,7 +689,7 @@ factor					: variable
 							$$ = new FunctionCall($1->getSymbol(), $3->getArgs());
 
 							vector<SymbolInfo*> child = {$1,$2,$3,$4};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");				
 						}
 						| LPAREN expression RPAREN 
@@ -697,7 +697,7 @@ factor					: variable
 							$$ = $2;
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");
 						}
 						| CONST_INT
@@ -705,7 +705,7 @@ factor					: variable
 							$$ = new IntegerCall($1->getSymbol());
 							
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");
 						}
 						| CONST_FLOAT
@@ -713,7 +713,7 @@ factor					: variable
 							$$ = new FloatCall($1->getSymbol());
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");	
 						}
 						| variable INCOP
@@ -721,14 +721,14 @@ factor					: variable
 							$$ = new IncOp($1);
 
 							vector<SymbolInfo*> child = {$1,$2};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");
 						}
 						| variable DECOP
 						{
 							$$ = new DecOp($1);
 							vector<SymbolInfo*> child = {$1,$2};	
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "factor");
 						}
 						;
@@ -738,7 +738,7 @@ argument_list 			: arguments
 							$$ = $1;	
 
 							vector<SymbolInfo*> child = {$1};					
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "argument_list");
 						}
 						| 
@@ -746,7 +746,7 @@ argument_list 			: arguments
 							$$ = new ArgumentList();
 
 							vector<SymbolInfo*> child = {};		
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "argument_list");
 						}
 						;
@@ -757,7 +757,7 @@ arguments 				: arguments COMMA logic_expression
 							$$->addArg($3);
 
 							vector<SymbolInfo*> child = {$1,$2,$3};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "arguments");
 						}
 						| logic_expression
@@ -766,7 +766,7 @@ arguments 				: arguments COMMA logic_expression
 							$$->addArg($1);
 
 							vector<SymbolInfo*> child = {$1};
-							// $$->setSymbol(Util::formatCode(child));				
+										
 							syn_anlzr->setChildren($$, child, "arguments");
 						}
 						;

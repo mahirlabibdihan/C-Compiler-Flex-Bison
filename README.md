@@ -1,7 +1,9 @@
 # **C Compiler (Bison+Flex)**
 
 Preprocessor: `source.c` &rarr; `source.i`
+
 **Compiler: `source.i` &rarr; `source.asm`**
+
 Assembler: `source.asm` &rarr; `source.exe`
 
 ## Demo

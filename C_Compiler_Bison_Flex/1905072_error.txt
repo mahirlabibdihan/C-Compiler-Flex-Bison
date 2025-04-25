@@ -1,3 +1,0 @@
-Total Lexical Errors: 0
-Total Syntax Errors: 0
-Total Semantic Errors: 0

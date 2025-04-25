@@ -6,6 +6,8 @@ Assembler: `source.asm` &rarr; `source.exe`
 
 ## Demo
 
+Youtube: https://youtu.be/E7yGnD405UM?si=MQiZXQOHkM-sjeWF
+
 https://user-images.githubusercontent.com/62663759/220677637-45c0c1f6-6a7d-403d-a189-6154b872da3e.mp4
 
 

@@ -11,6 +11,26 @@ Youtube: https://youtu.be/E7yGnD405UM?si=MQiZXQOHkM-sjeWF
 https://user-images.githubusercontent.com/62663759/220677637-45c0c1f6-6a7d-403d-a189-6154b872da3e.mp4
 
 
+## Offline01 - Symbol Table
+
+- [Problem Specification](01_Symbol_Table\specs\CSE310_Assignment1_Specification.pdf)
+- [Solution](01_Symbol_Table)
+
+## Offline02 - Lexical Analysis
+
+- [Problem Specification](02_Lexical_Analysis\specs\CSE310_July2022_Offline2_LexicalAnalysis_Specifications.pdf)
+- [Solution](02_Lexical_Analysis)
+
+## Offline03 - Syntax and Semantic Analysis
+
+- [Problem Specification](03_Syntax_and_Semantic_Analysis\specs\CSE310_July_2022_YACC_Assignment_Spec-1.pdf)
+- [Solution](03_Syntax_and_Semantic_Analysis)
+
+## Offline04 - Intermediate Code Generation
+
+- [Assignment 4](04_Intermediate_Code_Generation\specs\CSE_310_July_2023_ICG_Spec.docx.pdf)
+- [Solution](04_Intermediate_Code_Generation)
+
 <!-- 
 <video width="900">
   <source src="demo.mp4" type="video/mp4">

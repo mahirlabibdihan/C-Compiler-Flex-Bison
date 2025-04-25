@@ -1,8 +1,0 @@
-/*sadsa/
-/*asdas**/
-/*dasdas****<<EOF>>
-/*sdsaasd*//
-'\\' -> Matches both Valid and Unfinished
-'\' -> Matches both Valid and Unfinished
-'\n'-> Matches both Valid and Multiple
-'' -> Matches both Empty and Unfinished
